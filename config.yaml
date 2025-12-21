@@ -1,0 +1,159 @@
+database:
+  url: sqlite:///./gpu.db
+  # For PostgreSQL (production): postgresql://user:password@localhost:5432/gpu_market
+  # 🔒 SECURITY: Use DATABASE_URL environment variable in production
+  echo: false  # SQLAlchemy logging
+  pool_size: 5
+  max_overflow: 10
+
+scraper:
+  max_pages: 100
+  scrape_all_pages: true  # Scrape until no more results
+  use_tor: true
+  
+  tor_proxy:
+    http: "socks5h://127.0.0.1:9150"
+    https: "socks5h://127.0.0.1:9150"
+  
+  user_agents:
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0"
+  
+  # Rate limiting - ВАЖНО за целия OLX!
+  rate_limit:
+    requests_per_minute: 8   # По-бавно за да не ни банат
+    delay_between_pages: 7   # 7 секунди между страници
+    max_retries: 5
+    retry_delay: 15
+  
+  # Quality filters
+  blacklist_keywords:
+    # Bulgarian
+    - "за części"
+    - "за části"
+    - "счупена"
+    - "не работи"
+    - "повредена"
+    - "дефект"
+    - "за ремонт"
+    - "артефакти"
+    - "черен екран"
+    - "не дава екран"
+    - "не стартира"
+    - "изгоря"
+    - "развален"
+    - "нетествана"
+    - "проблем"
+    - "майнинг"
+    - "не е тествана"
+    - "дефектна"
+    - "не функционира"
+    - "няма сигнал"
+    - "без сигнал"
+    - "не дава сигнал"
+
+    # English
+    - "broken"
+    - "damaged"
+    - "faulty"
+    - "defective"
+    - "not working"
+    - "for parts"
+    - "parts only"
+    - "as is"
+    - "repair"
+    - "artifacts"
+    - "black screen"
+    - "burnt"
+    - "mining rig"
+    - "mining"
+    - "dead"
+    - "fried"
+    - "doa"
+    - "no signal"
+    - "no display"
+
+    # Suspicious patterns
+    - "срочно"
+    - "бързо"
+    - "спешно"
+  
+  # Post-processing filtering thresholds
+  outlier_threshold_low: 0.50   # 50% от медианата (low outlier detection)
+  outlier_threshold_high: 3.0   # 300% от медианата (high outlier detection)
+  min_sample_size: 3            # Минимум обяви за да приложим statistical filtering
+
+logging:
+  level: DEBUG
+  format: "text"  # 'text' for development, 'json' for production (auto-detected by ENVIRONMENT)
+  file: "logs/gpu_service.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+  console_output: true
+  # 🔒 PRODUCTION: Automatically switches to JSON format when ENVIRONMENT=production
+
+api:
+  title: "GPU Market Service API"
+  description: "API за анализ на цени на видео карти в България"
+  version: "1.0.0"
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+
+  # 🔴 SECURITY WARNING: CORS Configuration
+  # Current: "*" allows ALL domains (OK for development)
+  # PRODUCTION: Change to specific domain(s)!
+  #   Example: ["https://yourdomain.com", "https://www.yourdomain.com"]
+  cors_origins:
+    - "*"  # TODO: Change in production!
+
+# Redis configuration (optional - for future caching)
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+  db: 0
+  password: null  # Set via REDIS_PASSWORD env var in production
+  cache_ttl: 3600  # 1 hour
+  # 🔒 SECURITY: In production, set REDIS_PASSWORD environment variable
+
+# Celery configuration (optional - for future scheduled tasks)
+celery:
+  broker_url: "redis://localhost:6379/0"
+  result_backend: "redis://localhost:6379/0"
+
+# Scheduled tasks configuration (optional - for future use)
+schedule:
+  scrape_cron: "0 */6 * * *"  # Every 6 hours
+  run_on_startup: true
+
+# Benchmark sources (може да се обновява динамично)
+benchmarks:
+  source: "manual"  # manual, api, or file
+  update_interval_days: 30
+  api_url: null  # За бъдещо използване
+
+# Notifications configuration
+notifications:
+  # Email notifications (SMTP)
+  email:
+    enabled: false
+    smtp_host: smtp.gmail.com
+    smtp_port: 587
+    smtp_user: your_email@gmail.com
+    smtp_password: your_app_password  # Use app password, not regular password
+    from_email: your_email@gmail.com
+
+  # Telegram bot notifications
+  telegram:
+    enabled: false
+    bot_token: null  # Get from @BotFather
+    chat_ids: []  # List of chat IDs to notify
+
+  # Price drop settings
+  price_drop:
+    threshold_percent: 10  # Minimum % drop to trigger notification
+    check_interval_hours: 6  # How often to check for drops
+    enabled: true

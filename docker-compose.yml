@@ -1,0 +1,99 @@
+# ============================================================
+# Docker Compose за Development
+# За production използвай: docker-compose.production.yml
+# За PostgreSQL development използвай: docker-compose.postgres.yml
+# ============================================================
+
+version: '3.8'
+
+services:
+  # Redis Cache (Development)
+  redis:
+    image: redis:7-alpine
+    container_name: gpu_redis_dev
+    command: redis-server --appendonly no --requirepass ${REDIS_PASSWORD:-redis_dev_password}
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_dev_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gpu_dev_network
+
+  # Main API Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gpu_api_dev
+    environment:
+      # Development environment
+      ENVIRONMENT: development
+      DEBUG: true
+      API_RELOAD: true
+
+      # Database (SQLite в volume)
+      DATABASE_URL: sqlite:////app/data/gpu.db
+
+      # Logging
+      LOGGING_LEVEL: DEBUG
+      LOGGING_FILE: /app/logs/gpu_service.log
+
+      # Scraper settings
+      SCRAPER_MAX_PAGES: 2
+      SCRAPER_USE_TOR: true
+      SCRAPER_RATE_LIMIT_REQUESTS_PER_MINUTE: 10
+
+      # API settings
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+
+      # Redis cache
+      REDIS_ENABLED: true
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_dev_password}
+      REDIS_CACHE_TTL: 300  # 5 minutes для development
+
+      # CORS (development - permissive)
+      API_CORS_ORIGINS: "*"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      # Mount code for hot reload (опционално - премахни за production-like testing)
+      - ./api:/app/api
+      - ./core:/app/core
+      - ./ingest:/app/ingest
+      - ./storage:/app/storage
+      - ./static:/app/static
+
+      # Persistent data
+      - gpu_data:/app/data
+      - gpu_logs:/app/logs
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    networks:
+      - gpu_dev_network
+
+volumes:
+  # Persistent volumes за database и logs
+  gpu_data:
+    driver: local
+  gpu_logs:
+    driver: local
+
+networks:
+  gpu_dev_network:
+    driver: bridge
