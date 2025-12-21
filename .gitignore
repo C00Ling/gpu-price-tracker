@@ -10,7 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+lib/  # Python lib folder only
 lib64/
 parts/
 sdist/
@@ -98,3 +98,6 @@ tor_data/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+
+# Exception: Include frontend source lib folder
+!frontend/src/lib/
