@@ -126,6 +126,27 @@ except RuntimeError:
     logger.warning("Static directory not found, skipping mount")
 
 
+# Frontend setup - mount SPA dist folder
+import os as os_module
+if os_module.path.isdir("frontend/dist"):
+    # Custom static files mount with HTML SPA fallback
+    class SPAStaticFiles(StaticFiles):
+        async def get_response(self, path, scope, **kwargs):
+            try:
+                return await super().get_response(path, scope, **kwargs)
+            except FileNotFoundError:
+                # For HTML5 SPA routing, return index.html for non-existent routes
+                try:
+                    return await super().get_response("index.html", scope, **kwargs)
+                except FileNotFoundError:
+                    return await super().get_response(path, scope, **kwargs)
+    
+    app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), name="frontend")
+    logger.info("✅ Frontend mounted from frontend/dist with SPA routing")
+else:
+    logger.warning("frontend/dist directory not found")
+
+
 # Favicon
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
@@ -264,33 +285,6 @@ async def dashboard():
             content="<h1>Dashboard not found</h1><p>Please create static/dashboard.html</p>",
             status_code=404
         )
-
-
-# SPA fallback - serve index.html for all unmatched routes (after all API routes)
-@app.get("/{full_path:path}", include_in_schema=False)
-async def spa_fallback(full_path: str):
-    """
-    Fallback for SPA routing - serves frontend/dist/index.html
-    This is intentionally last so all API routes take precedence
-    """
-    try:
-        # Check if file exists in frontend/dist
-        import os
-        file_path = f"frontend/dist/{full_path}"
-        
-        if os.path.isfile(file_path):
-            # If it's a real file (asset), serve it
-            return FileResponse(file_path)
-        
-        # Otherwise, return index.html for SPA routing
-        if os.path.isfile("frontend/dist/index.html"):
-            return FileResponse("frontend/dist/index.html", media_type="text/html")
-        else:
-            logger.warning(f"SPA index.html not found, returning root info for path: {full_path}")
-            return root()
-    except Exception as e:
-        logger.error(f"Error serving SPA fallback for {full_path}: {e}")
-        return root()
 
 
 if __name__ == "__main__":
