@@ -1,6 +1,5 @@
 // WebSocket hook for real-time updates
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { config } from '../lib/config';
 import type { WebSocketMessage } from '../types';
 
 interface UseWebSocketOptions {
@@ -32,7 +31,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
   const connect = useCallback(() => {
     try {
-      const wsUrl = `${config.api.wsUrl}/api/ws`;
+      // Get WebSocket URL at runtime based on hostname
+      const isLocal = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1';
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = isLocal ? 'localhost:8000' : window.location.host;
+      const wsUrl = `${wsProtocol}//${wsHost}/api/ws`;
+      
       console.log('📡 Connecting to WebSocket:', wsUrl);
 
       ws.current = new WebSocket(wsUrl);

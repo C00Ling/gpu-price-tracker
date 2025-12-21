@@ -1,5 +1,4 @@
 // API service layer for backend communication
-import { config } from '../lib/config';
 import type {
   GPU,
   ModelStats,
@@ -8,9 +7,21 @@ import type {
   PaginationParams,
 } from '../types';
 
-// Get baseUrl at runtime (not at module load time)
-const getBaseUrl = () => config.api.baseUrl;
-const getTimeout = () => config.api.timeout;
+// Get baseUrl at runtime - check hostname directly
+const getBaseUrl = () => {
+  // Check if running locally
+  const isLocal = window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1';
+  
+  if (isLocal) {
+    return 'http://localhost:8000';
+  }
+  
+  // In production, use same origin
+  return window.location.origin;
+};
+
+const getTimeout = () => 30000; // 30 seconds
 
 class ApiError extends Error {
   status?: number;
