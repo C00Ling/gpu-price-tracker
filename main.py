@@ -119,32 +119,11 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Mount static files (backend static files)
+# Mount static files (backend static files + frontend)
 try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
 except RuntimeError:
     logger.warning("Static directory not found, skipping mount")
-
-
-# Frontend setup - mount SPA dist folder
-import os as os_module
-if os_module.path.isdir("frontend/dist"):
-    # Custom static files mount with HTML SPA fallback
-    class SPAStaticFiles(StaticFiles):
-        async def get_response(self, path, scope, **kwargs):
-            try:
-                return await super().get_response(path, scope, **kwargs)
-            except FileNotFoundError:
-                # For HTML5 SPA routing, return index.html for non-existent routes
-                try:
-                    return await super().get_response("index.html", scope, **kwargs)
-                except FileNotFoundError:
-                    return await super().get_response(path, scope, **kwargs)
-    
-    app.mount("/", SPAStaticFiles(directory="frontend/dist", html=True), name="frontend")
-    logger.info("✅ Frontend mounted from frontend/dist with SPA routing")
-else:
-    logger.warning("frontend/dist directory not found")
 
 
 # Favicon
@@ -166,26 +145,30 @@ app.include_router(value.router, prefix="/api/value", tags=["💎 Value Analysis
 app.include_router(websocket.router, prefix="/api", tags=["🔌 WebSocket"])
 
 
-# Root endpoint
-@app.get("/", tags=["Info"])
-def root():
-    """API Information"""
-    return {
-        "name": "GPU Market Service API",
-        "message": "GPU Market Service API",
-        "version": config.get("api.version", "1.0.0"),
-        "description": "Анализ на цени на видео карти в България",
-        "status": "operational",
-        "endpoints": {
-            "home": "/ - Landing page",
-            "dashboard": "/dashboard - Interactive Dashboard 🎨",
-            "listings": "/api/listings - Всички обяви",
-            "stats": "/api/stats - Статистики по модели",
-            "value": "/api/value - FPS per лв анализ",
-            "docs": "/docs - API документация",
-            "redoc": "/redoc - ReDoc документация"
+# Root endpoint - serve SPA
+@app.get("/", tags=["Info"], include_in_schema=False)
+async def root():
+    """Serve frontend SPA"""
+    try:
+        return FileResponse("static/index.html", media_type="text/html")
+    except FileNotFoundError:
+        logger.warning("Frontend index.html not found, returning API info")
+        return {
+            "name": "GPU Market Service API",
+            "message": "GPU Market Service API",
+            "version": config.get("api.version", "1.0.0"),
+            "description": "Анализ на цени на видео карти в България",
+            "status": "operational",
+            "endpoints": {
+                "home": "/ - Landing page",
+                "dashboard": "/dashboard - Interactive Dashboard 🎨",
+                "listings": "/api/listings - Всички обяви",
+                "stats": "/api/stats - Статистики по модели",
+                "value": "/api/value - FPS per лв анализ",
+                "docs": "/docs - API документация",
+                "redoc": "/redoc - ReDoc документация"
+            }
         }
-    }
 
 
 # Health check
@@ -275,15 +258,34 @@ async def home():
 # Dashboard
 @app.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
 async def dashboard():
-    """Interactive GPU Market Dashboard"""
+    """Interactive GPU Market Dashboard - serve SPA"""
     try:
-        with open("static/dashboard.html", "r", encoding="utf-8") as f:
+        with open("static/index.html", "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        logger.warning("Dashboard HTML not found")
+        logger.warning("Dashboard index.html not found")
         return HTMLResponse(
-            content="<h1>Dashboard not found</h1><p>Please create static/dashboard.html</p>",
+            content="<h1>Dashboard not found</h1><p>Please create static/index.html</p>",
             status_code=404
+        )
+
+
+# SPA catch-all - serve index.html for any unmatched routes (SPA routing)
+@app.get("/{full_path:path}", include_in_schema=False)
+async def spa_fallback(full_path: str):
+    """Catch-all for SPA routes - serves index.html for client-side routing"""
+    # Don't interfere with API routes (should be handled before this)
+    if full_path.startswith(("api/", "static/", "docs", "redoc", "openapi")):
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+    
+    # Serve index.html for SPA routing
+    try:
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Frontend not found, please contact support"}
         )
 
 
