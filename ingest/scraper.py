@@ -96,27 +96,39 @@ class GPUScraper:
         except Exception as e:
             logger.error(f"Failed to renew TOR IP: {e}")
 
-    @retry_on_failure(
-        max_retries=3,
-        delay=5,
-        backoff=2.0,
-        exceptions=(requests.RequestException,)
-    )
     def test_connection(self) -> bool:
-        """Тества връзката (с retry)"""
+        """Тества връзката с TOR fallback"""
+        # First try with TOR if enabled
+        if self.use_tor:
+            try:
+                logger.info("Testing connection with TOR...")
+                r = requests.get(
+                    "https://api.ipify.org?format=json",
+                    proxies=self.get_proxy(),
+                    timeout=10,
+                )
+                ip = r.json().get('ip', 'Unknown')
+                logger.info(f"✅ TOR connection OK. Current IP: {ip}")
+                return True
+            except Exception as e:
+                logger.warning(f"⚠️ TOR connection failed: {e}")
+                logger.info("🔄 Falling back to direct connection (no TOR)...")
+                self.use_tor = False
+                self.use_proxy = False
+
+        # Try without TOR (either fallback or never enabled)
         try:
-            logger.info("Testing connection...")
+            logger.info("Testing direct connection...")
             r = requests.get(
                 "https://api.ipify.org?format=json",
-                proxies=self.get_proxy(),
                 timeout=10,
             )
             ip = r.json().get('ip', 'Unknown')
-            logger.info(f"Connection OK. Current IP: {ip}")
+            logger.info(f"✅ Direct connection OK. Current IP: {ip}")
             return True
         except Exception as e:
-            logger.error(f"Connection test failed: {e}")
-            raise
+            logger.error(f"❌ Connection test failed completely: {e}")
+            return False
 
     # ================= CORE =================
 
