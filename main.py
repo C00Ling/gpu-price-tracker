@@ -119,7 +119,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Mount static files
+# Mount static files (backend static files)
 try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
 except RuntimeError:
@@ -264,6 +264,33 @@ async def dashboard():
             content="<h1>Dashboard not found</h1><p>Please create static/dashboard.html</p>",
             status_code=404
         )
+
+
+# SPA fallback - serve index.html for all unmatched routes (after all API routes)
+@app.get("/{full_path:path}", include_in_schema=False)
+async def spa_fallback(full_path: str):
+    """
+    Fallback for SPA routing - serves frontend/dist/index.html
+    This is intentionally last so all API routes take precedence
+    """
+    try:
+        # Check if file exists in frontend/dist
+        import os
+        file_path = f"frontend/dist/{full_path}"
+        
+        if os.path.isfile(file_path):
+            # If it's a real file (asset), serve it
+            return FileResponse(file_path)
+        
+        # Otherwise, return index.html for SPA routing
+        if os.path.isfile("frontend/dist/index.html"):
+            return FileResponse("frontend/dist/index.html", media_type="text/html")
+        else:
+            logger.warning(f"SPA index.html not found, returning root info for path: {full_path}")
+            return root()
+    except Exception as e:
+        logger.error(f"Error serving SPA fallback for {full_path}: {e}")
+        return root()
 
 
 if __name__ == "__main__":
