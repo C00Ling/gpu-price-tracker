@@ -199,6 +199,43 @@ def health_check():
         )
 
 
+# Trigger scraper
+@app.post("/api/trigger-scrape", tags=["Admin"])
+async def trigger_scrape():
+    """Trigger GPU scraper (runs in background)"""
+    try:
+        import threading
+        from ingest.pipeline import run_pipeline
+
+        def run_scraper():
+            try:
+                logger.info("🔥 Starting scraper in background...")
+                run_pipeline()
+                logger.info("✅ Scraper completed successfully")
+            except Exception as e:
+                logger.error(f"❌ Scraper failed: {e}", exc_info=True)
+
+        # Start scraper in background thread
+        thread = threading.Thread(target=run_scraper, daemon=True)
+        thread.start()
+
+        return {
+            "status": "started",
+            "message": "Scraper started in background",
+            "note": "Check logs for progress. This may take 2-5 minutes."
+        }
+    except Exception as e:
+        logger.error(f"Failed to start scraper: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "Failed to start scraper",
+                "error": str(e)
+            }
+        )
+
+
 # Landing page
 @app.get("/home", response_class=HTMLResponse, include_in_schema=False)
 async def home():
