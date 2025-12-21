@@ -11,9 +11,13 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/dashboard" element={<Home />} />
             <Route path="/listings" element={<Listings />} />
             <Route path="/value" element={<ValueAnalysis />} />
             <Route path="/about" element={<About />} />
+            {/* Catch-all for SPA */}
+            <Route path="*" element={<Home />} />
           </Routes>
         </div>
       </BrowserRouter>
