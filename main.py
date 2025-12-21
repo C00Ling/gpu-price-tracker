@@ -126,6 +126,13 @@ except RuntimeError:
     logger.warning("Static directory not found, skipping mount")
 
 
+# Mount assets folder directly at /assets for SPA frontend
+try:
+    app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
+except RuntimeError:
+    logger.warning("Static assets directory not found, skipping mount")
+
+
 # Favicon
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
