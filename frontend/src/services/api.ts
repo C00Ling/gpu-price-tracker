@@ -8,7 +8,9 @@ import type {
   PaginationParams,
 } from '../types';
 
-const { baseUrl, timeout } = config.api;
+// Get baseUrl at runtime (not at module load time)
+const getBaseUrl = () => config.api.baseUrl;
+const getTimeout = () => config.api.timeout;
 
 class ApiError extends Error {
   status?: number;
@@ -27,7 +29,7 @@ async function fetchWithTimeout(
   options: RequestInit = {}
 ): Promise<Response> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = setTimeout(() => controller.abort(), getTimeout());
 
   try {
     const response = await fetch(url, {
@@ -61,24 +63,24 @@ export const api = {
       if (params?.page) queryParams.append('page', params.page.toString());
       if (params?.size) queryParams.append('size', params.size.toString());
 
-      const url = `${baseUrl}/api/listings/?${queryParams}`;
+      const url = `${getBaseUrl()}/api/listings/?${queryParams}`;
       const response = await fetchWithTimeout(url);
       return response.json();
     },
 
     getByModel: async (model: string): Promise<GPU[]> => {
-      const url = `${baseUrl}/api/listings/${encodeURIComponent(model)}`;
+      const url = `${getBaseUrl()}/api/listings/${encodeURIComponent(model)}`;
       const response = await fetchWithTimeout(url);
       return response.json();
     },
 
     getCount: async (): Promise<{ total: number }> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/listings/count/total`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/listings/count/total`);
       return response.json();
     },
 
     getModels: async (): Promise<{ models: string[]; count: number }> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/listings/models/list`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/listings/models/list`);
       return response.json();
     },
   },
@@ -86,17 +88,17 @@ export const api = {
   // Statistics endpoints
   stats: {
     getAll: async (): Promise<ModelStats> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/stats/`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/stats/`);
       return response.json();
     },
 
     getSummary: async (): Promise<SummaryStats> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/stats/summary`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/stats/summary`);
       return response.json();
     },
 
     getByModel: async (model: string): Promise<any> => {
-      const url = `${baseUrl}/api/stats/${encodeURIComponent(model)}`;
+      const url = `${getBaseUrl()}/api/stats/${encodeURIComponent(model)}`;
       const response = await fetchWithTimeout(url);
       return response.json();
     },
@@ -105,12 +107,12 @@ export const api = {
   // Value analysis endpoints
   value: {
     getAll: async (): Promise<ValueAnalysis[]> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/value/`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/value/`);
       return response.json();
     },
 
     getTopN: async (n: number = 10): Promise<ValueAnalysis[]> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/value/top/${n}`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/value/top/${n}`);
       return response.json();
     },
   },
@@ -118,14 +120,14 @@ export const api = {
   // WebSocket connection status
   websocket: {
     getConnections: async (): Promise<{ active_connections: number; total_connections: number }> => {
-      const response = await fetchWithTimeout(`${baseUrl}/api/ws/connections`);
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/ws/connections`);
       return response.json();
     },
   },
 
   // Health check
   health: async (): Promise<any> => {
-    const response = await fetchWithTimeout(`${baseUrl}/health`);
+    const response = await fetchWithTimeout(`${getBaseUrl()}/health`);
     return response.json();
   },
 };
