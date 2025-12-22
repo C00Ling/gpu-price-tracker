@@ -1,5 +1,6 @@
 // Home page - Dashboard with summary stats and top GPUs
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useSummaryStats, useTopValue } from '../hooks/useGPUData';
 import {
   Card,
@@ -9,10 +10,39 @@ import {
   LoadingPage,
   ErrorMessage,
 } from '../components';
+import api from '../services/api';
 
 export function Home() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useSummaryStats();
   const { data: topGPUs, isLoading: topLoading, error: topError } = useTopValue(5);
+
+  // Scraper state
+  const [isScraping, setIsScraping] = useState(false);
+  const [scrapeMessage, setScrapeMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  const handleTriggerScrape = async () => {
+    try {
+      setIsScraping(true);
+      setScrapeMessage(null);
+
+      const result = await api.admin.triggerScrape();
+
+      setScrapeMessage({
+        type: 'success',
+        text: `${result.message}. ${result.note || 'Данните ще се обновят след 2-5 минути.'}`,
+      });
+
+      // Auto-hide success message after 10 seconds
+      setTimeout(() => setScrapeMessage(null), 10000);
+    } catch (error) {
+      setScrapeMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Грешка при стартиране на scraper',
+      });
+    } finally {
+      setIsScraping(false);
+    }
+  };
 
   if (statsLoading || topLoading) {
     return <LoadingPage />;
@@ -119,7 +149,7 @@ export function Home() {
       </Card>
 
       {/* CTA Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card hover>
           <CardHeader title="Разгледай всички обяви" />
           <CardContent>
@@ -144,6 +174,57 @@ export function Home() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Admin Section - Update Data */}
+      <Card className="border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-blue-50">
+        <CardHeader
+          title="🔄 Обнови данните"
+          subtitle="Стартирай нов scrape за най-нови обяви от OLX"
+        />
+        <CardContent>
+          {scrapeMessage && (
+            <div
+              className={`mb-4 p-4 rounded-lg ${
+                scrapeMessage.type === 'success'
+                  ? 'bg-green-50 border border-green-200 text-green-800'
+                  : scrapeMessage.type === 'error'
+                  ? 'bg-red-50 border border-red-200 text-red-800'
+                  : 'bg-blue-50 border border-blue-200 text-blue-800'
+              }`}
+            >
+              <p className="text-sm font-medium">{scrapeMessage.text}</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex-1 mr-4">
+              <p className="text-gray-600 text-sm mb-2">
+                Последните данни: {stats?.total_listings || 0} обяви от {stats?.unique_models || 0} модела
+              </p>
+              <p className="text-gray-500 text-xs">
+                Scraping отнема ~2-5 минути и ще обнови production базата данни.
+              </p>
+            </div>
+            <Button
+              onClick={handleTriggerScrape}
+              disabled={isScraping}
+              className="min-w-[140px]"
+            >
+              {isScraping ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Стартиране...
+                </>
+              ) : (
+                '🚀 Стартирай Scrape'
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

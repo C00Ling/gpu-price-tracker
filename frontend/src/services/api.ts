@@ -141,6 +141,16 @@ export const api = {
     const response = await fetchWithTimeout(`${getBaseUrl()}/health`);
     return response.json();
   },
+
+  // Admin endpoints
+  admin: {
+    triggerScrape: async (): Promise<{ status: string; message: string; note?: string }> => {
+      const response = await fetchWithTimeout(`${getBaseUrl()}/api/trigger-scrape`, {
+        method: 'POST',
+      });
+      return response.json();
+    },
+  },
 };
 
 export { ApiError };
