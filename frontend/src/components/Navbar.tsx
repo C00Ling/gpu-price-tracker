@@ -15,15 +15,15 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-black border-b border-zinc-800 shadow-lg shadow-black/50 sticky top-0 z-50 backdrop-blur-sm bg-black/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl">🎮</span>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <span className="text-2xl group-hover:scale-110 transition-transform">🎮</span>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">{config.app.name}</h1>
-              <p className="text-xs text-gray-500 hidden sm:block">{config.app.description}</p>
+              <h1 className="text-xl font-bold text-white">{config.app.name}</h1>
+              <p className="text-xs text-gray-400 hidden sm:block">{config.app.description}</p>
             </div>
           </Link>
 
@@ -34,10 +34,10 @@ export function Navbar() {
                 key={item.path}
                 to={item.path}
                 className={`
-                  px-3 py-2 rounded-md text-sm font-medium transition-colors
+                  px-3 py-2 rounded-md text-sm font-medium transition-all
                   ${isActive(item.path)
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                    : 'text-gray-300 hover:bg-zinc-800 hover:text-white'
                   }
                 `}
               >

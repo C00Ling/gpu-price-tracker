@@ -34,22 +34,22 @@ export function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
 export function LoadingPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black">
       <LoadingSpinner size="lg" />
-      <p className="mt-4 text-gray-600">Зареждане...</p>
+      <p className="mt-4 text-gray-400">Зареждане...</p>
     </div>
   );
 }
 
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+    <div className={`animate-pulse bg-zinc-800 rounded ${className}`} />
   );
 }
 
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-md p-6">
       <Skeleton className="h-6 w-3/4 mb-4" />
       <Skeleton className="h-4 w-1/2 mb-2" />
       <Skeleton className="h-4 w-2/3 mb-2" />

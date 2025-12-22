@@ -58,10 +58,10 @@ export function Home() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl font-bold text-white mb-4">
           Анализ на цени на видео карти в България
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
           Проследяваме цените на GPU-та от OLX и предоставяме детайлна статистика и анализ на стойността
         </p>
       </div>
@@ -70,22 +70,22 @@ export function Home() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">Обяви</p>
-            <p className="text-3xl font-bold text-primary-600">{stats?.total_listings || 0}</p>
+            <p className="text-sm text-gray-400 mb-2">Обяви</p>
+            <p className="text-3xl font-bold text-primary-400">{stats?.total_listings || 0}</p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">Модели</p>
-            <p className="text-3xl font-bold text-primary-600">{stats?.unique_models || 0}</p>
+            <p className="text-sm text-gray-400 mb-2">Модели</p>
+            <p className="text-3xl font-bold text-primary-400">{stats?.unique_models || 0}</p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">Средна цена</p>
-            <p className="text-3xl font-bold text-primary-600">
+            <p className="text-sm text-gray-400 mb-2">Средна цена</p>
+            <p className="text-3xl font-bold text-primary-400">
               {stats?.avg_price ? `${stats.avg_price.toFixed(0)}лв` : '-'}
             </p>
           </div>
@@ -93,8 +93,8 @@ export function Home() {
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-2">Мин. цена</p>
-            <p className="text-3xl font-bold text-primary-600">
+            <p className="text-sm text-gray-400 mb-2">Мин. цена</p>
+            <p className="text-3xl font-bold text-primary-400">
               {stats?.min_price ? `${stats.min_price.toFixed(0)}лв` : '-'}
             </p>
           </div>
@@ -120,21 +120,21 @@ export function Home() {
               {topGPUs.map((gpu, index) => (
                 <div
                   key={gpu.model}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg hover:bg-zinc-800 hover:border-primary-500/50 transition-all"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="flex items-center justify-center w-8 h-8 bg-primary-600 text-white rounded-full font-bold">
+                    <div className="flex items-center justify-center w-8 h-8 bg-primary-600 text-white rounded-full font-bold shadow-lg shadow-primary-500/30">
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">{gpu.model}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-semibold text-white">{gpu.model}</p>
+                      <p className="text-sm text-gray-400">
                         {gpu.fps} FPS @ {gpu.price.toFixed(0)}лв
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-primary-600">
+                    <p className="text-lg font-bold text-primary-400">
                       {gpu.fps_per_lv.toFixed(2)}
                     </p>
                     <p className="text-xs text-gray-500">FPS/лв</p>
@@ -143,7 +143,7 @@ export function Home() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-8">Няма данни</p>
+            <p className="text-center text-gray-400 py-8">Няма данни</p>
           )}
         </CardContent>
       </Card>
@@ -153,7 +153,7 @@ export function Home() {
         <Card hover>
           <CardHeader title="Разгледай всички обяви" />
           <CardContent>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-400 mb-4">
               Преглед на всички обяви с филтри и търсене по модел
             </p>
             <Link to="/listings">
@@ -165,7 +165,7 @@ export function Home() {
         <Card hover>
           <CardHeader title="Анализ на стойността" />
           <CardContent>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-400 mb-4">
               Виж коя видео карта предлага най-добра стойност за парите
             </p>
             <Link to="/value">
@@ -176,7 +176,7 @@ export function Home() {
       </div>
 
       {/* Admin Section - Update Data */}
-      <Card className="border-2 border-primary-200 bg-gradient-to-r from-primary-50 to-blue-50">
+      <Card className="border-2 border-primary-500/30 bg-gradient-to-r from-primary-950/30 to-blue-950/30">
         <CardHeader
           title="🔄 Обнови данните"
           subtitle="Стартирай нов scrape за най-нови обяви от OLX"
@@ -186,10 +186,10 @@ export function Home() {
             <div
               className={`mb-4 p-4 rounded-lg ${
                 scrapeMessage.type === 'success'
-                  ? 'bg-green-50 border border-green-200 text-green-800'
+                  ? 'bg-green-950/30 border border-green-500/30 text-green-400'
                   : scrapeMessage.type === 'error'
-                  ? 'bg-red-50 border border-red-200 text-red-800'
-                  : 'bg-blue-50 border border-blue-200 text-blue-800'
+                  ? 'bg-red-950/30 border border-red-500/30 text-red-400'
+                  : 'bg-blue-950/30 border border-blue-500/30 text-blue-400'
               }`}
             >
               <p className="text-sm font-medium">{scrapeMessage.text}</p>
@@ -198,7 +198,7 @@ export function Home() {
 
           <div className="flex items-center justify-between">
             <div className="flex-1 mr-4">
-              <p className="text-gray-600 text-sm mb-2">
+              <p className="text-gray-300 text-sm mb-2">
                 Последните данни: {stats?.total_listings || 0} обяви от {stats?.unique_models || 0} модела
               </p>
               <p className="text-gray-500 text-xs">

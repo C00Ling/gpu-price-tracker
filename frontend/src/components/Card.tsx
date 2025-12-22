@@ -9,11 +9,11 @@ interface CardProps {
 }
 
 export function Card({ children, className = '', hover = false, onClick }: CardProps) {
-  const hoverClass = hover ? 'hover:shadow-lg hover:scale-[1.02] transition-all duration-200 cursor-pointer' : '';
+  const hoverClass = hover ? 'hover:shadow-lg hover:shadow-primary-500/20 hover:scale-[1.02] transition-all duration-200 cursor-pointer' : '';
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-md p-6 ${hoverClass} ${className}`}
+      className={`bg-zinc-900 border border-zinc-800 rounded-lg shadow-md p-6 ${hoverClass} ${className}`}
       onClick={onClick}
     >
       {children}
@@ -31,8 +31,8 @@ export function CardHeader({ title, subtitle, action }: CardHeaderProps) {
   return (
     <div className="flex justify-between items-start mb-4">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
       </div>
       {action && <div>{action}</div>}
     </div>
@@ -55,7 +55,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`mt-4 pt-4 border-t border-gray-200 ${className}`}>
+    <div className={`mt-4 pt-4 border-t border-zinc-800 ${className}`}>
       {children}
     </div>
   );

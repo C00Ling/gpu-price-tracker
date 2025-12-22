@@ -51,22 +51,22 @@ interface ErrorFallbackProps {
 
 export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
+    <div className="min-h-screen flex items-center justify-center bg-black px-4">
+      <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg p-6">
+        <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-500/10 rounded-full">
           <span className="text-2xl">⚠️</span>
         </div>
 
-        <h2 className="mt-4 text-xl font-semibold text-center text-gray-900">
+        <h2 className="mt-4 text-xl font-semibold text-center text-white">
           Нещо се обърка
         </h2>
 
-        <p className="mt-2 text-sm text-gray-600 text-center">
+        <p className="mt-2 text-sm text-gray-400 text-center">
           Възникна грешка при зареждане на страницата
         </p>
 
         {error.message && (
-          <div className="mt-4 p-3 bg-gray-100 rounded text-xs text-gray-700 font-mono overflow-x-auto">
+          <div className="mt-4 p-3 bg-zinc-800 rounded text-xs text-gray-300 font-mono overflow-x-auto">
             {error.message}
           </div>
         )}
@@ -89,9 +89,9 @@ interface ErrorMessageProps {
 export function ErrorMessage({ message, retry }: ErrorMessageProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12">
-      <div className="text-red-600 text-5xl mb-4">⚠️</div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Грешка</h3>
-      <p className="text-gray-600 text-center mb-4">{message}</p>
+      <div className="text-red-500 text-5xl mb-4">⚠️</div>
+      <h3 className="text-lg font-semibold text-white mb-2">Грешка</h3>
+      <p className="text-gray-400 text-center mb-4">{message}</p>
       {retry && (
         <Button onClick={retry} variant="outline" size="sm">
           Опитай отново

@@ -59,7 +59,7 @@ export function Table<T extends Record<string, any>>({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
+      <div className="text-center py-12 text-gray-400">
         {emptyMessage}
       </div>
     );
@@ -67,21 +67,21 @@ export function Table<T extends Record<string, any>>({
 
   return (
     <div className={`overflow-x-auto ${className}`}>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <table className="min-w-full divide-y divide-zinc-800">
+        <thead className="bg-zinc-900/50">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                  column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+                className={`px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider ${
+                  column.sortable ? 'cursor-pointer hover:bg-zinc-800' : ''
                 } ${column.className || ''}`}
                 onClick={() => column.sortable && handleSort(column.key)}
               >
                 <div className="flex items-center space-x-1">
                   <span>{column.label}</span>
                   {column.sortable && (
-                    <span className="text-gray-400">
+                    <span className="text-gray-500">
                       {sortKey === column.key ? (
                         sortDirection === 'asc' ? '↑' : '↓'
                       ) : (
@@ -94,13 +94,13 @@ export function Table<T extends Record<string, any>>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-zinc-900 divide-y divide-zinc-800">
           {sortedData.map((item) => (
-            <tr key={keyExtractor(item)} className="hover:bg-gray-50">
+            <tr key={keyExtractor(item)} className="hover:bg-zinc-800/50 transition-colors">
               {columns.map((column) => (
                 <td
                   key={column.key}
-                  className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${column.className || ''}`}
+                  className={`px-6 py-4 whitespace-nowrap text-sm text-white ${column.className || ''}`}
                 >
                   {column.render ? column.render(item) : item[column.key]}
                 </td>
