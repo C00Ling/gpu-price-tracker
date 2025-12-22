@@ -598,14 +598,10 @@ GPU_SERVICE/
 ├── 📄 README.md               # Documentation
 │
 ├── 📁 api/                    # API Layer
-│   ├── routers/               # API endpoints
+│   ├── routers/               # API endpoints (with inline Pydantic schemas)
 │   │   ├── listings.py        # Listings endpoints
 │   │   ├── stats.py           # Statistics endpoints
 │   │   └── value.py           # Value analysis endpoints
-│   ├── schemas/               # Pydantic models
-│   │   ├── listings.py        # Listing schemas
-│   │   ├── stats.py           # Stats schemas
-│   │   └── value.py           # Value schemas
 │   ├── dependencies.py        # Dependency injection
 │   └── __init__.py
 │
@@ -621,8 +617,6 @@ GPU_SERVICE/
 │   └── __init__.py
 │
 ├── 📁 ingest/                 # Data Collection
-│   ├── sources/               # Data sources
-│   │   └── olx.py            # OLX scraper wrapper
 │   ├── pipeline.py            # Main data pipeline
 │   ├── scraper.py             # Enhanced scraper
 │   └── __init__.py
@@ -868,154 +862,66 @@ session.close()
 
 ## 🚀 Deployment
 
-### 🐳 Docker Deployment (Препоръчително)
+Проектът е готов за production deployment с множество опции.
 
-Docker е най-лесният начин да deploy-неш приложението с всички dependencies.
+### 🎯 Quick Start Deployment
 
-#### Development с Docker Compose
+Препоръчваме **Railway** за най-бърз deployment (5 минути):
 
 ```bash
-# 1. Build и start
+# 1. Push към GitHub
+git remote add origin https://github.com/твоят-username/gpu-price-tracker.git
+git push -u origin main
+
+# 2. Deploy на Railway.app
+# - Login with GitHub
+# - Click "New Project" → "Deploy from GitHub repo"
+# - Избери gpu-price-tracker
+# - Добави PostgreSQL + Redis
+# - Generate domain
+# ✅ Done! Проектът е live!
+```
+
+**Цена:** $0-5/месец (безплатен $5 credit)
+
+### 📚 Deployment Guides
+
+За детайлни инструкции, виж deployment documentation:
+
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Пълен deployment guide
+  - Railway deployment (препоръчано, 5 мин)
+  - Docker deployment
+  - Platform comparison
+  - Troubleshooting
+  - Security best practices
+
+- **[DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md)** - Advanced VPS guide
+  - DigitalOcean / Hetzner setup
+  - Nginx + SSL configuration
+  - systemd service setup
+  - Automated backups
+  - Monitoring
+
+### 🐳 Docker Quick Start
+
+```bash
+# Development
 docker-compose up --build
 
-# 2. Само start (ако вече е build-нат)
-docker-compose up
-
-# 3. Background mode
-docker-compose up -d
-
-# 4. Виж logs
-docker-compose logs -f api
-
-# 5. Stop containers
-docker-compose down
-
-# 6. Stop и изтрий volumes (ВНИМАНИЕ: Изтрива данни!)
-docker-compose down -v
-```
-
-**Достъп:**
-- API: http://localhost:8000
-- Dashboard: http://localhost:8000/dashboard
-- API Docs: http://localhost:8000/docs
-
-#### Production с Docker Compose
-
-За production използвай `docker-compose.production.yml`:
-
-```bash
-# 1. Създай .env файл с production настройки
-cp .env.example .env
-nano .env  # Редактирай с production values
-
-# 2. Start production stack
+# Production
 docker-compose -f docker-compose.production.yml up -d
-
-# 3. Виж logs
-docker-compose -f docker-compose.production.yml logs -f
-
-# 4. Scaling workers
-docker-compose -f docker-compose.production.yml up -d --scale celery_worker=3
 ```
 
-Production stack включва:
-- ✅ PostgreSQL database
-- ✅ Redis cache
-- ✅ TOR proxy (separate container)
-- ✅ Celery worker & beat (background tasks)
-- ✅ Nginx reverse proxy
-- ✅ Prometheus monitoring
-- ✅ Grafana dashboards
+### 💰 Platform Options
 
-#### Manual Docker Build
+| Platform | Setup време | Цена/месец | Best for |
+|----------|-------------|------------|----------|
+| Railway | 5 мин | $0-5 | Бърз старт |
+| Hetzner VPS | 30 мин | €4 | Най-евтино |
+| Docker | 10 мин | Varies | Flexibility |
+| DigitalOcean | 15 мин | $6 | Managed |
 
-```bash
-# Build image
-docker build -t gpu-price-tracker:latest .
-
-# Run container
-docker run -d \
-  -p 8000:8000 \
-  -v gpu_data:/app/data \
-  -v gpu_logs:/app/logs \
-  -e ENVIRONMENT=production \
-  -e DATABASE_URL=sqlite:////app/data/gpu.db \
-  --name gpu_api \
-  gpu-price-tracker:latest
-
-# Check logs
-docker logs -f gpu_api
-
-# Stop container
-docker stop gpu_api
-
-# Remove container
-docker rm gpu_api
-```
-
-#### Docker Best Practices
-
-**Development:**
-- Използвай `docker-compose.yml`
-- Volumes за hot reload (code changes)
-- Debug logs enabled
-- Permissive CORS
-
-**Production:**
-- Използвай `docker-compose.production.yml`
-- Persistent volumes за data & logs
-- PostgreSQL вместо SQLite
-- Nginx за reverse proxy & SSL
-- Health checks enabled
-- Resource limits (CPU/Memory)
-
-### systemd Service
-
-#### 1. Създай service file
-```bash
-sudo nano /etc/systemd/system/gpu-service.service
-```
-
-```ini
-[Unit]
-Description=GPU Market Service
-After=network.target tor.service
-
-[Service]
-Type=simple
-User=your-user
-WorkingDirectory=/path/to/gpu_service
-Environment="PATH=/path/to/gpu_service/venv/bin"
-ExecStart=/path/to/gpu_service/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-#### 2. Enable и start
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable gpu-service
-sudo systemctl start gpu-service
-sudo systemctl status gpu-service
-```
-
-### Nginx Reverse Proxy
-
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-```
+Виж пълно comparison в [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ---
 
