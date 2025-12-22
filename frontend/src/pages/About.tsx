@@ -64,8 +64,16 @@ export function About() {
             </h3>
             <p className="text-gray-700">
               Анализът на стойността се базира на съотношението FPS/лв, където FPS са
-              benchmark резултати за 1080p игри (използваме данни от TechPowerUp), а цената
-              е медианната стойност от всички обяви за съответния модел.
+              benchmark резултати за 1080p игри (използваме данни от{' '}
+              <a
+                href="https://www.tomshardware.com/reviews/gpu-hierarchy,4388.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-600 hover:text-primary-700 underline"
+              >
+                Tom's Hardware GPU Hierarchy 2025
+              </a>
+              ), а цената е медианната стойност от всички обяви за съответния модел.
             </p>
 
             <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">

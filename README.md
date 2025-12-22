@@ -57,7 +57,8 @@
 - 🔧 **Health Checks** - Monitoring endpoints
 
 ### Data Sources
-- 📊 **OLX.bg** - Основен източник на данни
+- 📊 **OLX.bg** - GPU listings (основен източник на данни за цени)
+- 📊 **Tom's Hardware GPU Hierarchy 2025** - 1080p raster performance benchmarks (96 GPU models)
 - 📊 **Future**: Pazaruvaj.com, Technomarket, etc.
 
 ---
