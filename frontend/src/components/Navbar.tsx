@@ -15,7 +15,7 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="bg-black border-b border-zinc-800 shadow-lg shadow-black/50 sticky top-0 z-50 backdrop-blur-sm bg-black/95">
+    <nav className="bg-[#1E1E1E] border-b border-zinc-800 shadow-lg shadow-black/50 sticky top-0 z-50 backdrop-blur-sm bg-[#1E1E1E]/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}

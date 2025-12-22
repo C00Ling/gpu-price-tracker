@@ -34,7 +34,7 @@ export function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
 export function LoadingPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#1E1E1E]">
       <LoadingSpinner size="lg" />
       <p className="mt-4 text-gray-400">Зареждане...</p>
     </div>
