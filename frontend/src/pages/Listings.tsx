@@ -1,6 +1,6 @@
 // Listings page - All GPU listings with filters
 import { useState } from 'react';
-import { useListings, useAvailableModels } from '../hooks/useGPUData';
+import { useListings, useListingsByModel, useAvailableModels } from '../hooks/useGPUData';
 import {
   Card,
   CardHeader,
@@ -17,10 +17,17 @@ export function Listings() {
   const page = 1;
   const pageSize = 50;
 
-  const { data: listings, isLoading, error, refetch } = useListings({
+  // Use different queries based on whether a model is selected
+  const allListingsQuery = useListings({
     page,
     size: pageSize,
   });
+  const modelListingsQuery = useListingsByModel(selectedModel);
+
+  // Choose the appropriate query based on selection
+  const { data: listings, isLoading, error, refetch } = selectedModel
+    ? modelListingsQuery
+    : allListingsQuery;
 
   const { data: modelsData } = useAvailableModels();
 
@@ -32,9 +39,8 @@ export function Listings() {
     return <ErrorMessage message="Грешка при зареждане на обявите" retry={refetch} />;
   }
 
-  const filteredListings = selectedModel
-    ? listings?.filter((gpu) => gpu.model === selectedModel)
-    : listings;
+  // No need for client-side filtering - backend handles it with normalization
+  const filteredListings = listings;
 
   const columns = [
     {
