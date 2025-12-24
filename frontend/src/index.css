@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
-/* Dark Navy theme global styles - pure black background */
+/* Dark Navy theme global styles - YouTube dark theme background */
 html {
-  background-color: #000000;
+  background-color: #121212;
 }
 
 body {
   min-height: 100vh;
-  background-color: #000000;
+  background-color: #121212;
   color: #ffffff;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 #root {
-  background-color: #000000;
+  background-color: #121212;
   color: #ffffff;
 }
 

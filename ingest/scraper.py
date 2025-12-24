@@ -631,16 +631,16 @@ SAMPLE_BENCHMARKS = {
     "RTX 2060": 101.0,
 
     # NVIDIA GeForce GTX 10/16-series (Pascal/Turing)
-    "GTX 1660 SUPER": 86.0,
-    "GTX 1660 TI": 85.0,
-    "GTX 1660": 78.0,
-    "GTX 1650 SUPER": 68.0,
-    "GTX 1080 TI": 110.0,
-    "GTX 1080": 90.0,
-    "GTX 1070 TI": 86.0,
-    "GTX 1070": 75.0,
-    "GTX 1060 6GB": 58.0,
-    "GTX 1060 3GB": 53.0,
+    "GTX 1660 SUPER": 55.0,
+    "GTX 1660 TI": 54.0,
+    "GTX 1660": 50.0,
+    "GTX 1650 SUPER": 45.0,
+    "GTX 1080 TI": 65.0,
+    "GTX 1080": 55.0,
+    "GTX 1070 TI": 50.0,
+    "GTX 1070": 45.0,
+    "GTX 1060 6GB": 32.0,
+    "GTX 1060 3GB": 28.0,
 
     # AMD Radeon RX 9000-series (RDNA 4)
     "RX 9070 XT": 169.0,
@@ -669,20 +669,20 @@ SAMPLE_BENCHMARKS = {
     "RX 6600": 116.0,
 
     # AMD Radeon RX 5000-series (RDNA 1)
-    "RX 5700 XT": 125.0,
-    "RX 5700": 111.0,
-    "RX 5600 XT": 100.0,
-    "RX 5500 XT": 72.0,
+    "RX 5700 XT": 75.0,
+    "RX 5700": 68.0,
+    "RX 5600 XT": 60.0,
+    "RX 5500 XT": 45.0,
 
     # AMD Radeon RX 500-series (Polaris)
-    "RX 590": 69.0,
-    "RX 580": 62.0,
-    "RX 570": 54.0,
+    "RX 590": 40.0,
+    "RX 580": 35.0,
+    "RX 570": 30.0,
 
     # AMD Radeon Vega
-    "RADEON VII": 114.0,
-    "RX VEGA 64": 94.0,
-    "RX VEGA 56": 84.0,
+    "RADEON VII": 70.0,
+    "RX VEGA 64": 55.0,
+    "RX VEGA 56": 50.0,
 
     # Intel Arc (Alchemist & Battlemage)
     "ARC B580": 80.0,
