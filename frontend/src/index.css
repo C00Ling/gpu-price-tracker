@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
-/* Dark Navy theme global styles */
+/* Dark Navy theme global styles with gradient */
 html {
-  background-color: #0a0e1a;
+  background: linear-gradient(90deg, #000000 0%, #0a1929 100%);
 }
 
 body {
   min-height: 100vh;
-  background-color: #0a0e1a;
+  background: linear-gradient(90deg, #000000 0%, #0a1929 100%);
+  background-attachment: fixed;
   color: #ffffff;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 #root {
-  background-color: #0a0e1a;
+  background: transparent;
   color: #ffffff;
 }
 
