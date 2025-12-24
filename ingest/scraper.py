@@ -700,3 +700,119 @@ SAMPLE_BENCHMARKS = {
     "TITAN V": 95.0,
     "TITAN XP": 85.0,
 }
+
+# GPU VRAM specifications in GB
+GPU_VRAM = {
+    # NVIDIA GeForce RTX 50-series (Blackwell)
+    "RTX 5090": 32,
+    "RTX 5080": 16,
+    "RTX 5070 TI": 16,
+    "RTX 5070": 12,
+    "RTX 5060 TI 16GB": 16,
+    "RTX 5060 TI 8GB": 8,
+    "RTX 5060 TI": 8,
+    "RTX 5060": 8,
+
+    # NVIDIA GeForce RTX 40-series (Ada Lovelace)
+    "RTX 4090": 24,
+    "RTX 4080 SUPER": 16,
+    "RTX 4080": 16,
+    "RTX 4070 TI SUPER": 16,
+    "RTX 4070 TI": 12,
+    "RTX 4070 SUPER": 12,
+    "RTX 4070": 12,
+    "RTX 4060 TI 16GB": 16,
+    "RTX 4060 TI": 8,
+    "RTX 4060": 8,
+
+    # NVIDIA GeForce RTX 30-series (Ampere)
+    "RTX 3090 TI": 24,
+    "RTX 3090": 24,
+    "RTX 3080 TI": 12,
+    "RTX 3080 12GB": 12,
+    "RTX 3080": 10,
+    "RTX 3070 TI": 8,
+    "RTX 3070": 8,
+    "RTX 3060 TI": 8,
+    "RTX 3060": 12,
+    "RTX 3050": 8,
+
+    # NVIDIA GeForce RTX 20-series (Turing)
+    "RTX 2080 TI": 11,
+    "RTX 2080 SUPER": 8,
+    "RTX 2080": 8,
+    "RTX 2070 SUPER": 8,
+    "RTX 2070": 8,
+    "RTX 2060 SUPER": 8,
+    "RTX 2060": 6,
+
+    # NVIDIA GeForce GTX 10/16-series (Pascal/Turing)
+    "GTX 1660 SUPER": 6,
+    "GTX 1660 TI": 6,
+    "GTX 1660": 6,
+    "GTX 1650 SUPER": 4,
+    "GTX 1080 TI": 11,
+    "GTX 1080": 8,
+    "GTX 1070 TI": 8,
+    "GTX 1070": 8,
+    "GTX 1060 6GB": 6,
+    "GTX 1060 3GB": 3,
+    "GTX 1050 TI": 4,
+    "GTX 1050": 2,
+
+    # AMD Radeon RX 9000-series (RDNA 4)
+    "RX 9070 XT": 16,
+    "RX 9070": 12,
+    "RX 9060 XT": 12,
+
+    # AMD Radeon RX 7000-series (RDNA 3)
+    "RX 7900 XTX": 24,
+    "RX 7900 XT": 20,
+    "RX 7900 GRE": 16,
+    "RX 7800 XT": 16,
+    "RX 7700 XT": 12,
+    "RX 7600 XT": 16,
+    "RX 7600": 8,
+
+    # AMD Radeon RX 6000-series (RDNA 2)
+    "RX 6950 XT": 16,
+    "RX 6900 XT": 16,
+    "RX 6800 XT": 16,
+    "RX 6800": 16,
+    "RX 6750 XT": 12,
+    "RX 6700 XT": 12,
+    "RX 6700": 10,
+    "RX 6650 XT": 8,
+    "RX 6600 XT": 8,
+    "RX 6600": 8,
+    "RX 6500 XT": 4,
+
+    # AMD Radeon RX 5000-series (RDNA 1)
+    "RX 5700 XT": 8,
+    "RX 5700": 8,
+    "RX 5600 XT": 6,
+    "RX 5500 XT": 8,
+
+    # AMD Radeon RX 500-series (Polaris)
+    "RX 590": 8,
+    "RX 580": 8,
+    "RX 570": 4,
+
+    # AMD Radeon Vega
+    "RADEON VII": 16,
+    "RX VEGA 64": 8,
+    "RX VEGA 56": 8,
+
+    # Intel Arc (Alchemist & Battlemage)
+    "ARC B580": 12,
+    "ARC B570": 10,
+    "ARC A770": 16,
+    "ARC A750": 8,
+    "ARC A580": 8,
+    "ARC A380": 6,
+
+    # Titan cards
+    "TITAN RTX": 24,
+    "TITAN V": 12,
+    "TITAN XP": 12,
+}

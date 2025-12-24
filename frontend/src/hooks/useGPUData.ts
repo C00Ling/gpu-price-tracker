@@ -46,10 +46,10 @@ export function useSummaryStats() {
   });
 }
 
-export function useValueAnalysis() {
+export function useValueAnalysis(minVram?: number) {
   return useQuery({
-    queryKey: queryKeys.value.all,
-    queryFn: () => api.value.getAll(),
+    queryKey: [...queryKeys.value.all, minVram],
+    queryFn: () => api.value.getAll(minVram),
   });
 }
 

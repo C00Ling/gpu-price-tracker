@@ -1,6 +1,6 @@
 # core/value.py
-from typing import Dict, List, Tuple
-from ingest.scraper import SAMPLE_BENCHMARKS
+from typing import Dict, List, Tuple, Optional
+from ingest.scraper import SAMPLE_BENCHMARKS, GPU_VRAM
 
 def calculate_value(prices_by_model: Dict[str, List[float]],
                    benchmarks: Dict[str, float]) -> List[Tuple[str, float, float, float]]:
@@ -39,12 +39,13 @@ def calculate_value(prices_by_model: Dict[str, List[float]],
     return result
 
 
-def calculate_value_from_stats(stats: Dict[str, Dict]) -> List[Dict]:
+def calculate_value_from_stats(stats: Dict[str, Dict], min_vram: Optional[int] = None) -> List[Dict]:
     """
     Изчислява FPS/лв за всеки модел от stats dict (за API)
 
     Args:
         stats: Речник {model: {min, max, median, mean, count}}
+        min_vram: Минимум VRAM в GB (опционално филтриране)
 
     Returns:
         Списък с модели сортирани по FPS/лв
@@ -60,6 +61,14 @@ def calculate_value_from_stats(stats: Dict[str, Dict]) -> List[Dict]:
         if fps is None:
             continue  # Пропускаме модели без FPS данни
 
+        # Взимаме VRAM за модела
+        vram = get_vram_for_model(model)
+
+        # Филтрираме по VRAM, ако е зададен минимум
+        if min_vram is not None:
+            if vram is None or vram < min_vram:
+                continue
+
         # Използваме MIN цена - най-добрата налична оферта
         price = data.get("min", 1)
         fps_per_lv = round(fps / price, 3)
@@ -68,7 +77,8 @@ def calculate_value_from_stats(stats: Dict[str, Dict]) -> List[Dict]:
             "model": model,
             "fps": fps,
             "price": price,
-            "fps_per_lv": fps_per_lv
+            "fps_per_lv": fps_per_lv,
+            "vram": vram
         })
 
     # Сортиране по най-добър FPS/лв
@@ -82,17 +92,39 @@ def get_fps_for_model(model: str) -> float | None:
     Използва нормализация за по-добро съвпадение
     """
     from core.filters import normalize_model_name
-    
+
     # Normalize both the input model and benchmark models
     normalized_model = normalize_model_name(model).replace(' ', '')
-    
+
     for bench_model, fps in SAMPLE_BENCHMARKS.items():
         bench_normalized = normalize_model_name(bench_model).replace(' ', '')
-        
+
         # Exact match or contains
         if bench_normalized == normalized_model or \
            bench_normalized in normalized_model or \
            normalized_model in bench_normalized:
             return fps
-    
+
+    return None
+
+
+def get_vram_for_model(model: str) -> int | None:
+    """
+    Намира VRAM за даден модел от GPU_VRAM данните
+    Използва нормализация за по-добро съвпадение
+    """
+    from core.filters import normalize_model_name
+
+    # Normalize both the input model and VRAM models
+    normalized_model = normalize_model_name(model).replace(' ', '')
+
+    for vram_model, vram in GPU_VRAM.items():
+        vram_normalized = normalize_model_name(vram_model).replace(' ', '')
+
+        # Exact match or contains
+        if vram_normalized == normalized_model or \
+           vram_normalized in normalized_model or \
+           normalized_model in vram_normalized:
+            return vram
+
     return None

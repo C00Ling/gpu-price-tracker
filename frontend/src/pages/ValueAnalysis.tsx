@@ -13,7 +13,8 @@ import {
 } from '../components';
 
 export function ValueAnalysis() {
-  const { data: valueData, isLoading, error, refetch } = useValueAnalysis();
+  const [vramFilter, setVramFilter] = useState<number | undefined>(undefined);
+  const { data: valueData, isLoading, error, refetch } = useValueAnalysis(vramFilter);
   const [showAll, setShowAll] = useState(true);
 
   if (isLoading) {
@@ -48,6 +49,16 @@ export function ValueAnalysis() {
       sortable: true,
       render: (item: any) => (
         <span className="text-gray-300">{item.fps}</span>
+      ),
+    },
+    {
+      key: 'vram',
+      label: 'VRAM',
+      sortable: true,
+      render: (item: any) => (
+        <span className="text-gray-300">
+          {item.vram ? `${item.vram}GB` : '-'}
+        </span>
       ),
     },
     {
@@ -111,6 +122,43 @@ export function ValueAnalysis() {
         />
 
         <CardContent>
+          {/* VRAM Filter */}
+          <div className="mb-6 flex items-center space-x-3">
+            <span className="text-sm font-medium text-gray-300">VRAM филтър:</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setVramFilter(undefined)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  vramFilter === undefined
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50'
+                }`}
+              >
+                Всички
+              </button>
+              <button
+                onClick={() => setVramFilter(8)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  vramFilter === 8
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50'
+                }`}
+              >
+                ≥8GB VRAM
+              </button>
+              <button
+                onClick={() => setVramFilter(9)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  vramFilter === 9
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50'
+                }`}
+              >
+                &gt;8GB VRAM
+              </button>
+            </div>
+          </div>
+
           {/* Legend */}
           <div className="mb-6 flex flex-wrap gap-6 text-sm">
             <div className="flex items-center space-x-2">

@@ -11,12 +11,15 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[Dict])
-def get_gpu_value(db: Session = Depends(get_db)):
+def get_gpu_value(min_vram: int = None, db: Session = Depends(get_db)):
     """
     Връща GPU модели сортирани по FPS per лв
+
+    Args:
+        min_vram: Минимум VRAM в GB (опционално филтриране)
     """
-    # Try cache first
-    cache_key = "value:all_gpus"
+    # Try cache first (include min_vram in cache key)
+    cache_key = f"value:all_gpus:vram_{min_vram}"
     cached_result = cache.get(cache_key)
     if cached_result:
         return cached_result
@@ -31,8 +34,8 @@ def get_gpu_value(db: Session = Depends(get_db)):
             if model_stats:
                 stats[model] = model_stats
 
-        # Изчисляваме value
-        result = calculate_value_from_stats(stats)
+        # Изчисляваме value с VRAM филтър
+        result = calculate_value_from_stats(stats, min_vram=min_vram)
 
         # Cache for 10 minutes
         cache.set(cache_key, result, ttl=600)

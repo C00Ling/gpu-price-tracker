@@ -117,8 +117,13 @@ export const api = {
 
   // Value analysis endpoints
   value: {
-    getAll: async (): Promise<ValueAnalysis[]> => {
-      const response = await fetchWithTimeout(`${getBaseUrl()}/api/value/`);
+    getAll: async (minVram?: number): Promise<ValueAnalysis[]> => {
+      const queryParams = new URLSearchParams();
+      if (minVram !== undefined && minVram !== null) {
+        queryParams.append('min_vram', minVram.toString());
+      }
+      const url = `${getBaseUrl()}/api/value/?${queryParams}`;
+      const response = await fetchWithTimeout(url);
       return response.json();
     },
 
