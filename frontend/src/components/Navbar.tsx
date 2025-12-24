@@ -16,7 +16,7 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="bg-[#1E1E1E] border-b border-zinc-800 shadow-lg shadow-black/50 sticky top-0 z-50 backdrop-blur-sm bg-[#1E1E1E]/95">
+    <nav className="bg-dark-navy-900 border-b border-dark-navy-700 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -37,8 +37,8 @@ export function Navbar() {
                 className={`
                   px-3 py-2 rounded-md text-sm font-medium transition-all
                   ${isActive(item.path)
-                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
-                    : 'text-gray-300 hover:bg-zinc-800 hover:text-white'
+                    ? 'text-primary-500 font-semibold'
+                    : 'text-gray-400 hover:text-white hover:bg-dark-navy-800'
                   }
                 `}
               >

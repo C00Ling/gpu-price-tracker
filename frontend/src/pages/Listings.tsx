@@ -50,7 +50,7 @@ export function Listings() {
       label: 'Цена',
       sortable: true,
       render: (item: any) => (
-        <span className="text-primary-400 font-bold">{item.price.toFixed(2)} лв</span>
+        <span className="text-primary-500 font-bold">{item.price.toFixed(2)} лв</span>
       ),
     },
     {
@@ -98,7 +98,7 @@ export function Listings() {
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full rounded-lg bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                className="w-full rounded-lg bg-dark-navy-800 border-dark-navy-700 text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
               >
                 <option value="">Всички модели ({modelsData?.count || 0})</option>
                 {modelsData?.models?.map((model) => (

@@ -71,21 +71,21 @@ export function Home() {
         <Card>
           <div className="text-center">
             <p className="text-sm text-gray-400 mb-2">Обяви</p>
-            <p className="text-3xl font-bold text-primary-400">{stats?.total_listings || 0}</p>
+            <p className="text-3xl font-bold text-primary-500">{stats?.total_listings || 0}</p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
             <p className="text-sm text-gray-400 mb-2">Модели</p>
-            <p className="text-3xl font-bold text-primary-400">{stats?.unique_models || 0}</p>
+            <p className="text-3xl font-bold text-primary-500">{stats?.unique_models || 0}</p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
             <p className="text-sm text-gray-400 mb-2">Средна цена</p>
-            <p className="text-3xl font-bold text-primary-400">
+            <p className="text-3xl font-bold text-primary-500">
               {stats?.avg_price ? `${stats.avg_price.toFixed(0)}лв` : '-'}
             </p>
           </div>
@@ -94,7 +94,7 @@ export function Home() {
         <Card>
           <div className="text-center">
             <p className="text-sm text-gray-400 mb-2">Мин. цена</p>
-            <p className="text-3xl font-bold text-primary-400">
+            <p className="text-3xl font-bold text-primary-500">
               {stats?.min_price ? `${stats.min_price.toFixed(0)}лв` : '-'}
             </p>
           </div>
@@ -120,10 +120,10 @@ export function Home() {
               {topGPUs.map((gpu, index) => (
                 <div
                   key={gpu.model}
-                  className="flex items-center justify-between p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg hover:bg-zinc-800 hover:border-primary-500/50 transition-all"
+                  className="flex items-center justify-between p-4 bg-dark-navy-800/50 border border-dark-navy-700 rounded-lg hover:bg-dark-navy-800 hover:border-primary-500/50 transition-all"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="flex items-center justify-center w-8 h-8 bg-primary-600 text-white rounded-full font-bold shadow-lg shadow-primary-500/30">
+                    <div className="flex items-center justify-center w-8 h-8 bg-primary-500 text-white rounded-full font-bold">
                       {index + 1}
                     </div>
                     <div>
@@ -134,7 +134,7 @@ export function Home() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-primary-400">
+                    <p className="text-lg font-bold text-primary-500">
                       {gpu.fps_per_lv.toFixed(2)}
                     </p>
                     <p className="text-xs text-gray-500">FPS/лв</p>
@@ -176,7 +176,7 @@ export function Home() {
       </div>
 
       {/* Admin Section - Update Data */}
-      <Card className="border-2 border-primary-500/30 bg-gradient-to-r from-primary-950/30 to-blue-950/30">
+      <Card className="border-2 border-primary-500/30 bg-dark-navy-800/50">
         <CardHeader
           title="🔄 Обнови данните"
           subtitle="Стартирай нов scrape за най-нови обяви от OLX"
@@ -186,10 +186,10 @@ export function Home() {
             <div
               className={`mb-4 p-4 rounded-lg ${
                 scrapeMessage.type === 'success'
-                  ? 'bg-green-950/30 border border-green-500/30 text-green-400'
+                  ? 'bg-dark-navy-800/50 border border-green-500/50 text-green-400'
                   : scrapeMessage.type === 'error'
-                  ? 'bg-red-950/30 border border-red-500/30 text-red-400'
-                  : 'bg-blue-950/30 border border-blue-500/30 text-blue-400'
+                  ? 'bg-dark-navy-800/50 border border-red-500/50 text-red-400'
+                  : 'bg-dark-navy-800/50 border border-primary-500/50 text-primary-400'
               }`}
             >
               <p className="text-sm font-medium">{scrapeMessage.text}</p>

@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardContent,
   Table,
+  ValueBadge,
   LoadingPage,
   ErrorMessage,
   TableSkeleton,
@@ -54,27 +55,21 @@ export function ValueAnalysis() {
       label: 'Цена',
       sortable: true,
       render: (item: any) => (
-        <span className="text-primary-400 font-bold">{item.price.toFixed(0)} лв</span>
+        <span className="text-gray-300 font-semibold">{item.price.toFixed(0)} лв</span>
       ),
     },
     {
       key: 'fps_per_lv',
-      label: 'FPS/лв',
+      label: 'Стойност',
       sortable: true,
-      render: (item: any) => {
-        const value = item.fps_per_lv;
-        let colorClass = 'text-gray-300';
-
-        if (value >= 0.5) colorClass = 'text-green-400';
-        else if (value >= 0.3) colorClass = 'text-blue-400';
-        else if (value >= 0.2) colorClass = 'text-yellow-400';
-
-        return (
-          <span className={`font-bold text-lg ${colorClass}`}>
-            {value.toFixed(3)}
+      render: (item: any) => (
+        <div className="flex items-center space-x-3">
+          <ValueBadge value={item.fps_per_lv} size="md" />
+          <span className="text-sm text-gray-500">
+            {item.fps_per_lv.toFixed(3)} FPS/лв
           </span>
-        );
-      },
+        </div>
+      ),
     },
   ];
 
@@ -87,10 +82,14 @@ export function ValueAnalysis() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Info Card */}
-      <Card className="mb-6 bg-blue-950/30 border-blue-500/30">
+      <Card className="mb-6 bg-dark-navy-800/50 border-dark-navy-700">
         <CardContent className="py-4">
           <div className="flex items-start space-x-3">
-            <span className="text-2xl">💡</span>
+            <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
             <div>
               <h3 className="font-semibold text-white mb-1">
                 Как работи анализът на стойността?
@@ -113,17 +112,17 @@ export function ValueAnalysis() {
 
         <CardContent>
           {/* Legend */}
-          <div className="mb-6 flex flex-wrap gap-4 text-sm">
+          <div className="mb-6 flex flex-wrap gap-6 text-sm">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+              <ValueBadge value={0.5} size="sm" />
               <span className="text-gray-300">Отлична стойност (≥ 0.5)</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+              <ValueBadge value={0.3} size="sm" />
               <span className="text-gray-300">Добра стойност (≥ 0.3)</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+              <ValueBadge value={0.2} size="sm" />
               <span className="text-gray-300">Средна стойност (≥ 0.2)</span>
             </div>
           </div>

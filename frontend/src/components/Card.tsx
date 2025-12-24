@@ -9,11 +9,11 @@ interface CardProps {
 }
 
 export function Card({ children, className = '', hover = false, onClick }: CardProps) {
-  const hoverClass = hover ? 'hover:shadow-lg hover:shadow-primary-500/20 hover:scale-[1.02] transition-all duration-200 cursor-pointer' : '';
+  const hoverClass = hover ? 'hover:border-primary-500/50 transition-all duration-200 cursor-pointer' : '';
 
   return (
     <div
-      className={`bg-zinc-900 border border-zinc-800 rounded-lg shadow-md p-6 ${hoverClass} ${className}`}
+      className={`bg-dark-navy-800 border border-dark-navy-700 rounded-lg p-6 ${hoverClass} ${className}`}
       onClick={onClick}
     >
       {children}
@@ -55,7 +55,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`mt-4 pt-4 border-t border-zinc-800 ${className}`}>
+    <div className={`mt-4 pt-4 border-t border-dark-navy-700 ${className}`}>
       {children}
     </div>
   );

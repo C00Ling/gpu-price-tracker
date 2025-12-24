@@ -1,36 +1,36 @@
 @import "tailwindcss";
 
-/* Dark theme global styles */
+/* Dark Navy theme global styles */
 html {
-  background-color: #1E1E1E;
+  background-color: #0a0e1a;
 }
 
 body {
   min-height: 100vh;
-  background-color: #1E1E1E;
+  background-color: #0a0e1a;
   color: #ffffff;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 #root {
-  background-color: #1E1E1E;
+  background-color: #0a0e1a;
   color: #ffffff;
 }
 
-/* Custom scrollbar - Dark theme */
+/* Custom scrollbar - Dark Navy theme */
 ::-webkit-scrollbar {
   width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #18181b;
+  background-color: #0a0e1a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #52525b;
+  background-color: #1a2332;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #71717a;
+  background-color: #2a3342;
 }

@@ -67,14 +67,14 @@ export function Table<T extends Record<string, any>>({
 
   return (
     <div className={`overflow-x-auto ${className}`}>
-      <table className="min-w-full divide-y divide-zinc-800">
-        <thead className="bg-zinc-900/50">
+      <table className="min-w-full">
+        <thead className="bg-transparent">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider ${
-                  column.sortable ? 'cursor-pointer hover:bg-zinc-800' : ''
+                className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-dark-navy-700 ${
+                  column.sortable ? 'cursor-pointer hover:text-gray-300' : ''
                 } ${column.className || ''}`}
                 onClick={() => column.sortable && handleSort(column.key)}
               >
@@ -94,13 +94,13 @@ export function Table<T extends Record<string, any>>({
             ))}
           </tr>
         </thead>
-        <tbody className="bg-zinc-900 divide-y divide-zinc-800">
+        <tbody className="bg-transparent divide-y divide-dark-navy-800">
           {sortedData.map((item) => (
-            <tr key={keyExtractor(item)} className="hover:bg-zinc-800/50 transition-colors">
+            <tr key={keyExtractor(item)} className="hover:bg-dark-navy-800/30 transition-colors border-b border-dark-navy-800">
               {columns.map((column) => (
                 <td
                   key={column.key}
-                  className={`px-6 py-4 whitespace-nowrap text-sm text-white ${column.className || ''}`}
+                  className={`px-6 py-4 whitespace-nowrap text-sm text-gray-300 ${column.className || ''}`}
                 >
                   {column.render ? column.render(item) : item[column.key]}
                 </td>
