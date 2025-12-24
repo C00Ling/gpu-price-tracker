@@ -116,6 +116,7 @@ def normalize_model_name(model: str) -> str:
         gtx 1660ti -> GTX 1660 TI
         GTX 1060 6GB -> GTX 1060 6GB
         RX 7900 -> RX 7900 XT (autocorrect incomplete names)
+        AMD Radeon RX 7900 GRE -> RX 7900 GRE
     """
     if not model:
         return model
@@ -123,7 +124,15 @@ def normalize_model_name(model: str) -> str:
     # Convert to uppercase
     model = model.upper().strip()
 
-    # Remove all spaces first
+    # Remove brand prefixes (AMD, NVIDIA, GEFORCE, RADEON, INTEL) - with optional spaces
+    # This must run BEFORE removing all spaces
+    model = re.sub(r'^(AMD|NVIDIA|GEFORCE|RADEON|INTEL)\s+', '', model)
+
+    # Remove "RADEON" if it appears after removing first prefix (e.g., "AMD RADEON RX")
+    model = re.sub(r'^RADEON\s+', '', model)
+    model = re.sub(r'^GEFORCE\s+', '', model)
+
+    # Remove all remaining spaces
     model = model.replace(" ", "")
 
     # Add space after brand (RTX, GTX, RX, VEGA, ARC)
@@ -132,10 +141,10 @@ def normalize_model_name(model: str) -> str:
     # Add space before memory size (3GB, 6GB, 8GB, 12GB, 16GB, etc.) - FIRST
     # This must run before TI/SUPER/XT to handle cases like "TI16GB"
     model = re.sub(r'(\d{4})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., 30603GB -> 3060 3GB
-    model = re.sub(r'(TI|SUPER|XT|XTX)(\d{1,2}GB)$', r'\1 \2', model)  # e.g., TI16GB -> TI 16GB
+    model = re.sub(r'(TI|SUPER|XT|XTX|GRE)(\d{1,2}GB)$', r'\1 \2', model)  # e.g., TI16GB -> TI 16GB
 
-    # Add space before suffix (TI, SUPER, XT, XTX)
-    model = re.sub(r'(\d+)(TI|SUPER|XT|XTX)', r'\1 \2', model)
+    # Add space before suffix (TI, SUPER, XT, XTX, GRE)
+    model = re.sub(r'(\d+)(TI|SUPER|XT|XTX|GRE)', r'\1 \2', model)
 
     # Apply model corrections for incomplete/ambiguous names
     if model in MODEL_CORRECTIONS:
