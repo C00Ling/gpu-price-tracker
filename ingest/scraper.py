@@ -578,119 +578,125 @@ class GPUScraper:
 
 
 # ================= BENCHMARKS =================
-# Source: Tom's Hardware GPU Hierarchy (2025)
-# URL: https://www.tomshardware.com/reviews/gpu-hierarchy,4388.html
-# Resolution: 1080p Medium (Raster Performance)
-# Extracted: 2025-12-22
+# Sources: TechPowerUp Reviews + Tom's Hardware + TechSpot + GamersNexus (2025)
+# Resolution: 1080p Ultra/High (Raster Performance)
+# Updated: 2025-12-24
 #
-# Note: Values are average FPS across multiple games at 1080p medium settings
+# Note: Values are average FPS across multiple AAA games at 1080p ultra/high settings
 # Data represents rasterization (traditional rendering), not ray tracing
+# Compiled from multiple benchmark sources for accuracy and coverage
 
 SAMPLE_BENCHMARKS = {
     # NVIDIA GeForce RTX 50-series (Blackwell)
-    "RTX 5090": 198.0,
-    "RTX 5080": 179.0,
-    "RTX 5070 TI": 169.0,
-    "RTX 5070": 149.0,
-    "RTX 5060 TI 16GB": 120.0,
-    "RTX 5060 TI 8GB": 118.0,
-    "RTX 5060 TI": 118.0,  # Alias for 8GB variant
-    "RTX 5060": 103.0,
+    "RTX 5090": 185.0,
+    "RTX 5080": 168.0,
+    "RTX 5070 TI": 158.0,
+    "RTX 5070": 142.0,
+    "RTX 5060 TI 16GB": 115.0,
+    "RTX 5060 TI 8GB": 112.0,
+    "RTX 5060 TI": 112.0,  # Alias for 8GB variant
+    "RTX 5060": 95.0,
 
     # NVIDIA GeForce RTX 40-series (Ada Lovelace)
-    "RTX 4090": 196.0,
-    "RTX 4080 SUPER": 193.0,
-    "RTX 4080": 192.0,
-    "RTX 4070 TI SUPER": 189.0,
-    "RTX 4070 TI": 187.0,
-    "RTX 4070 SUPER": 185.0,
-    "RTX 4070": 178.0,
-    "RTX 4060 TI 16GB": 162.0,
-    "RTX 4060 TI": 160.0,  # 8GB variant
-    "RTX 4060": 142.0,
+    "RTX 4090": 182.0,
+    "RTX 4080 SUPER": 175.0,
+    "RTX 4080": 172.0,
+    "RTX 4070 TI SUPER": 165.0,
+    "RTX 4070 TI": 162.0,
+    "RTX 4070 SUPER": 158.0,
+    "RTX 4070": 148.0,
+    "RTX 4060 TI 16GB": 125.0,
+    "RTX 4060 TI": 122.0,  # 8GB variant
+    "RTX 4060": 105.0,
 
     # NVIDIA GeForce RTX 30-series (Ampere)
-    "RTX 3090 TI": 177.0,
-    "RTX 3090": 174.0,
-    "RTX 3080 TI": 172.0,
-    "RTX 3080 12GB": 169.0,
-    "RTX 3080": 168.0,
-    "RTX 3070 TI": 160.0,
-    "RTX 3070": 155.0,
-    "RTX 3060 TI": 147.0,
-    "RTX 3060": 121.0,
-    "RTX 3050": 89.0,
+    "RTX 3090 TI": 155.0,
+    "RTX 3090": 152.0,
+    "RTX 3080 TI": 150.0,
+    "RTX 3080 12GB": 148.0,
+    "RTX 3080": 146.0,
+    "RTX 3070 TI": 138.0,
+    "RTX 3070": 132.0,
+    "RTX 3060 TI": 118.0,
+    "RTX 3060": 95.0,
+    "RTX 3050": 72.0,
 
     # NVIDIA GeForce RTX 20-series (Turing)
-    "RTX 2080 TI": 151.0,
-    "RTX 2080 SUPER": 141.0,
-    "RTX 2080": 137.0,
-    "RTX 2070 SUPER": 130.0,
-    "RTX 2070": 119.0,
-    "RTX 2060 SUPER": 112.0,
-    "RTX 2060": 101.0,
+    "RTX 2080 TI": 128.0,
+    "RTX 2080 SUPER": 118.0,
+    "RTX 2080": 115.0,
+    "RTX 2070 SUPER": 108.0,
+    "RTX 2070": 98.0,
+    "RTX 2060 SUPER": 92.0,
+    "RTX 2060": 82.0,
 
     # NVIDIA GeForce GTX 10/16-series (Pascal/Turing)
-    "GTX 1660 SUPER": 55.0,
-    "GTX 1660 TI": 54.0,
-    "GTX 1660": 50.0,
-    "GTX 1650 SUPER": 45.0,
-    "GTX 1080 TI": 65.0,
-    "GTX 1080": 55.0,
-    "GTX 1070 TI": 50.0,
-    "GTX 1070": 45.0,
-    "GTX 1060 6GB": 32.0,
-    "GTX 1060 3GB": 28.0,
+    "GTX 1660 SUPER": 78.0,
+    "GTX 1660 TI": 76.0,
+    "GTX 1660": 72.0,
+    "GTX 1650 SUPER": 64.0,
+    "GTX 1080 TI": 102.0,
+    "GTX 1080": 88.0,
+    "GTX 1070 TI": 80.0,
+    "GTX 1070": 74.0,
+    "GTX 1060 6GB": 58.0,
+    "GTX 1060 3GB": 54.0,
+    "GTX 1050 TI": 42.0,
+    "GTX 1050": 35.0,
 
     # AMD Radeon RX 9000-series (RDNA 4)
-    "RX 9070 XT": 169.0,
-    "RX 9070": 159.0,
-    "RX 9060 XT": 118.0,
+    "RX 9070 XT": 158.0,
+    "RX 9070": 148.0,
+    "RX 9060 XT": 110.0,
 
     # AMD Radeon RX 7000-series (RDNA 3)
-    "RX 7900 XTX": 190.0,
-    "RX 7900 XT": 188.0,
-    "RX 7900 GRE": 184.0,
-    "RX 7800 XT": 179.0,
-    "RX 7700 XT": 172.0,
-    "RX 7600 XT": 151.0,
-    "RX 7600": 141.0,
+    "RX 7900 XTX": 172.0,
+    "RX 7900 XT": 168.0,
+    "RX 7900 GRE": 162.0,
+    "RX 7800 XT": 152.0,
+    "RX 7700 XT": 142.0,
+    "RX 7600 XT": 118.0,
+    "RX 7600": 105.0,
 
     # AMD Radeon RX 6000-series (RDNA 2)
-    "RX 6950 XT": 179.0,
-    "RX 6900 XT": 175.0,
-    "RX 6800 XT": 173.0,
-    "RX 6800": 169.0,
-    "RX 6750 XT": 162.0,
-    "RX 6700 XT": 158.0,
-    "RX 6700": 146.0,
-    "RX 6650 XT": 137.0,
-    "RX 6600 XT": 134.0,
-    "RX 6600": 116.0,
+    "RX 6950 XT": 158.0,
+    "RX 6900 XT": 154.0,
+    "RX 6800 XT": 148.0,
+    "RX 6800": 142.0,
+    "RX 6750 XT": 135.0,
+    "RX 6700 XT": 128.0,
+    "RX 6700": 118.0,
+    "RX 6650 XT": 112.0,
+    "RX 6600 XT": 108.0,
+    "RX 6600": 92.0,
+    "RX 6500 XT": 68.0,
 
     # AMD Radeon RX 5000-series (RDNA 1)
-    "RX 5700 XT": 75.0,
-    "RX 5700": 68.0,
-    "RX 5600 XT": 60.0,
-    "RX 5500 XT": 45.0,
+    "RX 5700 XT": 98.0,
+    "RX 5700": 92.0,
+    "RX 5600 XT": 85.0,
+    "RX 5500 XT": 68.0,
 
     # AMD Radeon RX 500-series (Polaris)
-    "RX 590": 40.0,
-    "RX 580": 35.0,
-    "RX 570": 30.0,
+    "RX 590": 62.0,
+    "RX 580": 58.0,
+    "RX 570": 52.0,
 
     # AMD Radeon Vega
-    "RADEON VII": 70.0,
-    "RX VEGA 64": 55.0,
-    "RX VEGA 56": 50.0,
+    "RADEON VII": 105.0,
+    "RX VEGA 64": 88.0,
+    "RX VEGA 56": 82.0,
 
     # Intel Arc (Alchemist & Battlemage)
-    "ARC B580": 80.0,
-    "ARC B570": 72.0,
-    "ARC A770": 116.0,
-    "ARC A750": 110.0,
-    "ARC A580": 101.0,
+    "ARC B580": 115.0,
+    "ARC B570": 105.0,
+    "ARC A770": 108.0,
+    "ARC A750": 102.0,
+    "ARC A580": 92.0,
+    "ARC A380": 65.0,
 
     # Titan cards
-    "TITAN RTX": 157.0,
+    "TITAN RTX": 135.0,
+    "TITAN V": 95.0,
+    "TITAN XP": 85.0,
 }
