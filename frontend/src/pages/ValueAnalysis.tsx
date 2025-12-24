@@ -30,7 +30,7 @@ export function ValueAnalysis() {
       key: 'rank',
       label: '#',
       render: (item: any) => (
-        <span className="font-bold text-gray-500">{item.rank}</span>
+        <span className="font-bold text-gray-400">{item.rank}</span>
       ),
     },
     {
@@ -38,7 +38,7 @@ export function ValueAnalysis() {
       label: 'Модел',
       sortable: true,
       render: (item: any) => (
-        <span className="font-semibold text-gray-900">{item.model}</span>
+        <span className="font-semibold text-white">{item.model}</span>
       ),
     },
     {
@@ -46,7 +46,7 @@ export function ValueAnalysis() {
       label: 'FPS (1080p)',
       sortable: true,
       render: (item: any) => (
-        <span className="text-gray-700">{item.fps}</span>
+        <span className="text-gray-300">{item.fps}</span>
       ),
     },
     {
@@ -54,7 +54,7 @@ export function ValueAnalysis() {
       label: 'Цена',
       sortable: true,
       render: (item: any) => (
-        <span className="text-primary-600 font-bold">{item.price.toFixed(0)} лв</span>
+        <span className="text-primary-400 font-bold">{item.price.toFixed(0)} лв</span>
       ),
     },
     {
@@ -63,11 +63,11 @@ export function ValueAnalysis() {
       sortable: true,
       render: (item: any) => {
         const value = item.fps_per_lv;
-        let colorClass = 'text-gray-700';
+        let colorClass = 'text-gray-300';
 
-        if (value >= 0.5) colorClass = 'text-green-600';
-        else if (value >= 0.3) colorClass = 'text-blue-600';
-        else if (value >= 0.2) colorClass = 'text-yellow-600';
+        if (value >= 0.5) colorClass = 'text-green-400';
+        else if (value >= 0.3) colorClass = 'text-blue-400';
+        else if (value >= 0.2) colorClass = 'text-yellow-400';
 
         return (
           <span className={`font-bold text-lg ${colorClass}`}>
@@ -87,15 +87,15 @@ export function ValueAnalysis() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Info Card */}
-      <Card className="mb-6 bg-blue-50 border-blue-200">
+      <Card className="mb-6 bg-blue-950/30 border-blue-500/30">
         <CardContent className="py-4">
           <div className="flex items-start space-x-3">
             <span className="text-2xl">💡</span>
             <div>
-              <h3 className="font-semibold text-blue-900 mb-1">
+              <h3 className="font-semibold text-white mb-1">
                 Как работи анализът на стойността?
               </h3>
-              <p className="text-sm text-blue-800">
+              <p className="text-sm text-gray-300">
                 Изчисляваме FPS/лв (кадри в секунда на лев) за всеки модел, използвайки benchmark данни за 1080p игри
                 и медианната цена от обявите. По-високата стойност означава по-добра стойност за парите.
               </p>
@@ -115,16 +115,16 @@ export function ValueAnalysis() {
           {/* Legend */}
           <div className="mb-6 flex flex-wrap gap-4 text-sm">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-              <span className="text-gray-600">Отлична стойност (≥ 0.5)</span>
+              <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+              <span className="text-gray-300">Отлична стойност (≥ 0.5)</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-              <span className="text-gray-600">Добра стойност (≥ 0.3)</span>
+              <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+              <span className="text-gray-300">Добра стойност (≥ 0.3)</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
-              <span className="text-gray-600">Средна стойност (≥ 0.2)</span>
+              <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+              <span className="text-gray-300">Средна стойност (≥ 0.2)</span>
             </div>
           </div>
 

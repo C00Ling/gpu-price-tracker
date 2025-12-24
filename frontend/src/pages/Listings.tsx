@@ -42,7 +42,7 @@ export function Listings() {
       label: 'Модел',
       sortable: true,
       render: (item: any) => (
-        <span className="font-semibold text-gray-900">{item.model}</span>
+        <span className="font-semibold text-white">{item.model}</span>
       ),
     },
     {
@@ -50,7 +50,7 @@ export function Listings() {
       label: 'Цена',
       sortable: true,
       render: (item: any) => (
-        <span className="text-primary-600 font-bold">{item.price.toFixed(2)} лв</span>
+        <span className="text-primary-400 font-bold">{item.price.toFixed(2)} лв</span>
       ),
     },
     {
@@ -58,7 +58,7 @@ export function Listings() {
       label: 'Източник',
       sortable: true,
       render: (item: any) => (
-        <span className="text-sm text-gray-600">{item.source}</span>
+        <span className="text-sm text-gray-300">{item.source}</span>
       ),
     },
     {
@@ -66,7 +66,7 @@ export function Listings() {
       label: 'Дата',
       sortable: true,
       render: (item: any) => (
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-400">
           {item.created_at
             ? new Date(item.created_at).toLocaleDateString('bg-BG')
             : '-'}
@@ -92,13 +92,13 @@ export function Listings() {
           {/* Filters */}
           <div className="mb-6 flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Филтър по модел
               </label>
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                className="w-full rounded-lg bg-zinc-800 border-zinc-700 text-white shadow-sm focus:border-primary-500 focus:ring-primary-500"
               >
                 <option value="">Всички модели ({modelsData?.count || 0})</option>
                 {modelsData?.models?.map((model) => (
@@ -136,7 +136,7 @@ export function Listings() {
 
           {/* Pagination info */}
           {filteredListings && filteredListings.length > 0 && (
-            <div className="mt-6 text-center text-sm text-gray-600">
+            <div className="mt-6 text-center text-sm text-gray-400">
               Показани {filteredListings.length} обяви
             </div>
           )}
