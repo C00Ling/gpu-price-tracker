@@ -9,6 +9,7 @@ import {
   Button,
   LoadingPage,
   ErrorMessage,
+  ValueBadge,
 } from '../components';
 import api from '../services/api';
 
@@ -133,11 +134,13 @@ export function Home() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-primary-500">
-                      {gpu.fps_per_lv.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500">FPS/лв</p>
+                  <div className="flex items-center space-x-3">
+                    <ValueBadge value={gpu.fps_per_lv} size="md" />
+                    <div className="text-right">
+                      <p className="text-sm text-gray-400">
+                        {gpu.fps_per_lv.toFixed(3)} FPS/лв
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
