@@ -14,7 +14,7 @@ import {
 
 export function ValueAnalysis() {
   const { data: valueData, isLoading, error, refetch } = useValueAnalysis();
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
 
   if (isLoading) {
     return <LoadingPage />;
