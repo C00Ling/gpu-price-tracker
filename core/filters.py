@@ -95,6 +95,12 @@ MODEL_CORRECTIONS = {
     "GTX 1070": "GTX 1070 TI",    # TI is more common
     "GTX 1060": "GTX 1060 6GB",   # 6GB is more common
     "GTX 1050": "GTX 1050 TI",    # TI is more common
+
+    # Common typos and errors
+    "GTX 1060 SUPER": "GTX 1660 SUPER",  # Common confusion
+    "GTX 1600": "GTX 1650 SUPER",        # Typo
+    "RTX 2260 SUPER": "RTX 2060 SUPER",  # Typo
+    "RX 1650": "GTX 1650 SUPER",         # Brand confusion (AMD → NVIDIA)
 }
 
 
@@ -108,6 +114,7 @@ def normalize_model_name(model: str) -> str:
         RX6600XT -> RX 6600 XT
         VEGA56 -> VEGA 56
         gtx 1660ti -> GTX 1660 TI
+        GTX 1060 6GB -> GTX 1060 6GB
         RX 7900 -> RX 7900 XT (autocorrect incomplete names)
     """
     if not model:
@@ -119,11 +126,16 @@ def normalize_model_name(model: str) -> str:
     # Remove all spaces first
     model = model.replace(" ", "")
 
-    # Add space after brand (RTX, GTX, RX, VEGA)
-    model = re.sub(r'(RTX|GTX|RX|VEGA)(\d+)', r'\1 \2', model)
+    # Add space after brand (RTX, GTX, RX, VEGA, ARC)
+    model = re.sub(r'(RTX|GTX|RX|VEGA|ARC)(\d+)', r'\1 \2', model)
+
+    # Add space before memory size (3GB, 6GB, 8GB, 12GB, 16GB, etc.) - FIRST
+    # This must run before TI/SUPER/XT to handle cases like "TI16GB"
+    model = re.sub(r'(\d{4})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., 30603GB -> 3060 3GB
+    model = re.sub(r'(TI|SUPER|XT|XTX)(\d{1,2}GB)$', r'\1 \2', model)  # e.g., TI16GB -> TI 16GB
 
     # Add space before suffix (TI, SUPER, XT, XTX)
-    model = re.sub(r'(\d+)(TI|SUPER|XT|XTX)$', r'\1 \2', model)
+    model = re.sub(r'(\d+)(TI|SUPER|XT|XTX)', r'\1 \2', model)
 
     # Apply model corrections for incomplete/ambiguous names
     if model in MODEL_CORRECTIONS:
