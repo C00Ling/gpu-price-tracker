@@ -1,19 +1,21 @@
 @import "tailwindcss";
 
-/* Dark Navy theme global styles - YouTube dark theme background */
+/* Dark Navy theme global styles - Gradient background */
 html {
-  background-color: #121212;
+  background: linear-gradient(135deg, #0a0e1a 0%, #1a2f4a 100%);
+  min-height: 100vh;
 }
 
 body {
   min-height: 100vh;
-  background-color: #121212;
+  background: linear-gradient(135deg, #0a0e1a 0%, #1a2f4a 100%);
+  background-attachment: fixed;
   color: #ffffff;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 #root {
-  background-color: #121212;
+  background: transparent;
   color: #ffffff;
 }
 
