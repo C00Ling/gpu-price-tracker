@@ -47,32 +47,90 @@ MIN_SAMPLE_SIZE = 3  # Минимум 3 обяви за да приложим с
 ADAPTIVE_WARMUP_SIZE = 5  # След 5 обяви използваме пълна статистическа филтрация
 
 
+# Model corrections for incomplete/ambiguous names
+MODEL_CORRECTIONS = {
+    # AMD RX 7000-series - fix incomplete model names
+    "RX 7900": "RX 7900 XT",      # Default to XT (most common)
+    "RX 7800": "RX 7800 XT",      # Only XT variant exists
+    "RX 7700": "RX 7700 XT",      # Only XT variant exists
+    "RX 7600": "RX 7600",         # Non-XT is the base model
+
+    # AMD RX 6000-series - fix incomplete model names
+    "RX 6950": "RX 6950 XT",      # Only XT variant exists
+    "RX 6900": "RX 6900 XT",      # Only XT variant exists
+    "RX 6800": "RX 6800",         # Non-XT is valid
+    "RX 6700": "RX 6700 XT",      # XT is more common
+    "RX 6600": "RX 6600",         # Non-XT is the base model
+    "RX 6500": "RX 6500 XT",      # Only XT variant exists
+
+    # AMD RX 5000-series
+    "RX 5700": "RX 5700 XT",      # XT is more common
+    "RX 5600": "RX 5600 XT",      # Only XT variant exists
+    "RX 5500": "RX 5500 XT",      # Only XT variant exists
+
+    # NVIDIA RTX 40-series
+    "RTX 4090": "RTX 4090",       # Only non-SUPER exists
+    "RTX 4080": "RTX 4080 SUPER", # SUPER is newer/better
+    "RTX 4070": "RTX 4070 SUPER", # SUPER is more common now
+    "RTX 4060": "RTX 4060 TI",    # TI is more common
+
+    # NVIDIA RTX 30-series
+    "RTX 3090": "RTX 3090",       # Non-TI is valid
+    "RTX 3080": "RTX 3080",       # Non-TI is valid
+    "RTX 3070": "RTX 3070",       # Non-TI is valid
+    "RTX 3060": "RTX 3060 TI",    # TI is more common
+    "RTX 3050": "RTX 3050",       # Only non-8GB exists
+
+    # NVIDIA RTX 20-series
+    "RTX 2080": "RTX 2080 SUPER", # SUPER is more common
+    "RTX 2070": "RTX 2070 SUPER", # SUPER is more common
+    "RTX 2060": "RTX 2060 SUPER", # SUPER is more common
+
+    # NVIDIA GTX 16-series
+    "GTX 1660": "GTX 1660 SUPER", # SUPER is more common
+    "GTX 1650": "GTX 1650 SUPER", # SUPER is more common
+
+    # NVIDIA GTX 10-series
+    "GTX 1080": "GTX 1080 TI",    # TI is more common
+    "GTX 1070": "GTX 1070 TI",    # TI is more common
+    "GTX 1060": "GTX 1060 6GB",   # 6GB is more common
+    "GTX 1050": "GTX 1050 TI",    # TI is more common
+}
+
+
 def normalize_model_name(model: str) -> str:
     """
     Normalize GPU model name for consistency
-    
+
     Examples:
         RTX3060TI -> RTX 3060 TI
         RTX 3060TI -> RTX 3060 TI
         RX6600XT -> RX 6600 XT
         VEGA56 -> VEGA 56
         gtx 1660ti -> GTX 1660 TI
+        RX 7900 -> RX 7900 XT (autocorrect incomplete names)
     """
     if not model:
         return model
-    
+
     # Convert to uppercase
     model = model.upper().strip()
-    
+
     # Remove all spaces first
     model = model.replace(" ", "")
-    
+
     # Add space after brand (RTX, GTX, RX, VEGA)
     model = re.sub(r'(RTX|GTX|RX|VEGA)(\d+)', r'\1 \2', model)
-    
+
     # Add space before suffix (TI, SUPER, XT, XTX)
     model = re.sub(r'(\d+)(TI|SUPER|XT|XTX)$', r'\1 \2', model)
-    
+
+    # Apply model corrections for incomplete/ambiguous names
+    if model in MODEL_CORRECTIONS:
+        corrected = MODEL_CORRECTIONS[model]
+        logger.debug(f"Model correction: '{model}' → '{corrected}'")
+        model = corrected
+
     return model
 
 

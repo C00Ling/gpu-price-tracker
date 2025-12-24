@@ -93,17 +93,29 @@ def get_fps_for_model(model: str) -> float | None:
     """
     from core.filters import normalize_model_name
 
-    # Normalize both the input model and benchmark models
-    normalized_model = normalize_model_name(model).replace(' ', '')
+    # Normalize the input model
+    normalized_model = normalize_model_name(model)
+
+    # First try exact match (highest priority)
+    for bench_model, fps in SAMPLE_BENCHMARKS.items():
+        bench_normalized = normalize_model_name(bench_model)
+        if bench_normalized == normalized_model:
+            return fps
+
+    # If no exact match, try fuzzy matching with word boundaries
+    # This prevents "RX 6800" from matching "RX 6800 XT"
+    normalized_model_no_spaces = normalized_model.replace(' ', '')
 
     for bench_model, fps in SAMPLE_BENCHMARKS.items():
         bench_normalized = normalize_model_name(bench_model).replace(' ', '')
 
-        # Exact match or contains
-        if bench_normalized == normalized_model or \
-           bench_normalized in normalized_model or \
-           normalized_model in bench_normalized:
-            return fps
+        # Only match if one contains the other AND they're similar length
+        # This prevents substring false matches
+        if normalized_model_no_spaces in bench_normalized or \
+           bench_normalized in normalized_model_no_spaces:
+            # Check if length difference is reasonable (within 3 chars)
+            if abs(len(bench_normalized) - len(normalized_model_no_spaces)) <= 3:
+                return fps
 
     return None
 
@@ -115,16 +127,28 @@ def get_vram_for_model(model: str) -> int | None:
     """
     from core.filters import normalize_model_name
 
-    # Normalize both the input model and VRAM models
-    normalized_model = normalize_model_name(model).replace(' ', '')
+    # Normalize the input model
+    normalized_model = normalize_model_name(model)
+
+    # First try exact match (highest priority)
+    for vram_model, vram in GPU_VRAM.items():
+        vram_normalized = normalize_model_name(vram_model)
+        if vram_normalized == normalized_model:
+            return vram
+
+    # If no exact match, try fuzzy matching with word boundaries
+    # This prevents "RX 6800" from matching "RX 6800 XT"
+    normalized_model_no_spaces = normalized_model.replace(' ', '')
 
     for vram_model, vram in GPU_VRAM.items():
         vram_normalized = normalize_model_name(vram_model).replace(' ', '')
 
-        # Exact match or contains
-        if vram_normalized == normalized_model or \
-           vram_normalized in normalized_model or \
-           normalized_model in vram_normalized:
-            return vram
+        # Only match if one contains the other AND they're similar length
+        # This prevents substring false matches
+        if normalized_model_no_spaces in vram_normalized or \
+           vram_normalized in normalized_model_no_spaces:
+            # Check if length difference is reasonable (within 3 chars)
+            if abs(len(vram_normalized) - len(normalized_model_no_spaces)) <= 3:
+                return vram
 
     return None
