@@ -13,7 +13,10 @@ export function Card({ children, className = '', hover = false, onClick }: CardP
 
   return (
     <div
-      className={`bg-dark-navy-800 border border-dark-navy-700 rounded-lg p-6 ${hoverClass} ${className}`}
+      className={`border border-dark-navy-700 rounded-lg p-6 ${hoverClass} ${className}`}
+      style={{
+        background: 'linear-gradient(135deg, #0f1420 0%, #1a2f4a 100%)'
+      }}
       onClick={onClick}
     >
       {children}

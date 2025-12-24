@@ -16,7 +16,12 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="bg-dark-navy-900 border-b border-dark-navy-700 sticky top-0 z-50">
+    <nav
+      className="border-b border-dark-navy-700 sticky top-0 z-50"
+      style={{
+        background: 'linear-gradient(135deg, #0a0e1a 0%, #1a2f4a 100%)'
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
