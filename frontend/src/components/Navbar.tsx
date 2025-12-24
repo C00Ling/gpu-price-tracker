@@ -1,6 +1,7 @@
 // Navigation bar component
 import { Link, useLocation } from 'react-router-dom';
 import { config } from '../lib/config';
+import { GpuIcon } from './GpuIcon';
 
 export function Navbar() {
   const location = useLocation();
@@ -8,10 +9,10 @@ export function Navbar() {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { path: '/', label: 'Начало', icon: '🏠' },
-    { path: '/listings', label: 'Обяви', icon: '📋' },
-    { path: '/value', label: 'Стойност', icon: '💎' },
-    { path: '/about', label: 'За проекта', icon: 'ℹ️' },
+    { path: '/', label: 'Начало' },
+    { path: '/listings', label: 'Обяви' },
+    { path: '/value', label: 'Стойност' },
+    { path: '/about', label: 'За проекта' },
   ];
 
   return (
@@ -19,8 +20,8 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <span className="text-2xl group-hover:scale-110 transition-transform">🎮</span>
+          <Link to="/" className="flex items-center space-x-3 group">
+            <GpuIcon size={32} className="group-hover:scale-110 transition-transform" />
             <div>
               <h1 className="text-xl font-bold text-white">{config.app.name}</h1>
               <p className="text-xs text-gray-400 hidden sm:block">{config.app.description}</p>
@@ -41,7 +42,6 @@ export function Navbar() {
                   }
                 `}
               >
-                <span className="hidden sm:inline">{item.icon} </span>
                 {item.label}
               </Link>
             ))}
