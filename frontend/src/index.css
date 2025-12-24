@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
-/* Dark Navy theme global styles - Gradient background */
+/* Dark Navy theme global styles - Darker gradient background */
 html {
-  background: linear-gradient(135deg, #0a0e1a 0%, #1a2f4a 100%);
+  background: linear-gradient(135deg, #050810 0%, #0f1a2a 100%);
   min-height: 100vh;
 }
 
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a0e1a 0%, #1a2f4a 100%);
+  background: linear-gradient(135deg, #050810 0%, #0f1a2a 100%);
   background-attachment: fixed;
   color: #ffffff;
   font-feature-settings: "rlig" 1, "calt" 1;
