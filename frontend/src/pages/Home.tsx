@@ -1,6 +1,6 @@
 // Home page - Dashboard with summary stats and top GPUs
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSummaryStats, useTopValue } from '../hooks/useGPUData';
 import {
   Card,
@@ -20,13 +20,64 @@ export function Home() {
   // Scraper state
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeMessage, setScrapeMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [statusText, setStatusText] = useState('');
+
+  // Simulated progress and status updates
+  useEffect(() => {
+    if (!isScraping) {
+      setProgress(0);
+      setStatusText('');
+      return;
+    }
+
+    // Status messages rotation
+    const statusMessages = [
+      'Свързване с OLX...',
+      'Scraping страница 1...',
+      'Scraping страница 2...',
+      'Scraping страница 3...',
+      'Обработване на данни...',
+      'Филтриране на обяви...',
+      'Запазване в база данни...',
+      'Почти готово...',
+    ];
+
+    let currentStatus = 0;
+    setStatusText(statusMessages[0]);
+
+    const statusInterval = setInterval(() => {
+      currentStatus++;
+      setStatusText(statusMessages[currentStatus % statusMessages.length]);
+    }, 20000); // Change status every 20 seconds
+
+    // Simulated progress (non-linear, faster at start, slower at end)
+    let currentProgress = 0;
+    const progressInterval = setInterval(() => {
+      const increment = Math.random() * (95 - currentProgress) * 0.02; // Slower as it approaches 95%
+      currentProgress += increment;
+      if (currentProgress > 95) currentProgress = 95; // Cap at 95% until complete
+      setProgress(Math.min(currentProgress, 95));
+    }, 1000);
+
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(progressInterval);
+    };
+  }, [isScraping]);
 
   const handleTriggerScrape = async () => {
     try {
       setIsScraping(true);
       setScrapeMessage(null);
+      setProgress(0);
+      setStatusText('Стартиране на scraper...');
 
       const result = await api.admin.triggerScrape();
+
+      // Complete the progress bar
+      setProgress(100);
+      setStatusText('Завършено! ✅');
 
       setScrapeMessage({
         type: 'success',
@@ -40,8 +91,14 @@ export function Home() {
         type: 'error',
         text: error instanceof Error ? error.message : 'Грешка при стартиране на scraper',
       });
+      setProgress(0);
+      setStatusText('');
     } finally {
-      setIsScraping(false);
+      setTimeout(() => {
+        setIsScraping(false);
+        setProgress(0);
+        setStatusText('');
+      }, 2000); // Keep 100% visible for 2 seconds
     }
   };
 
@@ -179,7 +236,11 @@ export function Home() {
       </div>
 
       {/* Admin Section - Update Data */}
-      <Card className="border-2 border-primary-500/30 bg-dark-navy-800/50">
+      <Card className={`border-2 bg-dark-navy-800/50 transition-all ${
+        isScraping
+          ? 'border-primary-500 animate-pulse'
+          : 'border-primary-500/30'
+      }`}>
         <CardHeader
           title="🔄 Обнови данните"
           subtitle="Стартирай нов scrape за най-нови обяви от OLX"
@@ -199,7 +260,7 @@ export function Home() {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex-1 mr-4">
               <p className="text-gray-300 text-sm mb-2">
                 Последните данни: {stats?.total_listings || 0} обяви от {stats?.unique_models || 0} модела
@@ -226,6 +287,28 @@ export function Home() {
               )}
             </Button>
           </div>
+
+          {/* Progress Bar */}
+          {isScraping && (
+            <div className="space-y-3">
+              {/* Status Text */}
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-primary-400 font-medium">{statusText}</span>
+                <span className="text-gray-400">{Math.round(progress)}%</span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="relative w-full h-3 bg-dark-navy-900 rounded-full overflow-hidden border border-dark-navy-700">
+                <div
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: `${progress}%` }}
+                >
+                  {/* Animated shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
