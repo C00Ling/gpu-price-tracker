@@ -7,7 +7,7 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <div className="min-h-screen bg-[#1E1E1E]">
+        <div className="min-h-screen">
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
