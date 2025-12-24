@@ -86,7 +86,7 @@ scraper:
   min_sample_size: 3            # Минимум обяви за да приложим statistical filtering
 
 logging:
-  level: DEBUG
+  level: INFO
   format: "text"  # 'text' for development, 'json' for production (auto-detected by ENVIRONMENT)
   file: "logs/gpu_service.log"
   max_bytes: 10485760  # 10MB
