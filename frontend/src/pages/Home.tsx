@@ -204,7 +204,7 @@ export function Home() {
       }`}>
         <CardHeader
           title="🔄 Обнови данните"
-          subtitle={`Стартирай нов scrape за най-нови обяви от OLX${scrapeProgress.usePolling ? ' (Polling mode)' : ''}`}
+          subtitle="Стартирай нов scrape за най-нови обяви от OLX"
         />
         <CardContent>
           {scrapeMessage && (
