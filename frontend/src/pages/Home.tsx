@@ -1,8 +1,8 @@
 // Home page - Dashboard with summary stats and top GPUs
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSummaryStats, useTopValue } from '../hooks/useGPUData';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useScrapeProgress } from '../hooks/useScrapeProgress';
 import {
   Card,
   CardHeader,
@@ -18,76 +18,48 @@ export function Home() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useSummaryStats();
   const { data: topGPUs, isLoading: topLoading, error: topError } = useTopValue(5);
 
-  // Scraper state
-  const [isScraping, setIsScraping] = useState(false);
-  const [scrapeMessage, setScrapeMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState('');
-
-  // WebSocket connection for real-time progress updates
-  useWebSocket({
-    onMessage: (message) => {
-      console.log('WebSocket message received:', message);
-
-      switch (message.type) {
-        case 'scrape_started':
-          setIsScraping(true);
-          setProgress(0);
-          setStatusText('Започване...');
-          setScrapeMessage(null);
-          break;
-
-        case 'scrape_progress':
-          if (message.progress !== undefined) {
-            setProgress(message.progress);
-          }
-          if (message.status) {
-            setStatusText(message.status);
-          }
-          break;
-
-        case 'scrape_completed':
-          setProgress(100);
-          setStatusText('Завършено! ✅');
-          setScrapeMessage({
-            type: 'success',
-            text: message.message || 'Scraping завършен успешно!',
-          });
-
-          // Reset after 2 seconds
-          setTimeout(() => {
-            setIsScraping(false);
-            setProgress(0);
-            setStatusText('');
-          }, 2000);
-          break;
-
-        default:
-          break;
-      }
-    },
+  // Scraper progress with automatic WebSocket → Polling fallback
+  const scrapeProgress = useScrapeProgress({
+    pollingInterval: 2000, // Poll every 2 seconds
+    wsFailoverTimeout: 5000 // Fall back to polling if no WS updates for 5 seconds
   });
+
+  const [scrapeMessage, setScrapeMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+
+  // Watch for scrape completion to show success message
+  useEffect(() => {
+    if (!scrapeProgress.isRunning && scrapeProgress.completedAt && scrapeProgress.progress === 100) {
+      setScrapeMessage({
+        type: 'success',
+        text: 'Scraping завършен успешно!',
+      });
+
+      // Clear message after 5 seconds
+      const timeout = setTimeout(() => {
+        setScrapeMessage(null);
+      }, 5000);
+
+      return () => clearTimeout(timeout);
+    }
+
+    if (scrapeProgress.error) {
+      setScrapeMessage({
+        type: 'error',
+        text: scrapeProgress.error,
+      });
+    }
+  }, [scrapeProgress.isRunning, scrapeProgress.completedAt, scrapeProgress.progress, scrapeProgress.error]);
 
   const handleTriggerScrape = async () => {
     try {
-      setIsScraping(true);
       setScrapeMessage(null);
-      setProgress(0);
-      setStatusText('Стартиране на scraper...');
-
       await api.admin.triggerScrape();
-
-      // Progress updates will come via WebSocket
-      // No need to manually set progress here
-
+      // Progress updates will come via WebSocket or polling
     } catch (error) {
       setScrapeMessage({
         type: 'error',
         text: error instanceof Error ? error.message : 'Грешка при стартиране на scraper',
       });
-      setProgress(0);
-      setStatusText('');
-      setIsScraping(false);
     }
   };
 
@@ -226,13 +198,13 @@ export function Home() {
 
       {/* Admin Section - Update Data */}
       <Card className={`border-2 bg-dark-navy-800/50 transition-all ${
-        isScraping
+        scrapeProgress.isRunning
           ? 'border-primary-500 animate-pulse'
           : 'border-primary-500/30'
       }`}>
         <CardHeader
           title="🔄 Обнови данните"
-          subtitle="Стартирай нов scrape за най-нови обяви от OLX"
+          subtitle={`Стартирай нов scrape за най-нови обяви от OLX${scrapeProgress.usePolling ? ' (Polling mode)' : ''}`}
         />
         <CardContent>
           {scrapeMessage && (
@@ -260,10 +232,10 @@ export function Home() {
             </div>
             <Button
               onClick={handleTriggerScrape}
-              disabled={isScraping}
+              disabled={scrapeProgress.isRunning}
               className="min-w-[140px]"
             >
-              {isScraping ? (
+              {scrapeProgress.isRunning ? (
                 <>
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -278,19 +250,19 @@ export function Home() {
           </div>
 
           {/* Progress Bar */}
-          {isScraping && (
+          {scrapeProgress.isRunning && (
             <div className="space-y-3">
               {/* Status Text */}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-primary-400 font-medium">{statusText}</span>
-                <span className="text-gray-400">{Math.round(progress)}%</span>
+                <span className="text-primary-400 font-medium">{scrapeProgress.status}</span>
+                <span className="text-gray-400">{Math.round(scrapeProgress.progress)}%</span>
               </div>
 
               {/* Progress Bar */}
               <div className="relative w-full h-3 bg-dark-navy-900 rounded-full overflow-hidden border border-dark-navy-700">
                 <div
                   className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${scrapeProgress.progress}%` }}
                 >
                   {/* Animated shimmer effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>

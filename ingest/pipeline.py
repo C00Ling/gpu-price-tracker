@@ -18,13 +18,19 @@ def run_pipeline(ws_manager=None):
     Args:
         ws_manager: Optional WebSocket manager for real-time progress updates
     """
+    from core.scraper_status import scraper_status
+
     logger.info("="*70)
     logger.info("🚀 STARTING DATA COLLECTION PIPELINE")
     logger.info("="*70)
 
-    # Helper to broadcast progress via WebSocket
+    # Helper to broadcast progress via WebSocket AND update polling status
     def broadcast_progress(progress: int, status: str, details: dict = None):
-        """Broadcast progress update via WebSocket if manager is provided"""
+        """Broadcast progress update via WebSocket and update status for polling"""
+        # Update status for polling (always works)
+        scraper_status.update(progress, status, details)
+
+        # Also try WebSocket broadcast (may fail on Railway)
         if ws_manager:
             try:
                 # Run async broadcast in sync context
@@ -35,7 +41,7 @@ def run_pipeline(ws_manager=None):
                 )
                 loop.close()
             except Exception as e:
-                logger.warning(f"Failed to broadcast progress: {e}")
+                logger.warning(f"Failed to broadcast progress via WebSocket: {e}")
 
     try:
         # 1️⃣ Initialize database
@@ -190,14 +196,22 @@ def run_pipeline(ws_manager=None):
             "total_listings": filtered_total if 'filtered_total' in locals() else 0
         })
 
+        # Mark as completed
+        scraper_status.complete({
+            "total_models": len(models) if 'models' in locals() else 0,
+            "total_listings": filtered_total if 'filtered_total' in locals() else 0
+        })
+
         return True
-        
+
     except KeyboardInterrupt:
         logger.warning("\n⚠️  Pipeline interrupted by user")
+        scraper_status.error("Pipeline interrupted by user")
         return False
-        
+
     except Exception as e:
         logger.error(f"\n❌ PIPELINE FAILED: {e}", exc_info=True)
+        scraper_status.error(str(e))
         return False
 
 

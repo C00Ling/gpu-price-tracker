@@ -210,6 +210,14 @@ def health_check():
         )
 
 
+# Scraper status endpoint (for polling fallback)
+@app.get("/api/scrape/status", tags=["Admin"])
+async def get_scrape_status():
+    """Get current scraper status (for polling fallback)"""
+    from core.scraper_status import scraper_status
+    return scraper_status.get_status()
+
+
 # Trigger scraper
 @app.post("/api/trigger-scrape", tags=["Admin"])
 async def trigger_scrape():
@@ -218,6 +226,10 @@ async def trigger_scrape():
         import threading
         from ingest.pipeline import run_pipeline
         from core.websocket import manager as ws_manager
+        from core.scraper_status import scraper_status
+
+        # Initialize scraper status
+        scraper_status.start()
 
         # Notify WebSocket clients that scraping started
         await ws_manager.broadcast_scrape_started()
@@ -225,10 +237,15 @@ async def trigger_scrape():
         def run_scraper():
             try:
                 logger.info("🔥 Starting scraper in background...")
-                run_pipeline(ws_manager=ws_manager)
-                logger.info("✅ Scraper completed successfully")
+                success = run_pipeline(ws_manager=ws_manager)
+                if success:
+                    logger.info("✅ Scraper completed successfully")
+                else:
+                    logger.warning("⚠️ Scraper completed with warnings")
+                    scraper_status.error("Scraper completed with warnings")
             except Exception as e:
                 logger.error(f"❌ Scraper failed: {e}", exc_info=True)
+                scraper_status.error(str(e))
 
         # Start scraper in background thread
         thread = threading.Thread(target=run_scraper, daemon=True)
@@ -237,10 +254,12 @@ async def trigger_scrape():
         return {
             "status": "started",
             "message": "Scraper started in background",
-            "note": "Real-time updates available via WebSocket."
+            "note": "Real-time updates available via WebSocket or polling /api/scrape/status"
         }
     except Exception as e:
         logger.error(f"Failed to start scraper: {e}")
+        from core.scraper_status import scraper_status
+        scraper_status.error(str(e))
         return JSONResponse(
             status_code=500,
             content={
