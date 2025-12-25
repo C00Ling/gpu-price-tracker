@@ -422,6 +422,11 @@ class GPUScraper:
         Returns:
             True if ad was processed and added, False otherwise
         """
+        # Extract URL from the ad link
+        url = ad.get('href', '')
+        if url and not url.startswith('http'):
+            url = f"https://www.olx.bg{url}"
+
         title_el = ad.find(["h4", "h6"])
         price_el = ad.find_next("p")
 
@@ -477,8 +482,9 @@ class GPUScraper:
 
                     return False
 
-            self.gpu_prices[model].append(price)
-            logger.debug(f"Added: {model} - {price}лв")
+            # Store both price and URL
+            self.gpu_prices[model].append({'price': price, 'url': url})
+            logger.debug(f"Added: {model} - {price}лв ({url})")
             return True
 
         return False

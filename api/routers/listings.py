@@ -19,6 +19,7 @@ class GPUListingResponse(BaseModel):
     model: str
     price: float
     source: str
+    url: Optional[str] = None
 
 
 class GPUListingCreate(BaseModel):

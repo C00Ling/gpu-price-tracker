@@ -263,7 +263,7 @@ def calculate_statistics(prices: List[float]) -> Optional[Dict[str, Any]]:
     return stats
 
 
-def filter_scraped_data(raw_data: Dict[str, List[float]]) -> tuple[Dict[str, List[float]], Dict[str, int]]:
+def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dict[str, int]]:
     """
     Post-processing filtering: филтрира scraped данни СЛЕД събирането им
 
@@ -273,11 +273,11 @@ def filter_scraped_data(raw_data: Dict[str, List[float]]) -> tuple[Dict[str, Lis
     - По-просто за debugging
 
     Args:
-        raw_data: Речник {model: [prices]} със ВСИЧКИ scraped данни
+        raw_data: Речник {model: [items]} където items са dict{'price': float, 'url': str}
 
     Returns:
         Tuple of (filtered_data, filter_stats)
-        - filtered_data: Речник {model: [prices]} само с валидни цени
+        - filtered_data: Речник {model: [items]} само с валидни listings
         - filter_stats: Речник {reason: count} с статистика за филтриране
     """
     filtered_data = {}
@@ -290,20 +290,24 @@ def filter_scraped_data(raw_data: Dict[str, List[float]]) -> tuple[Dict[str, Lis
         'total_kept': 0,
     }
 
-    for model, prices in raw_data.items():
-        if not prices or len(prices) < MIN_SAMPLE_SIZE:
+    for model, items in raw_data.items():
+        if not items or len(items) < MIN_SAMPLE_SIZE:
             # Keep models with too few listings (no stats available)
-            filtered_data[model] = prices
-            filter_stats['total_kept'] += len(prices)
+            filtered_data[model] = items
+            filter_stats['total_kept'] += len(items)
             continue
 
         import statistics
+        # Extract just prices for statistics
+        prices = [item['price'] for item in items]
         median = statistics.median(prices)
         low_threshold = median * OUTLIER_THRESHOLD_LOW
         high_threshold = median * OUTLIER_THRESHOLD_HIGH
 
-        valid_prices = []
-        for price in prices:
+        valid_items = []
+        for item in items:
+            price = item['price']
+
             # Check extremely low price (< 50 лв)
             if price < 50:
                 filter_stats['extremely_low_price'] += 1
@@ -331,12 +335,12 @@ def filter_scraped_data(raw_data: Dict[str, List[float]]) -> tuple[Dict[str, Lis
                 )
                 continue
 
-            # Price passed all checks
-            valid_prices.append(price)
+            # Listing passed all checks
+            valid_items.append(item)
             filter_stats['total_kept'] += 1
 
-        if valid_prices:
-            filtered_data[model] = valid_prices
+        if valid_items:
+            filtered_data[model] = valid_items
 
     return filtered_data, filter_stats
 

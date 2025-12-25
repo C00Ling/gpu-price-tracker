@@ -130,12 +130,13 @@ def run_pipeline(ws_manager=None):
             
             # Save new data using bulk insert
             listings = []
-            for model, prices in scraper.gpu_prices.items():
-                for price in prices:
+            for model, items in scraper.gpu_prices.items():
+                for item in items:
                     listings.append({
                         'model': model,
                         'source': 'OLX',
-                        'price': price
+                        'price': item['price'],
+                        'url': item.get('url', '')  # Include URL
                     })
             
             total_saved = repo.add_listings_bulk(listings)

@@ -76,33 +76,34 @@ class GPURepository:
     def add_listings_bulk(self, listings: List[Dict[str, Any]]) -> int:
         """
         Добавя множество обяви наведнъж с нормализация
-        
+
         Args:
-            listings: List of dicts with keys: model, source, price
-        
+            listings: List of dicts with keys: model, source, price, url (optional)
+
         Returns:
             Брой успешно добавени обяви
         """
         try:
             from core.filters import normalize_model_name
-            
+
             gpu_objects = []
             for item in listings:
                 if not all(k in item for k in ['model', 'source', 'price']):
                     logger.warning(f"Skipping invalid listing: {item}")
                     continue
-                
+
                 if item['price'] <= 0:
                     logger.warning(f"Skipping listing with invalid price: {item}")
                     continue
-                
+
                 # Normalize model
                 normalized_model = normalize_model_name(item['model'].strip())
-                
+
                 gpu = GPU(
                     model=normalized_model,
                     source=item['source'].strip(),
-                    price=item['price']
+                    price=item['price'],
+                    url=item.get('url', '')  # Optional URL field
                 )
                 gpu_objects.append(gpu)
             

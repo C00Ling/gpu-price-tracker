@@ -9,6 +9,7 @@ class GPU(Base):
     model = Column(String, index=True, nullable=False)
     source = Column(String, nullable=False)
     price = Column(Float, nullable=False)
+    url = Column(String, nullable=True)  # OLX listing URL
     mean_fps = Column(Float, default=0.0)
     # Добавяме дата на създаване за исторически справки
     created_at = Column(DateTime(timezone=True), server_default=func.now())

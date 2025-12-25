@@ -13,6 +13,8 @@ class SummaryStats(BaseModel):
     total_listings: int
     unique_models: int
     avg_price: float
+    min_price: float
+    max_price: float
 
 
 def get_all_models_stats(repo: GPURepository) -> dict:
@@ -43,18 +45,23 @@ def get_summary_stats(db: Session = Depends(get_db)):
             result = {
                 "total_listings": 0,
                 "unique_models": 0,
-                "avg_price": 0.0
+                "avg_price": 0.0,
+                "min_price": 0.0,
+                "max_price": 0.0
             }
         else:
             total = len(all_listings)
             # GPU objects have .model and .price attributes
             unique = len(set(listing.model for listing in all_listings))
-            avg = sum(listing.price for listing in all_listings) / total
+            prices = [listing.price for listing in all_listings]
+            avg = sum(prices) / total
 
             result = {
                 "total_listings": total,
                 "unique_models": unique,
-                "avg_price": round(avg, 2)
+                "avg_price": round(avg, 2),
+                "min_price": round(min(prices), 2),
+                "max_price": round(max(prices), 2)
             }
 
         # Cache for 5 minutes

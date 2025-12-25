@@ -5,6 +5,7 @@ export interface GPU {
   model: string;
   price: number;
   source: string;
+  url?: string;
   created_at?: string;
 }
 
