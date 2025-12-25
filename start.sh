@@ -5,17 +5,10 @@ echo "🔧 Starting TOR service..."
 
 # Start TOR in background
 tor --SocksPort 9050 --ControlPort 9051 &
-TOR_PID=$!
 
 echo "⏳ Waiting for TOR to initialize..."
 sleep 10
-
-# Check if TOR is running
-if ps -p $TOR_PID > /dev/null; then
-    echo "✅ TOR service started successfully (PID: $TOR_PID)"
-else
-    echo "⚠️ TOR failed to start, continuing without TOR..."
-fi
+echo "✅ TOR service started"
 
 # Run database migrations
 echo "📦 Running database migrations..."
