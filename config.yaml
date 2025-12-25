@@ -31,8 +31,7 @@ scraper:
   # Quality filters
   blacklist_keywords:
     # Bulgarian
-    - "за części"
-    - "за části"
+    - "за части"
     - "счупена"
     - "не работи"
     - "повредена"
