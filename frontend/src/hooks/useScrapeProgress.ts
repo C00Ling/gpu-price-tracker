@@ -1,5 +1,5 @@
 // Hook for scraper progress with automatic WebSocket → Polling fallback
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
 
 interface ScrapeProgressState {
@@ -36,60 +36,67 @@ export function useScrapeProgress(options: UseScrapeProgressOptions = {}) {
   const wsFailoverTimerRef = useRef<number | undefined>(undefined);
   const lastUpdateRef = useRef<number>(Date.now());
 
+  // Memoize callbacks to prevent infinite reconnection loop
+  const handleMessage = useCallback((message: any) => {
+    console.log('[useScrapeProgress] WebSocket message:', message);
+
+    // Reset failover timer on successful message
+    lastUpdateRef.current = Date.now();
+    if (wsFailoverTimerRef.current) {
+      clearTimeout(wsFailoverTimerRef.current);
+      wsFailoverTimerRef.current = undefined;
+    }
+
+    switch (message.type) {
+      case 'scrape_started':
+        setState({
+          isRunning: true,
+          progress: 0,
+          status: 'Започване...',
+          error: null,
+          startedAt: new Date().toISOString(),
+          completedAt: null
+        });
+        // Don't use polling if WebSocket is working
+        setUsePolling(false);
+        break;
+
+      case 'scrape_progress':
+        setState(prev => ({
+          ...prev,
+          progress: message.progress ?? prev.progress,
+          status: message.status ?? prev.status,
+          isRunning: true
+        }));
+        break;
+
+      case 'scrape_completed':
+        setState(prev => ({
+          ...prev,
+          isRunning: false,
+          progress: 100,
+          status: 'Завършено! ✅',
+          completedAt: new Date().toISOString()
+        }));
+        break;
+    }
+  }, []);
+
+  const handleOpen = useCallback(() => {
+    console.log('[useScrapeProgress] WebSocket connected');
+    // Reset failover when connection opens
+    lastUpdateRef.current = Date.now();
+  }, []);
+
+  const handleClose = useCallback(() => {
+    console.log('[useScrapeProgress] WebSocket disconnected');
+  }, []);
+
   // WebSocket connection
   const { isConnected, connectionCount } = useWebSocket({
-    onMessage: (message) => {
-      console.log('[useScrapeProgress] WebSocket message:', message);
-
-      // Reset failover timer on successful message
-      lastUpdateRef.current = Date.now();
-      if (wsFailoverTimerRef.current) {
-        clearTimeout(wsFailoverTimerRef.current);
-        wsFailoverTimerRef.current = undefined;
-      }
-
-      switch (message.type) {
-        case 'scrape_started':
-          setState({
-            isRunning: true,
-            progress: 0,
-            status: 'Започване...',
-            error: null,
-            startedAt: new Date().toISOString(),
-            completedAt: null
-          });
-          // Don't use polling if WebSocket is working
-          setUsePolling(false);
-          break;
-
-        case 'scrape_progress':
-          setState(prev => ({
-            ...prev,
-            progress: message.progress ?? prev.progress,
-            status: message.status ?? prev.status,
-            isRunning: true
-          }));
-          break;
-
-        case 'scrape_completed':
-          setState(prev => ({
-            ...prev,
-            isRunning: false,
-            progress: 100,
-            status: 'Завършено! ✅',
-            completedAt: new Date().toISOString()
-          }));
-          break;
-      }
-    },
-    onOpen: () => {
-      console.log('[useScrapeProgress] WebSocket connected');
-      // Reset failover when connection opens
-      lastUpdateRef.current = Date.now();
-    },
-    onClose: () => {
-      console.log('[useScrapeProgress] WebSocket disconnected');
-    }
+    onMessage: handleMessage,
+    onOpen: handleOpen,
+    onClose: handleClose
   });
 
   // Poll scraper status from /api/scrape/status
