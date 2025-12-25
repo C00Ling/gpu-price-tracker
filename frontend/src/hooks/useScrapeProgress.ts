@@ -31,7 +31,7 @@ export function useScrapeProgress(options: UseScrapeProgressOptions = {}) {
     completedAt: null
   });
 
-  const [usePolling, setUsePolling] = useState(false);
+  const [usePolling, setUsePolling] = useState(true);  // Always use polling - WebSocket has issues on Railway
   const pollingTimeoutRef = useRef<number | undefined>(undefined);
   const wsFailoverTimerRef = useRef<number | undefined>(undefined);
   const lastUpdateRef = useRef<number>(Date.now());
