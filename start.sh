@@ -44,4 +44,4 @@ fi
 
 # Start the web application
 echo "🚀 Starting web application..."
-exec uvicorn main:app --host 0.0.0.0 --port $PORT
+exec uvicorn main:app --host 0.0.0.0 --port $PORT --log-level warning
