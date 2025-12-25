@@ -23,7 +23,7 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections.append(websocket)
         self.connection_count += 1
-        logger.info(f"📡 WebSocket connected. Total: {len(self.active_connections)}")
+        logger.debug(f"📡 WebSocket connected. Total: {len(self.active_connections)}")
 
         # Send welcome message
         await self.send_personal_message(
@@ -39,7 +39,7 @@ class ConnectionManager:
         """Remove WebSocket connection"""
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-            logger.info(f"📡 WebSocket disconnected. Total: {len(self.active_connections)}")
+            logger.debug(f"📡 WebSocket disconnected. Total: {len(self.active_connections)}")
 
     async def send_personal_message(self, message: Dict[str, Any], websocket: WebSocket):
         """Send message to specific client"""
@@ -55,7 +55,7 @@ class ConnectionManager:
             logger.debug("No active connections to broadcast to")
             return
 
-        logger.info(f"📡 Broadcasting to {len(self.active_connections)} clients: {message.get('type')}")
+        logger.debug(f"📡 Broadcasting to {len(self.active_connections)} clients: {message.get('type')}")
 
         # Send to all connections, removing failed ones
         disconnected = []
