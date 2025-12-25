@@ -228,6 +228,17 @@ async def trigger_scrape():
         from core.websocket import manager as ws_manager
         from core.scraper_status import scraper_status
 
+        # Check if scraper is already running
+        if scraper_status.get_status()["is_running"]:
+            return JSONResponse(
+                status_code=409,
+                content={
+                    "status": "already_running",
+                    "message": "Scraper е вече стартиран. Моля изчакайте да завърши.",
+                    "current_status": scraper_status.get_status()
+                }
+            )
+
         # Initialize scraper status
         scraper_status.start()
 

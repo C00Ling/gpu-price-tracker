@@ -55,11 +55,19 @@ export function Home() {
       setScrapeMessage(null);
       await api.admin.triggerScrape();
       // Progress updates will come via WebSocket or polling
-    } catch (error) {
-      setScrapeMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Грешка при стартиране на scraper',
-      });
+    } catch (error: any) {
+      // Check if scraper is already running (409 status)
+      if (error.status === 409 && error.data?.message) {
+        setScrapeMessage({
+          type: 'info',
+          text: error.data.message,
+        });
+      } else {
+        setScrapeMessage({
+          type: 'error',
+          text: error instanceof Error ? error.message : 'Грешка при стартиране на scraper',
+        });
+      }
     }
   };
 
