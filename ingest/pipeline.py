@@ -6,18 +6,37 @@ from core.logging import get_logger
 from core.config import config
 from collections import defaultdict
 import sys
+import asyncio
 
 logger = get_logger("pipeline")
 
 
-def run_pipeline():
+def run_pipeline(ws_manager=None):
     """
     Enhanced pipeline със защита от грешки и подробно логване
+
+    Args:
+        ws_manager: Optional WebSocket manager for real-time progress updates
     """
     logger.info("="*70)
     logger.info("🚀 STARTING DATA COLLECTION PIPELINE")
     logger.info("="*70)
-    
+
+    # Helper to broadcast progress via WebSocket
+    def broadcast_progress(progress: int, status: str, details: dict = None):
+        """Broadcast progress update via WebSocket if manager is provided"""
+        if ws_manager:
+            try:
+                # Run async broadcast in sync context
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(
+                    ws_manager.broadcast_scrape_progress(progress, status, details or {})
+                )
+                loop.close()
+            except Exception as e:
+                logger.warning(f"Failed to broadcast progress: {e}")
+
     try:
         # 1️⃣ Initialize database
         logger.info("📦 Initializing database...")
@@ -26,9 +45,15 @@ def run_pipeline():
         
         # 2️⃣ Initialize scraper
         logger.info(f"🔧 Initializing scraper (TOR: {config.scraper_use_tor})...")
-        scraper = GPUScraper(use_tor=config.scraper_use_tor)
+        broadcast_progress(5, "Инициализиране на scraper...")
+
+        scraper = GPUScraper(
+            use_tor=config.scraper_use_tor,
+            progress_callback=broadcast_progress
+        )
         scraper.add_benchmark_data(SAMPLE_BENCHMARKS)
         logger.info("✅ Scraper initialized")
+        broadcast_progress(10, "Scraper готов")
         
         # 3️⃣ Test connection
         logger.info("🔍 Testing connection...")
@@ -61,6 +86,7 @@ def run_pipeline():
         logger.info("\n" + "="*70)
         logger.info("🧹 POST-PROCESSING: Filtering data")
         logger.info("="*70)
+        broadcast_progress(85, "Филтриране на данни...")
 
         from core.filters import filter_scraped_data
 
@@ -86,6 +112,7 @@ def run_pipeline():
 
         # 6️⃣ Save to database (only filtered data)
         logger.info("\n💾 Saving to database...")
+        broadcast_progress(90, "Запазване в база данни...")
 
         try:
             session = SessionLocal()
@@ -156,7 +183,13 @@ def run_pipeline():
         logger.info("📖 API docs: http://127.0.0.1:8000/docs")
         logger.info("🎨 Dashboard: http://127.0.0.1:8000/dashboard")
         logger.info("")
-        
+
+        # Broadcast completion
+        broadcast_progress(100, "Завършено! ✅", {
+            "total_models": len(models) if 'models' in locals() else 0,
+            "total_listings": filtered_total if 'filtered_total' in locals() else 0
+        })
+
         return True
         
     except KeyboardInterrupt:

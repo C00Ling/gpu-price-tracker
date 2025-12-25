@@ -217,11 +217,15 @@ async def trigger_scrape():
     try:
         import threading
         from ingest.pipeline import run_pipeline
+        from core.websocket import manager as ws_manager
+
+        # Notify WebSocket clients that scraping started
+        await ws_manager.broadcast_scrape_started()
 
         def run_scraper():
             try:
                 logger.info("🔥 Starting scraper in background...")
-                run_pipeline()
+                run_pipeline(ws_manager=ws_manager)
                 logger.info("✅ Scraper completed successfully")
             except Exception as e:
                 logger.error(f"❌ Scraper failed: {e}", exc_info=True)
@@ -233,7 +237,7 @@ async def trigger_scrape():
         return {
             "status": "started",
             "message": "Scraper started in background",
-            "note": "Check logs for progress. This may take 2-5 minutes."
+            "note": "Real-time updates available via WebSocket."
         }
     except Exception as e:
         logger.error(f"Failed to start scraper: {e}")

@@ -88,6 +88,16 @@ class ConnectionManager:
             "timestamp": asyncio.get_event_loop().time()
         })
 
+    async def broadcast_scrape_progress(self, progress: int, status: str, details: Dict[str, Any] = None):
+        """Broadcast scraping progress update"""
+        await self.broadcast({
+            "type": "scrape_progress",
+            "progress": progress,
+            "status": status,
+            "details": details or {},
+            "timestamp": asyncio.get_event_loop().time()
+        })
+
     async def broadcast_scrape_completed(self, summary: Dict[str, Any]):
         """Notify clients that scraping completed"""
         await self.broadcast({

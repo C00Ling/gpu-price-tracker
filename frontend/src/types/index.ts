@@ -37,7 +37,10 @@ export interface ValueAnalysis {
 }
 
 export interface WebSocketMessage {
-  type: 'connection' | 'scrape_started' | 'scrape_completed' | 'stats_update' | 'price_drop';
+  type: 'connection' | 'scrape_started' | 'scrape_progress' | 'scrape_completed' | 'stats_update' | 'price_drop';
+  progress?: number;
+  status?: string;
+  details?: any;
   data?: any;
   message?: string;
   timestamp?: number;

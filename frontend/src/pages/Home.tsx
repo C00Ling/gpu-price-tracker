@@ -1,7 +1,8 @@
 // Home page - Dashboard with summary stats and top GPUs
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSummaryStats, useTopValue } from '../hooks/useGPUData';
+import { useWebSocket } from '../hooks/useWebSocket';
 import {
   Card,
   CardHeader,
@@ -23,48 +24,49 @@ export function Home() {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('');
 
-  // Simulated progress and status updates
-  useEffect(() => {
-    if (!isScraping) {
-      setProgress(0);
-      setStatusText('');
-      return;
-    }
+  // WebSocket connection for real-time progress updates
+  useWebSocket({
+    onMessage: (message) => {
+      console.log('WebSocket message received:', message);
 
-    // Status messages rotation
-    const statusMessages = [
-      'Свързване с OLX...',
-      'Scraping страница 1...',
-      'Scraping страница 2...',
-      'Scraping страница 3...',
-      'Обработване на данни...',
-      'Филтриране на обяви...',
-      'Запазване в база данни...',
-      'Почти готово...',
-    ];
+      switch (message.type) {
+        case 'scrape_started':
+          setIsScraping(true);
+          setProgress(0);
+          setStatusText('Започване...');
+          setScrapeMessage(null);
+          break;
 
-    let currentStatus = 0;
-    setStatusText(statusMessages[0]);
+        case 'scrape_progress':
+          if (message.progress !== undefined) {
+            setProgress(message.progress);
+          }
+          if (message.status) {
+            setStatusText(message.status);
+          }
+          break;
 
-    const statusInterval = setInterval(() => {
-      currentStatus++;
-      setStatusText(statusMessages[currentStatus % statusMessages.length]);
-    }, 20000); // Change status every 20 seconds
+        case 'scrape_completed':
+          setProgress(100);
+          setStatusText('Завършено! ✅');
+          setScrapeMessage({
+            type: 'success',
+            text: message.message || 'Scraping завършен успешно!',
+          });
 
-    // Simulated progress (non-linear, faster at start, slower at end)
-    let currentProgress = 0;
-    const progressInterval = setInterval(() => {
-      const increment = Math.random() * (95 - currentProgress) * 0.02; // Slower as it approaches 95%
-      currentProgress += increment;
-      if (currentProgress > 95) currentProgress = 95; // Cap at 95% until complete
-      setProgress(Math.min(currentProgress, 95));
-    }, 1000);
+          // Reset after 2 seconds
+          setTimeout(() => {
+            setIsScraping(false);
+            setProgress(0);
+            setStatusText('');
+          }, 2000);
+          break;
 
-    return () => {
-      clearInterval(statusInterval);
-      clearInterval(progressInterval);
-    };
-  }, [isScraping]);
+        default:
+          break;
+      }
+    },
+  });
 
   const handleTriggerScrape = async () => {
     try {
@@ -73,19 +75,11 @@ export function Home() {
       setProgress(0);
       setStatusText('Стартиране на scraper...');
 
-      const result = await api.admin.triggerScrape();
+      await api.admin.triggerScrape();
 
-      // Complete the progress bar
-      setProgress(100);
-      setStatusText('Завършено! ✅');
+      // Progress updates will come via WebSocket
+      // No need to manually set progress here
 
-      setScrapeMessage({
-        type: 'success',
-        text: `${result.message}. ${result.note || 'Данните ще се обновят след 2-5 минути.'}`,
-      });
-
-      // Auto-hide success message after 10 seconds
-      setTimeout(() => setScrapeMessage(null), 10000);
     } catch (error) {
       setScrapeMessage({
         type: 'error',
@@ -93,12 +87,7 @@ export function Home() {
       });
       setProgress(0);
       setStatusText('');
-    } finally {
-      setTimeout(() => {
-        setIsScraping(false);
-        setProgress(0);
-        setStatusText('');
-      }, 2000); // Keep 100% visible for 2 seconds
+      setIsScraping(false);
     }
   };
 

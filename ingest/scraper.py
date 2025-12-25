@@ -22,12 +22,13 @@ class ScraperError(Exception):
 class GPUScraper:
     """Enhanced GPU scraper с TOR, филтри, rate limiting и error handling"""
 
-    def __init__(self, use_proxy=False, proxy_list=None, use_tor=None):
+    def __init__(self, use_proxy=False, proxy_list=None, use_tor=None, progress_callback=None):
         # Load from config if not specified
         self.use_tor = use_tor if use_tor is not None else config.scraper_use_tor
         self.use_proxy = use_proxy or self.use_tor
         self.proxy_list = proxy_list or []
         self.proxy_index = 0
+        self.progress_callback = progress_callback
 
         self.tor_proxy = config.get("scraper.tor_proxy", {
             "http": "socks5h://127.0.0.1:9050",
@@ -66,6 +67,14 @@ class GPUScraper:
             f"GPUScraper initialized (TOR: {self.use_tor}, "
             f"Rate limit: {config.rate_limit_rpm}/min)"
         )
+
+    def _report_progress(self, progress: int, status: str, **details):
+        """Report progress via callback if provided"""
+        if self.progress_callback:
+            try:
+                self.progress_callback(progress, status, details)
+            except Exception as e:
+                logger.warning(f"Progress callback failed: {e}")
 
     # ================= PROXY =================
 
@@ -291,6 +300,9 @@ class GPUScraper:
             f"(max_pages: {max_pages if not scrape_all else 'ALL'})"
         )
 
+        # Report initial progress
+        self._report_progress(0, "Започване на scraping...", search_term=search_term)
+
         # Always scrape without filtering - post-processing will handle it
         apply_filters = False
 
@@ -318,6 +330,15 @@ class GPUScraper:
                     url += f"?page={page}"
 
                 logger.info(f"Scraping page {page}...")
+
+                # Report progress for current page
+                progress_pct = min(int((page / max_pages) * 80), 80) if not scrape_all else min(page * 5, 80)
+                self._report_progress(
+                    progress_pct,
+                    f"Scraping страница {page}...",
+                    current_page=page,
+                    total_listings=sum(len(v) for v in self.gpu_prices.values())
+                )
 
                 response = self.make_request(url)
                 if not response:
@@ -370,10 +391,20 @@ class GPUScraper:
                 page += 1
                 continue
 
+        total_listings = sum(len(v) for v in self.gpu_prices.values())
         logger.info(
             f"Scraping complete. Scanned {page} pages. "
             f"Collected {len(self.gpu_prices)} models, "
-            f"{sum(len(v) for v in self.gpu_prices.values())} total listings"
+            f"{total_listings} total listings"
+        )
+
+        # Report scraping completion (80% - post-processing will be 80-100%)
+        self._report_progress(
+            80,
+            "Scraping завършено",
+            pages_scraped=page,
+            models_found=len(self.gpu_prices),
+            total_listings=total_listings
         )
 
         # Log filter statistics if filters were applied
