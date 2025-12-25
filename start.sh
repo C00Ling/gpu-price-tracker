@@ -17,6 +17,16 @@ else
     echo "⚠️ TOR failed to start, continuing without TOR..."
 fi
 
+# Run database migrations
+echo "📦 Running database migrations..."
+alembic upgrade head
+
+if [ $? -eq 0 ]; then
+    echo "✅ Database migrations completed successfully"
+else
+    echo "⚠️ Database migrations failed, but continuing..."
+fi
+
 # Start the web application
 echo "🚀 Starting web application..."
 exec uvicorn main:app --host 0.0.0.0 --port $PORT
