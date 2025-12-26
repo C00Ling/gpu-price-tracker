@@ -555,6 +555,7 @@ class GPUScraper:
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
             r"GTX\s?\d{4}\s?(TI|SUPER)?",
             r"RX\s?\d{4}\s?(XT|XTX|GRE)?",  # Added GRE for RX 7900 GRE
+            r"ARC\s?[AB]\d{3}",  # Intel ARC (A-series: Alchemist, B-series: Battlemage)
             r"VEGA\s?\d+",
         ]
 

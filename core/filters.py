@@ -193,9 +193,13 @@ def normalize_model_name(model: str) -> str:
     # Add space after brand (RTX, GTX, RX, VEGA, ARC)
     model = re.sub(r'(RTX|GTX|RX|VEGA|ARC)(\d+)', r'\1 \2', model)
 
+    # Special handling for Intel ARC (format: ARC A750, ARC B580)
+    model = re.sub(r'ARC([AB])(\d{3})', r'ARC \1\2', model)
+
     # Add space before memory size (3GB, 6GB, 8GB, 12GB, 16GB, etc.) - FIRST
     # This must run before TI/SUPER/XT to handle cases like "TI16GB"
     model = re.sub(r'(\d{4})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., 30603GB -> 3060 3GB
+    model = re.sub(r'([AB]\d{3})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., A77016GB -> A770 16GB (Intel ARC)
     model = re.sub(r'(TI|SUPER|XT|XTX|GRE)(\d{1,2}GB)$', r'\1 \2', model)  # e.g., TI16GB -> TI 16GB
 
     # Add space before suffix (TI, SUPER, XT, XTX, GRE)
