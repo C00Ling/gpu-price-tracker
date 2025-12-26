@@ -554,7 +554,7 @@ class GPUScraper:
         patterns = [
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
             r"GTX\s?\d{4}\s?(TI|SUPER)?",
-            r"RX\s?\d{4}\s?(XT|XTX)?",
+            r"RX\s?\d{4}\s?(XT|XTX|GRE)?",  # Added GRE for RX 7900 GRE
             r"VEGA\s?\d+",
         ]
 
