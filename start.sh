@@ -10,6 +10,13 @@ echo "⏳ Waiting for TOR to initialize..."
 sleep 10
 echo "✅ TOR service started"
 
+# Wait for PostgreSQL to be ready
+echo "🗄️  Checking PostgreSQL connection..."
+python wait_for_db.py
+if [ $? -ne 0 ]; then
+    echo "⚠️ PostgreSQL not ready, but continuing with migrations anyway..."
+fi
+
 # Run database migrations
 echo "📦 Running database migrations..."
 
