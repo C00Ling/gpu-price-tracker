@@ -39,6 +39,9 @@ websockets>=12.0
 python-telegram-bot>=20.7
 aiosmtplib>=3.0.0  # Async SMTP client
 
+# Error Monitoring
+sentry-sdk[fastapi]>=1.40.0
+
 # Rate Limiting (Optional - comment out if not using)
 # slowapi>=0.1.9
 # limits>=3.7.0

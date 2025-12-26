@@ -9,6 +9,7 @@ from api.routers import listings, stats, value, websocket
 from storage.db import init_db
 from core.logging import get_logger
 from core.config import config
+from core.sentry import init_sentry, capture_api_error
 import uvicorn
 import time
 import os
@@ -28,6 +29,9 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 STARTING GPU SERVICE API")
     logger.info("="*70)
     logger.info(f"📝 Environment: {os.getenv('ENVIRONMENT', 'development')}")
+
+    # Initialize Sentry error monitoring (before any other operations)
+    init_sentry()
 
     if is_production:
         logger.info("🔒 Production mode: API docs DISABLED (/docs, /redoc)")
@@ -110,6 +114,18 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def global_exception_handler(request: Request, exc: Exception):
     """Handle all other exceptions"""
     logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)
+
+    # Capture error in Sentry with request context
+    capture_api_error(
+        exc,
+        endpoint=request.url.path,
+        context={
+            "method": request.method,
+            "query_params": dict(request.query_params),
+            "client_host": request.client.host if request.client else None
+        }
+    )
+
     return JSONResponse(
         status_code=500,
         content={
@@ -257,6 +273,13 @@ async def trigger_scrape():
             except Exception as e:
                 logger.error(f"❌ Scraper failed: {e}", exc_info=True)
                 scraper_status.error(str(e))
+
+                # Capture scraper errors in Sentry
+                from core.sentry import capture_scraper_error
+                capture_scraper_error(e, context={
+                    "triggered_via": "api",
+                    "endpoint": "/api/trigger-scrape"
+                })
 
         # Start scraper in background thread
         thread = threading.Thread(target=run_scraper, daemon=True)

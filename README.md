@@ -51,6 +51,7 @@
 - 🔧 **Retry Mechanism** - Exponential backoff при грешки
 - 🔧 **Structured Logging** - Log rotation и цветен console output
 - 🔧 **Error Handling** - Comprehensive error handling на всички нива
+- 🔧 **Error Monitoring** - Sentry integration за production error tracking
 - 🔧 **Input Validation** - Pydantic models за валидация
 - 🔧 **Repository Pattern** - Clean architecture за database layer
 - 🔧 **Environment Variables** - Гъвкава конфигурация
@@ -609,6 +610,7 @@ GPU_SERVICE/
 ├── 📁 core/                   # Core Business Logic
 │   ├── config.py              # Configuration manager
 │   ├── logging.py             # Structured logging
+│   ├── sentry.py              # Sentry error monitoring
 │   ├── rate_limiter.py        # Rate limiting & retry
 │   ├── validation.py          # Input validation
 │   ├── filters.py             # Quality filters
@@ -645,6 +647,9 @@ GPU_SERVICE/
 │
 ├── 📁 tests/                  # Unit Tests
 │   ├── conftest.py            # Pytest configuration
+│   ├── test_filters.py        # Filter & normalization tests
+│   ├── test_scraper.py        # Scraper extraction tests
+│   ├── test_sentry.py         # Sentry integration tests
 │   ├── test_api.py            # API tests
 │   ├── test_ingest.py         # Scraper tests
 │   ├── test_storage.py        # Database tests
@@ -717,6 +722,130 @@ API_CORS_ORIGINS=https://yourdomain.com
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
+
+---
+
+## 📊 Monitoring & Error Tracking
+
+### Sentry Error Monitoring
+
+Проектът има built-in **Sentry** integration за production error tracking и performance monitoring.
+
+#### Setup
+
+1. **Създай Sentry проект:**
+   - Отиди на [sentry.io](https://sentry.io/)
+   - Създай нов проект (тип: Python/FastAPI)
+   - Копирай DSN от Settings → Client Keys
+
+2. **Конфигурирай в `.env`:**
+   ```bash
+   # Sentry Error Tracking (Recommended for Production)
+   SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
+   SENTRY_ENVIRONMENT=production
+   RELEASE=v1.0.0  # или git commit hash
+   ```
+
+3. **Стартирай приложението:**
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+
+Sentry ще автоматично:
+- ✅ Capture всички unhandled exceptions
+- ✅ Track API errors с request context (endpoint, method, params)
+- ✅ Monitor scraper errors с additional context
+- ✅ Integrate с FastAPI и SQLAlchemy
+- ✅ Filter out expected errors (404, 401, DB warmup errors)
+
+#### Features
+
+**Automatic Error Capture:**
+```python
+# API errors са automatically captured в global exception handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    # Автоматично изпраща към Sentry с request context
+    capture_api_error(exc, endpoint=request.url.path, context={...})
+```
+
+**Custom Error Capture:**
+```python
+from core.sentry import capture_scraper_error, capture_api_error
+
+# Scraper errors
+capture_scraper_error(error, context={
+    "page": 5,
+    "search_term": "rtx 4090"
+})
+
+# API errors
+capture_api_error(error, endpoint="/api/stats", context={
+    "model": "RTX 4090"
+})
+```
+
+**Event Filtering:**
+- ✅ Expected client errors (404, 401, 403) are filtered out
+- ✅ Database warmup errors (connection refused) are filtered out
+- ✅ Only real errors reach Sentry (reduced noise)
+
+**Performance Monitoring:**
+```bash
+# Development: 100% performance sampling
+SENTRY_ENVIRONMENT=development
+
+# Production: 10% performance sampling (cost optimization)
+SENTRY_ENVIRONMENT=production
+```
+
+**Privacy & Security:**
+```python
+# PII (Personally Identifiable Information) is NOT sent by default
+send_default_pii=False
+
+# Sample rate: 100% error capture (all errors)
+sample_rate=1.0
+
+# Traces sample rate: 10% in production (performance monitoring)
+traces_sample_rate=0.1
+```
+
+#### Testing
+
+```bash
+# Run Sentry integration tests
+pytest tests/test_sentry.py -v
+
+# Test error capture manually (visit this endpoint)
+# http://localhost:8000/test-error
+```
+
+#### Monitoring Dashboard
+
+След setup, можеш да:
+- 📊 View error trends и frequency
+- 🔍 Inspect stack traces с source code
+- 📈 Monitor API performance
+- 🔔 Setup alerts за critical errors
+- 📧 Get email notifications
+
+#### Cost
+
+**Sentry Pricing:**
+- **Developer Plan**: Free (5,000 errors/месец)
+- **Team Plan**: $26/месец (50,000 errors/месец)
+
+За този проект, Developer планът е **напълно достатъчен**.
+
+#### Без Sentry
+
+Ако не конфигурираш `SENTRY_DSN`, приложението ще работи нормално:
+```
+⚠️  Sentry DSN not configured - error monitoring disabled
+```
+
+Errors ще се логват само локално в `logs/gpu_service.log`.
 
 ---
 
