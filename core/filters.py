@@ -47,7 +47,7 @@ MIN_SAMPLE_SIZE = 3  # Минимум 3 обяви за да приложим с
 ADAPTIVE_WARMUP_SIZE = 5  # След 5 обяви използваме пълна статистическа филтрация
 
 
-# Model corrections for incomplete/ambiguous names
+# Model corrections for incomplete/ambiguous names and non-existent variants
 MODEL_CORRECTIONS = {
     # AMD RX 7000-series - fix incomplete model names
     "RX 7900": "RX 7900 XT",      # Default to XT (most common)
@@ -101,6 +101,61 @@ MODEL_CORRECTIONS = {
     "GTX 1600": "GTX 1650 SUPER",        # Typo
     "RTX 2260 SUPER": "RTX 2060 SUPER",  # Typo
     "RX 1650": "GTX 1650 SUPER",         # Brand confusion (AMD → NVIDIA)
+
+    # ===================================================================
+    # Non-existent GPU models - normalize to real equivalents
+    # These variants were never released but sellers often list them incorrectly
+    # ===================================================================
+
+    # NVIDIA GTX 10-series - no SUPER variants exist (SUPER only in GTX 16-series)
+    "GTX 1080 SUPER": "GTX 1080",    # GTX 1080 SUPER doesn't exist → GTX 1080
+    "GTX 1070 SUPER": "GTX 1070",    # GTX 1070 SUPER doesn't exist → GTX 1070
+    "GTX 1060 3GB SUPER": "GTX 1060 3GB",  # No SUPER variant
+    "GTX 1060 6GB SUPER": "GTX 1060 6GB",  # No SUPER variant
+    "GTX 1050 SUPER": "GTX 1050",    # GTX 1050 SUPER doesn't exist → GTX 1050
+
+    # NVIDIA RTX 30-series - no SUPER variants (SUPER only in 20-series and 40-series)
+    "RTX 3090 SUPER": "RTX 3090",
+    "RTX 3090 TI SUPER": "RTX 3090 TI",
+    "RTX 3080 SUPER": "RTX 3080",
+    "RTX 3080 TI SUPER": "RTX 3080 TI",
+    "RTX 3080 12GB SUPER": "RTX 3080 12GB",
+    "RTX 3070 SUPER": "RTX 3070",
+    "RTX 3070 TI SUPER": "RTX 3070 TI",
+    "RTX 3060 SUPER": "RTX 3060",
+    "RTX 3060 TI SUPER": "RTX 3060 TI",
+    "RTX 3060 12GB SUPER": "RTX 3060 12GB",
+    "RTX 3050 SUPER": "RTX 3050",
+    "RTX 3050 8GB SUPER": "RTX 3050 8GB",
+
+    # NVIDIA RTX 20-series - only 2060/2070/2080 have SUPER variants
+    "RTX 2080 TI SUPER": "RTX 2080 TI",  # RTX 2080 TI exists, but no SUPER variant
+    "RTX 2090": "RTX 2080 TI",           # RTX 2090 doesn't exist, likely means 2080 TI
+    "RTX 2090 SUPER": "RTX 2080 TI",
+    "RTX 2090 TI": "RTX 2080 TI",
+    "RTX 2050": "RTX 2060",              # RTX 2050 doesn't exist, likely means 2060
+    "RTX 2050 SUPER": "RTX 2060 SUPER",
+
+    # NVIDIA RTX 40-series - limited SUPER variants
+    "RTX 4090 SUPER": "RTX 4090",        # RTX 4090 doesn't have SUPER variant
+    "RTX 4090 TI": "RTX 4090",           # RTX 4090 TI doesn't exist
+    "RTX 4060 SUPER": "RTX 4060",        # Only RTX 4060 TI exists, not 4060 SUPER
+
+    # NVIDIA GTX 16-series - only 1650 and 1660 have SUPER
+    "GTX 1630 SUPER": "GTX 1650 SUPER",  # Likely confusion
+    "GTX 1640 SUPER": "GTX 1650 SUPER",  # Likely confusion
+
+    # AMD RX cards - no SUPER variants (AMD uses XT/XTX nomenclature)
+    "RX 7900 SUPER": "RX 7900 XT",
+    "RX 7800 SUPER": "RX 7800 XT",
+    "RX 7700 SUPER": "RX 7700 XT",
+    "RX 7600 SUPER": "RX 7600",
+    "RX 6900 SUPER": "RX 6900 XT",
+    "RX 6800 SUPER": "RX 6800 XT",
+    "RX 6700 SUPER": "RX 6700 XT",
+    "RX 6600 SUPER": "RX 6600 XT",
+    "RX 5700 SUPER": "RX 5700 XT",
+    "RX 5600 SUPER": "RX 5600 XT",
 }
 
 
