@@ -1,2 +1,3 @@
-# tests/__init__.py
-# Тест пакет
+"""
+GPU Price Tracker - Test Suite
+"""
