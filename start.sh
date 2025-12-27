@@ -3,8 +3,16 @@
 
 echo "🔧 Starting TOR service..."
 
-# Start TOR in background
-tor --SocksPort 9050 --ControlPort 9051 &
+# Create TOR data directory
+mkdir -p /tmp/tor_data
+
+# Start TOR in background with configuration file
+if [ -f "config/torrc" ]; then
+    tor -f config/torrc &
+else
+    # Fallback to Railway-compatible settings (matching scraper expectations)
+    tor --SocksPort 9050 --ControlPort 9151 --DataDirectory /tmp/tor_data &
+fi
 
 echo "⏳ Waiting for TOR to initialize..."
 sleep 10

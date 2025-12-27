@@ -2,8 +2,7 @@
 # This enables the control port for IP renewal
 
 # SOCKS proxy port (for routing traffic through TOR)
-# Using different port to avoid conflict with system TOR
-SOCKSPort 9150
+SOCKSPort 9050
 
 # Control port (for renewing IP via stem library)
 ControlPort 9151
@@ -12,14 +11,12 @@ ControlPort 9151
 SOCKSListenAddress 127.0.0.1
 ControlListenAddress 127.0.0.1
 
-# Authentication - no password needed for localhost
-# For development, we'll use cookie authentication (default)
-CookieAuthentication 1
-CookieAuthFile ./tor_data/control_auth_cookie
-CookieAuthFileGroupReadable 1
+# Authentication - disabled for localhost in containerized environment
+# This is safe because the control port is only accessible within the container
+CookieAuthentication 0
 
-# Data directory
-DataDirectory ./tor_data
+# Data directory - use temp directory in containerized environment
+DataDirectory /tmp/tor_data
 
 # Logging
-Log notice file ./logs/tor_control.log
+Log notice stdout
