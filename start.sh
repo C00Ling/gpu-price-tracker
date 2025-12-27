@@ -28,26 +28,19 @@ fi
 # Run database migrations
 echo "📦 Running database migrations..."
 
-# Try to run migrations
-alembic upgrade head 2>&1 | tee /tmp/migration.log
-
-# Check if migration failed due to table already existing
-if grep -q "relation \"listings\" already exists" /tmp/migration.log; then
-    echo "⚠️ Table already exists, marking initial migration as complete..."
-    # Mark the first migration as applied
-    alembic stamp bedc9c8b7145
-    # Now run the url column migration
-    echo "📦 Running remaining migrations..."
-    alembic upgrade head
-    if [ $? -eq 0 ]; then
-        echo "✅ Database migrations completed successfully"
-    else
-        echo "⚠️ Remaining migrations failed, but continuing..."
-    fi
-elif [ $? -eq 0 ]; then
+# Use manual migration script (more reliable than alembic in Railway)
+python manual_migrate.py
+if [ $? -eq 0 ]; then
     echo "✅ Database migrations completed successfully"
 else
-    echo "⚠️ Database migrations failed, but continuing..."
+    echo "⚠️ Manual migration failed, trying alembic..."
+    # Fallback to alembic if manual migration fails
+    alembic upgrade head 2>&1 | tee /tmp/migration.log
+    if [ $? -eq 0 ]; then
+        echo "✅ Alembic migrations completed successfully"
+    else
+        echo "⚠️ Database migrations failed, but continuing..."
+    fi
 fi
 
 # Start the web application
