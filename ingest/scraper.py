@@ -441,29 +441,43 @@ class GPUScraper:
         # Method 2: Look for price in next <p> with "лв" (original method)
         if not price_text:
             price_candidates = ad.find_all_next("p", limit=5)  # Check first 5 <p> elements
+            candidate_prices = []
+
             for candidate in price_candidates:
                 text = candidate.text.strip()
                 if "лв" in text and re.search(r"\d+", text):
-                    # Prefer elements with higher prices (avoid "99 лв" type promotional text)
-                    price_num_match = re.search(r"(\d+(?:\s\d+)*)", text)
+                    # Extract numeric value (including decimals like "1749.99")
+                    price_num_match = re.search(r"(\d+(?:[\s,]\d+)*(?:\.\d+)?)", text)
                     if price_num_match:
-                        price_num = int(price_num_match.group(1).replace(" ", ""))
-                        # Skip suspiciously low "prices" that are likely badges/promotions
-                        if price_num >= 20:  # Minimum reasonable price for any GPU part
-                            price_text = text
-                            break
+                        # Parse price (handle "1 500", "1,500", "1500.99" formats)
+                        price_str = price_num_match.group(1).replace(" ", "").replace(",", "")
+                        try:
+                            price_num = float(price_str)
+                            # Skip suspiciously low prices (likely decimal parts or badges)
+                            if price_num >= 100:  # Increased threshold to avoid decimal portions
+                                candidate_prices.append((price_num, text))
+                        except ValueError:
+                            continue
+
+            # Select the highest price among candidates (avoids decimal portions like "99 лв")
+            if candidate_prices:
+                candidate_prices.sort(reverse=True)  # Sort by price descending
+                price_text = candidate_prices[0][1]  # Take highest price text
 
         if not title_el or not price_text:
             return False
 
         title = title_el.text.strip()
-        price_match = re.search(r"(\d+(?:\s\d+)*)\s*лв", price_text)
+        # Updated regex to handle decimal prices like "1749.99 лв", "1 500.50 лв", or "1,500.99 лв"
+        price_match = re.search(r"(\d+(?:[\s,]\d+)*(?:\.\d+)?)\s*лв", price_text)
 
         if not price_match:
             return False
 
         try:
-            price = int(price_match.group(1).replace(" ", ""))
+            # Handle "1 500", "1,500", "1500.99" formats (space/comma = thousands, dot = decimal)
+            price_str = price_match.group(1).replace(" ", "").replace(",", "")
+            price = float(price_str)
         except ValueError:
             logger.warning(f"Invalid price format: {price_match.group(1)}")
             return False
