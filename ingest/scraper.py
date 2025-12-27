@@ -642,10 +642,13 @@ class GPUScraper:
         """
         Извлича и нормализира GPU модел от заглавие
 
+        VALIDATES extracted model against known GPUs to reject typos like "GTX 1018"
+
         Examples:
-            "RTX3060TI 12GB" -> "RTX 3060 TI"
-            "rx 6600xt oc" -> "RX 6600 XT"
-            "GTX 1660ti super" -> "GTX 1660 TI"
+            "RTX3060TI 12GB" -> "RTX 3060 TI" ✅
+            "rx 6600xt oc" -> "RX 6600 XT" ✅
+            "GTX 1660ti super" -> "GTX 1660 TI" ✅
+            "GTX 1018" -> None ❌ (typo, should be GTX 1080)
         """
         patterns = [
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
@@ -666,9 +669,56 @@ class GPUScraper:
                 from core.filters import normalize_model_name
                 normalized = normalize_model_name(model)
 
+                # VALIDATE: Check if model exists in known GPUs
+                # This rejects typos like "GTX 1018" (should be "GTX 1080")
+                if not self._is_valid_gpu_model(normalized):
+                    logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
+                    return None
+
                 return normalized
 
         return None
+
+    def _is_valid_gpu_model(self, model: str) -> bool:
+        """
+        Validates if GPU model exists in known benchmarks or VRAM specs
+
+        Args:
+            model: Normalized GPU model name (e.g., "GTX 1080", "RX 6600 XT")
+
+        Returns:
+            True if model is valid, False if it's a typo (e.g., "GTX 1018")
+        """
+        # Check against benchmark data (most comprehensive list)
+        if model in SAMPLE_BENCHMARKS:
+            return True
+
+        # Check against VRAM specs (alternative source)
+        if model in GPU_VRAM:
+            return True
+
+        # Fuzzy matching for common typos
+        # "GTX 1018" -> suggest "GTX 1080" (closest match)
+        for known_model in SAMPLE_BENCHMARKS.keys():
+            # Check if only 1-2 characters differ (likely typo)
+            if self._is_likely_typo(model, known_model):
+                logger.info(f"Typo detected: '{model}' -> probably '{known_model}' (rejected)")
+                return False
+
+        return False
+
+    def _is_likely_typo(self, model: str, known_model: str) -> bool:
+        """Check if model is a likely typo of known_model"""
+        # Simple heuristic: same prefix, similar numbers
+        # "GTX 1018" vs "GTX 1080" -> same prefix, numbers differ by transposition
+        if len(model) != len(known_model):
+            return False
+
+        # Count differing characters
+        diffs = sum(1 for a, b in zip(model, known_model) if a != b)
+
+        # If only 1-2 chars differ, likely a typo
+        return 1 <= diffs <= 2
 
     def get_min_prices(self, use_percentile=True) -> Dict[str, int]:
         """Връща минимални цени"""
