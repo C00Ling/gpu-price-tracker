@@ -2,14 +2,10 @@
 # This enables the control port for IP renewal
 
 # SOCKS proxy port (for routing traffic through TOR)
-SOCKSPort 9050
+SOCKSPort 127.0.0.1:9050
 
 # Control port (for renewing IP via stem library)
-ControlPort 9151
-
-# Allow connections from localhost only
-SOCKSListenAddress 127.0.0.1
-ControlListenAddress 127.0.0.1
+ControlPort 127.0.0.1:9151
 
 # Authentication - disabled for localhost in containerized environment
 # This is safe because the control port is only accessible within the container
