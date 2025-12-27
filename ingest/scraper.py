@@ -43,6 +43,7 @@ class GPUScraper:
         self.gpu_prices = defaultdict(list)
         self.gpu_benchmarks: Dict[str, float] = {}
         self.min_reasonable_prices = {}
+        self.seen_urls = set()  # Track URLs to prevent duplicates from multiple search terms
 
         self.blacklist_keywords = config.get("scraper.blacklist_keywords", [])
         self.suspicious_price_threshold = config.get(
@@ -578,8 +579,14 @@ class GPUScraper:
 
                     return False
 
+            # Check if URL already processed (prevents duplicates from multiple search terms)
+            if url in self.seen_urls:
+                logger.debug(f"Skipping duplicate URL: {url}")
+                return False
+
             # Store both price and URL
             self.gpu_prices[model].append({'price': price, 'url': url})
+            self.seen_urls.add(url)
             logger.debug(f"Added: {model} - {price}лв ({url})")
             return True
 
