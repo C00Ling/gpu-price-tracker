@@ -282,7 +282,7 @@ class GPUScraper:
 
     def scrape_olx_pass(
         self,
-        search_term="видео карта",
+        search_term="видео",
         max_pages=None,
         apply_filters=False
     ) -> Dict[str, List[int]]:
@@ -325,7 +325,7 @@ class GPUScraper:
                 if page > 1:
                     self.page_limiter.wait()
 
-                url = f"https://www.olx.bg/ads/q-{search_term}/"
+                url = f"https://www.olx.bg/elektronika/q-{search_term}/"
                 if page > 1:
                     url += f"?page={page}"
 
