@@ -282,118 +282,147 @@ class GPUScraper:
 
     def scrape_olx_pass(
         self,
-        search_term="видео",
+        search_terms=None,
         max_pages=None,
         apply_filters=False
     ) -> Dict[str, List[int]]:
         """
         Събира обяви от OLX със защита от грешки и auto-pagination
 
+        Args:
+            search_terms: Single search term (str) or list of search terms (List[str])
+                         Default: ["видео", "rtx", "gtx", "radeon", "geforce", "arc"]
+            max_pages: Max pages per search term
+            apply_filters: DEPRECATED - filtering happens in post-processing
+
         NOTE: apply_filters parameter is DEPRECATED and ignored.
         All filtering now happens in post-processing after scraping is complete.
         """
+        # Default search terms if none provided
+        if search_terms is None:
+            search_terms = ["видео", "rtx", "gtx", "radeon", "geforce", "arc"]
+
+        # Support single string for backwards compatibility
+        if isinstance(search_terms, str):
+            search_terms = [search_terms]
+
         max_pages = max_pages or config.scraper_max_pages
         scrape_all = config.get("scraper.scrape_all_pages", False)
 
         logger.info(
-            f"Starting OLX scrape: '{search_term}' "
-            f"(max_pages: {max_pages if not scrape_all else 'ALL'})"
+            f"Starting OLX scrape with {len(search_terms)} search terms: {search_terms} "
+            f"(max_pages: {max_pages if not scrape_all else 'ALL'} per term)"
         )
 
         # Report initial progress
-        self._report_progress(0, "Започване на scraping...", search_term=search_term)
+        self._report_progress(0, "Започване на scraping...", search_terms=search_terms)
 
         # Always scrape without filtering - post-processing will handle it
         apply_filters = False
 
-        page = 1
-        consecutive_empty_pages = 0
-        max_empty_pages = 3  # Stop after 3 empty pages in a row
+        total_pages_scraped = 0
 
-        while True:
-            # Check if we should stop
-            if not scrape_all and page > max_pages:
-                logger.info(f"Reached max pages limit: {max_pages}")
-                break
+        # Loop through each search term
+        for term_index, search_term in enumerate(search_terms):
+            logger.info(f"📍 [{term_index + 1}/{len(search_terms)}] Scraping search term: '{search_term}'")
 
-            if consecutive_empty_pages >= max_empty_pages:
-                logger.info(f"No more results found after {max_empty_pages} empty pages. Stopping.")
-                break
+            page = 1
+            consecutive_empty_pages = 0
+            max_empty_pages = 3  # Stop after 3 empty pages in a row
 
-            try:
-                # Rate limiting между страници
-                if page > 1:
-                    self.page_limiter.wait()
-
-                url = f"https://www.olx.bg/elektronika/q-{search_term}/"
-                if page > 1:
-                    url += f"?page={page}"
-
-                logger.info(f"Scraping page {page}...")
-
-                # Report progress for current page
-                progress_pct = min(int((page / max_pages) * 80), 80) if not scrape_all else min(page * 5, 80)
-                self._report_progress(
-                    progress_pct,
-                    f"Scraping страница {page}...",
-                    current_page=page,
-                    total_listings=sum(len(v) for v in self.gpu_prices.values())
-                )
-
-                response = self.make_request(url)
-                if not response:
-                    logger.warning(f"Failed to fetch page {page}, skipping...")
-                    consecutive_empty_pages += 1
-                    page += 1
-                    continue
-
-                soup = BeautifulSoup(response.content, "html.parser")
-                ads = soup.find_all("a", href=re.compile(r"^/d/ad/"))
-
-                # Check if page is empty
-                if len(ads) == 0:
-                    consecutive_empty_pages += 1
-                    logger.info(f"Page {page} is empty (attempt {consecutive_empty_pages}/{max_empty_pages})")
-                    page += 1
-                    continue
-
-                # Reset empty page counter
-                consecutive_empty_pages = 0
-
-                logger.debug(f"Found {len(ads)} ads on page {page}")
-
-                ads_processed = 0
-                for ad in ads:
-                    try:
-                        # Check if ad was processed (returns True if added)
-                        if self._process_ad(ad, apply_filters):
-                            ads_processed += 1
-                    except Exception as e:
-                        logger.warning(f"Error processing ad: {e}")
-                        continue
-
-                logger.info(
-                    f"Page {page} complete. Processed {ads_processed}/{len(ads)} ads. "
-                    f"Total GPUs: {sum(len(v) for v in self.gpu_prices.values())}"
-                )
-
-                # Check if this is the last page
-                has_next = self._check_has_next_page(soup)
-                if not has_next:
-                    logger.info(f"Reached last page (page {page}). No 'next' button found.")
+            while True:
+                # Check if we should stop
+                if not scrape_all and page > max_pages:
+                    logger.info(f"Reached max pages limit: {max_pages} for term '{search_term}'")
                     break
 
-                page += 1
+                if consecutive_empty_pages >= max_empty_pages:
+                    logger.info(f"No more results found after {max_empty_pages} empty pages for '{search_term}'. Moving to next term.")
+                    break
 
-            except Exception as e:
-                logger.error(f"Error on page {page}: {e}")
-                consecutive_empty_pages += 1
-                page += 1
-                continue
+                try:
+                    # Rate limiting между страници
+                    if page > 1:
+                        self.page_limiter.wait()
+
+                    url = f"https://www.olx.bg/elektronika/q-{search_term}/"
+                    if page > 1:
+                        url += f"?page={page}"
+
+                    logger.info(f"Scraping '{search_term}' page {page}...")
+
+                    # Report progress for current page
+                    # Calculate progress based on term index and page
+                    term_progress = (term_index / len(search_terms)) * 80
+                    page_progress = (page / max_pages) * (80 / len(search_terms)) if not scrape_all else 5
+                    progress_pct = min(int(term_progress + page_progress), 80)
+
+                    self._report_progress(
+                        progress_pct,
+                        f"Scraping '{search_term}' ({term_index + 1}/{len(search_terms)}) - страница {page}...",
+                        current_term=search_term,
+                        current_page=page,
+                        total_listings=sum(len(v) for v in self.gpu_prices.values())
+                    )
+
+                    response = self.make_request(url)
+                    if not response:
+                        logger.warning(f"Failed to fetch page {page} for '{search_term}', skipping...")
+                        consecutive_empty_pages += 1
+                        page += 1
+                        continue
+
+                    soup = BeautifulSoup(response.content, "html.parser")
+                    ads = soup.find_all("a", href=re.compile(r"^/d/ad/"))
+
+                    # Check if page is empty
+                    if len(ads) == 0:
+                        consecutive_empty_pages += 1
+                        logger.info(f"Page {page} is empty (attempt {consecutive_empty_pages}/{max_empty_pages})")
+                        page += 1
+                        continue
+
+                    # Reset empty page counter
+                    consecutive_empty_pages = 0
+
+                    logger.debug(f"Found {len(ads)} ads on page {page}")
+
+                    ads_processed = 0
+                    for ad in ads:
+                        try:
+                            # Check if ad was processed (returns True if added)
+                            if self._process_ad(ad, apply_filters):
+                                ads_processed += 1
+                        except Exception as e:
+                            logger.warning(f"Error processing ad: {e}")
+                            continue
+
+                    logger.info(
+                        f"'{search_term}' page {page} complete. Processed {ads_processed}/{len(ads)} ads. "
+                        f"Total GPUs: {sum(len(v) for v in self.gpu_prices.values())}"
+                    )
+
+                    # Check if this is the last page
+                    has_next = self._check_has_next_page(soup)
+                    if not has_next:
+                        logger.info(f"Reached last page (page {page}) for '{search_term}'.")
+                        break
+
+                    page += 1
+
+                except Exception as e:
+                    logger.error(f"Error on page {page} for '{search_term}': {e}")
+                    consecutive_empty_pages += 1
+                    page += 1
+                    continue
+
+            total_pages_scraped += page
+            logger.info(f"✅ Completed '{search_term}': scanned {page} pages")
 
         total_listings = sum(len(v) for v in self.gpu_prices.values())
         logger.info(
-            f"Scraping complete. Scanned {page} pages. "
+            f"🎯 Scraping complete for all {len(search_terms)} terms. "
+            f"Total pages: {total_pages_scraped}. "
             f"Collected {len(self.gpu_prices)} models, "
             f"{total_listings} total listings"
         )
@@ -402,7 +431,7 @@ class GPUScraper:
         self._report_progress(
             80,
             "Scraping завършено",
-            pages_scraped=page,
+            pages_scraped=total_pages_scraped,
             models_found=len(self.gpu_prices),
             total_listings=total_listings
         )

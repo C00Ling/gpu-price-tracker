@@ -74,8 +74,10 @@ def run_pipeline(ws_manager=None):
         logger.info("="*70)
 
         try:
+            # Use default search terms: ["видео", "rtx", "gtx", "radeon", "geforce", "arc"]
+            # This covers listings with and without "видео" in the title
             scraper.scrape_olx_pass(
-                search_term="видео карта",
+                search_terms=None,  # Use defaults
                 max_pages=config.scraper_max_pages,
                 apply_filters=False  # No filtering during scrape
             )
