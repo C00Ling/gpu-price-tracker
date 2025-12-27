@@ -428,13 +428,36 @@ class GPUScraper:
             url = f"https://www.olx.bg{url}"
 
         title_el = ad.find(["h4", "h6"])
-        price_el = ad.find_next("p")
 
-        if not title_el or not price_el:
+        # Try multiple methods to find the price element (OLX structure varies)
+        price_el = None
+        price_text = ""
+
+        # Method 1: Look for price with data-testid (most reliable)
+        price_el = ad.find_next("p", {"data-testid": "ad-price"})
+        if price_el:
+            price_text = price_el.text.strip()
+
+        # Method 2: Look for price in next <p> with "лв" (original method)
+        if not price_text:
+            price_candidates = ad.find_all_next("p", limit=5)  # Check first 5 <p> elements
+            for candidate in price_candidates:
+                text = candidate.text.strip()
+                if "лв" in text and re.search(r"\d+", text):
+                    # Prefer elements with higher prices (avoid "99 лв" type promotional text)
+                    price_num_match = re.search(r"(\d+(?:\s\d+)*)", text)
+                    if price_num_match:
+                        price_num = int(price_num_match.group(1).replace(" ", ""))
+                        # Skip suspiciously low "prices" that are likely badges/promotions
+                        if price_num >= 20:  # Minimum reasonable price for any GPU part
+                            price_text = text
+                            break
+
+        if not title_el or not price_text:
             return False
 
         title = title_el.text.strip()
-        price_match = re.search(r"(\d+(?:\s\d+)*)\s*лв", price_el.text)
+        price_match = re.search(r"(\d+(?:\s\d+)*)\s*лв", price_text)
 
         if not price_match:
             return False
