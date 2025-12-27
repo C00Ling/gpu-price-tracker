@@ -291,8 +291,13 @@ class GPUScraper:
 
         Args:
             search_terms: Single search term (str) or list of search terms (List[str])
-                         Default: ["видео", "rtx", "gtx", "radeon", "geforce", "arc"]
-            max_pages: Max pages per search term
+                         Default: 13 terms covering all GPU types:
+                         - Bulgarian: видео, видеокарта, графична
+                         - NVIDIA: rtx, gtx, geforce, nvidia
+                         - AMD: rx, radeon, amd
+                         - Intel: arc, intel
+                         - Technical: gpu
+            max_pages: Max pages per search term (default: 3)
             apply_filters: DEPRECATED - filtering happens in post-processing
 
         NOTE: apply_filters parameter is DEPRECATED and ignored.
@@ -300,7 +305,32 @@ class GPUScraper:
         """
         # Default search terms if none provided
         if search_terms is None:
-            search_terms = ["видео", "rtx", "gtx", "radeon", "geforce", "arc"]
+            search_terms = [
+                # Primary Bulgarian terms
+                "видео",           # видео карта
+                "видеокарта",      # слято написано
+                "графична",        # графична карта
+
+                # NVIDIA series
+                "rtx",             # RTX 4090, GeForce RTX 3080
+                "gtx",             # GTX 1660, GeForce GTX 1080
+                "geforce",         # GeForce RTX, GeForce GTX
+
+                # AMD series
+                "rx",              # RX 6600, RX 7900 XT (CRITICAL!)
+                "radeon",          # Radeon RX 7900, AMD Radeon
+
+                # Intel
+                "arc",             # Arc A770, Intel Arc B580
+
+                # Brand names
+                "nvidia",          # NVIDIA RTX 4090
+                "amd",             # AMD RX 6600
+                "intel",           # Intel Arc A770
+
+                # Technical/International
+                "gpu",             # GPU for sale
+            ]
 
         # Support single string for backwards compatibility
         if isinstance(search_terms, str):
