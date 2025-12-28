@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY services/api/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Final stage
@@ -33,13 +33,13 @@ WORKDIR /app
 COPY --from=builder /root/.local /home/apiuser/.local
 
 # Copy shared libraries
-COPY --chown=apiuser:apiuser ../shared ./shared
+COPY --chown=apiuser:apiuser services/shared ./shared
 
 # Copy API service code
-COPY --chown=apiuser:apiuser . .
+COPY --chown=apiuser:apiuser services/api .
 
-# Copy static files (frontend build)
-COPY --chown=apiuser:apiuser ../../static ./static 2>/dev/null || true
+# Copy static files (frontend build) - optional, comment out if not built yet
+# COPY --chown=apiuser:apiuser static ./static
 
 # Switch to non-root user
 USER apiuser
