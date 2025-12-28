@@ -23,7 +23,7 @@ sentry-sdk[fastapi]==2.19.2
 
 # Data validation
 pydantic==2.11.3
-pydantic-settings==2.7.2
+pydantic-settings==2.7.1
 
 # HTTP client (for health checks)
 httpx==0.28.2
