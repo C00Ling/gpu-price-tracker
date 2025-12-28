@@ -27,3 +27,4 @@ pydantic-settings==2.7.1
 
 # HTTP client (for health checks)
 httpx==0.28.1
+requests==2.32.3
