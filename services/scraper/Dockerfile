@@ -17,6 +17,9 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # Final stage
 FROM python:3.11-slim
 
+# Cache bust for Railway - forces rebuild of shared libs
+ARG CACHE_BUST=2025-12-28-v2
+
 # Install runtime dependencies (TOR + cron + curl + procps)
 RUN apt-get update && apt-get install -y \
     tor \
