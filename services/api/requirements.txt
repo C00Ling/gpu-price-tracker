@@ -19,7 +19,7 @@ pyyaml==6.0.2
 python-dotenv==1.0.1
 
 # Error Monitoring
-sentry-sdk[fastapi]==2.19.3
+sentry-sdk[fastapi]==2.19.2
 
 # Data validation
 pydantic==2.11.3
