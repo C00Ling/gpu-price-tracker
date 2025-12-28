@@ -35,6 +35,9 @@ COPY --from=builder /root/.local /home/apiuser/.local
 # Copy shared libraries
 COPY --chown=apiuser:apiuser services/shared ./shared
 
+# Copy configuration file
+COPY --chown=apiuser:apiuser config.yaml .
+
 # Copy API service code
 COPY --chown=apiuser:apiuser services/api .
 
