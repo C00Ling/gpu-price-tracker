@@ -8,8 +8,8 @@ requests[socks]==2.32.3
 PySocks==1.7.1
 
 # HTTP Client with TOR support
-httpx==0.28.2
-httpx[socks]==0.28.2
+httpx==0.28.1
+httpx[socks]==0.28.1
 
 # Database (Write operations)
 sqlalchemy==2.0.37
@@ -32,7 +32,7 @@ pydantic==2.11.3
 pydantic-settings==2.7.1
 
 # Text processing (for model name extraction)
-python-Levenshtein==0.27.0
+python-Levenshtein==0.27.3
 fuzzywuzzy==0.18.0
 
 # Rate limiting
