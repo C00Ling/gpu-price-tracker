@@ -3,10 +3,16 @@ Sentry Error Monitoring Integration
 Provides production error tracking and performance monitoring
 """
 import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 import os
 from core.logging import get_logger
+
+# Conditionally import FastAPI integration (only available in API service)
+try:
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    FASTAPI_AVAILABLE = True
+except ImportError:
+    FASTAPI_AVAILABLE = False
 
 logger = get_logger("sentry")
 
@@ -30,19 +36,24 @@ def init_sentry():
     release = os.getenv("RELEASE", "unknown")
 
     try:
+        # Build integrations list based on available packages
+        integrations = [SqlalchemyIntegration()]
+
+        if FASTAPI_AVAILABLE:
+            integrations.append(
+                FastApiIntegration(
+                    transaction_style="endpoint",  # Group by endpoint path
+                    failed_request_status_codes=[500, 501, 502, 503, 504]
+                )
+            )
+
         sentry_sdk.init(
             dsn=sentry_dsn,
             environment=environment,
             release=release,
 
             # Integrations
-            integrations=[
-                FastApiIntegration(
-                    transaction_style="endpoint",  # Group by endpoint path
-                    failed_request_status_codes=[500, 501, 502, 503, 504]
-                ),
-                SqlalchemyIntegration(),
-            ],
+            integrations=integrations,
 
             # Performance monitoring
             traces_sample_rate=1.0 if environment == "development" else 0.1,  # 10% in production
