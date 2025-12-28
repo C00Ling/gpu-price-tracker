@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install Python dependencies
-COPY requirements.txt .
+COPY services/scraper/requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Final stage
@@ -35,16 +35,19 @@ WORKDIR /app
 COPY --from=builder /root/.local /home/scraperuser/.local
 
 # Copy shared libraries
-COPY --chown=scraperuser:scraperuser ../shared ./shared
+COPY --chown=scraperuser:scraperuser services/shared ./shared
+
+# Copy configuration file
+COPY --chown=scraperuser:scraperuser config.yaml .
 
 # Copy scraper worker code
-COPY --chown=scraperuser:scraperuser . .
+COPY --chown=scraperuser:scraperuser services/scraper .
 
-# Copy TOR configuration
-COPY --chown=scraperuser:scraperuser ../../config/torrc ./config/torrc 2>/dev/null || true
+# Copy TOR configuration (optional - start.sh will use defaults if missing)
+# COPY --chown=scraperuser:scraperuser config/torrc ./config/torrc
 
 # Copy crontab file (if using cron mode)
-COPY --chown=scraperuser:scraperuser crontab /etc/cron.d/scraper-cron
+COPY --chown=scraperuser:scraperuser services/scraper/crontab /etc/cron.d/scraper-cron
 RUN chmod 0644 /etc/cron.d/scraper-cron && \
     crontab -u scraperuser /etc/cron.d/scraper-cron
 
