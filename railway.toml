@@ -1,0 +1,60 @@
+# Railway Configuration for API Service
+# Read-only HTTP server for web UI and REST API
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "services/api/Dockerfile"
+watchPatterns = [
+    "services/api/**",
+    "services/shared/**",
+    "static/**"
+]
+
+[deploy]
+startCommand = "./start.sh"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+
+[env]
+# Service identification
+SERVICE_NAME = "api"
+ENVIRONMENT = "production"
+
+# API configuration
+API_HOST = "0.0.0.0"
+API_PORT = "${PORT}"
+
+# CORS (allow all in production - can be restricted)
+CORS_ORIGINS = "*"
+
+# Logging
+LOG_LEVEL = "INFO"
+LOG_FORMAT = "json"
+
+# NOTE: Database credentials should be added via Railway UI:
+# - DATABASE_URL (from PostgreSQL service)
+# - SENTRY_DSN (optional, for error monitoring)
+
+[healthcheck]
+enabled = true
+path = "/health"
+interval = 30
+timeout = 10
+retries = 3
+
+[resources]
+# API service resource limits
+memory = 512  # MB
+cpu = 0.5     # CPU cores
+
+[scaling]
+# Horizontal scaling configuration
+minReplicas = 1
+maxReplicas = 3  # Can scale up to 3 instances
+
+# Auto-scaling triggers
+targetCPU = 70      # Scale when CPU > 70%
+targetMemory = 80   # Scale when Memory > 80%
