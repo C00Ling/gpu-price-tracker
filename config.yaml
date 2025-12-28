@@ -1,6 +1,7 @@
 database:
-  url: sqlite:///./gpu.db
-  # For PostgreSQL (production): postgresql://user:password@localhost:5432/gpu_market
+  # PostgreSQL connection (default for multi-service architecture)
+  # Override with DATABASE_URL environment variable
+  url: postgresql://postgres:postgres@localhost:5432/gpu_tracker
   # 🔒 SECURITY: Use DATABASE_URL environment variable in production
   echo: false  # SQLAlchemy logging
   pool_size: 5
