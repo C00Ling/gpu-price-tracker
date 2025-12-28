@@ -25,11 +25,11 @@ pyyaml==6.0.2
 python-dotenv==1.0.1
 
 # Error Monitoring
-sentry-sdk==2.19.3
+sentry-sdk==2.19.2
 
 # Data validation
 pydantic==2.11.3
-pydantic-settings==2.7.3
+pydantic-settings==2.7.2
 
 # Text processing (for model name extraction)
 python-Levenshtein==0.27.0
@@ -39,4 +39,4 @@ fuzzywuzzy==0.18.0
 ratelimit==2.2.1
 
 # TOR control
-stem==1.8.3
+stem==1.8.2
