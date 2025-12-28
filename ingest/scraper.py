@@ -307,30 +307,20 @@ class GPUScraper:
         # Default search terms if none provided
         if search_terms is None:
             search_terms = [
-                # Primary Bulgarian terms
-                "видео",           # видео карта
-                "видеокарта",      # слято написано
-                "графична",        # графична карта
+                # Primary Bulgarian terms (highest priority)
+                "видеокарта",      # слято написано (264 new GPUs)
+                "графична",        # графична карта (105 new GPUs)
+                "видео",           # видео карта (103 new GPUs)
 
-                # NVIDIA series
-                "rtx",             # RTX 4090, GeForce RTX 3080
-                "gtx",             # GTX 1660, GeForce GTX 1080
-                "geforce",         # GeForce RTX, GeForce GTX
+                # NVIDIA series (most results)
+                "rtx",             # RTX 4090, GeForce RTX 3080 (677 new GPUs)
+                "gtx",             # GTX 1660, GeForce GTX 1080 (375 new GPUs)
 
                 # AMD series
-                "rx",              # RX 6600, RX 7900 XT (CRITICAL!)
-                "radeon",          # Radeon RX 7900, AMD Radeon
+                "rx",              # RX 6600, RX 7900 XT (219 new GPUs)
 
                 # Intel
-                "arc",             # Arc A770, Intel Arc B580
-
-                # Brand names
-                "nvidia",          # NVIDIA RTX 4090
-                "amd",             # AMD RX 6600
-                "intel",           # Intel Arc A770
-
-                # Technical/International
-                "gpu",             # GPU for sale
+                "arc",             # Arc A770, Intel Arc B580 (4 new GPUs)
             ]
 
         # Support single string for backwards compatibility
