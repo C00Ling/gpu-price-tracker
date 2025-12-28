@@ -1,0 +1,17 @@
+# Scraper Worker Crontab
+# Runs GPU scraping at scheduled intervals
+
+# Run every 6 hours (00:00, 06:00, 12:00, 18:00)
+0 */6 * * * cd /app && /home/scraperuser/.local/bin/python worker.py >> /app/logs/scraper.log 2>&1
+
+# Alternative schedules (commented out):
+# Every 3 hours:
+# 0 */3 * * * cd /app && /home/scraperuser/.local/bin/python worker.py >> /app/logs/scraper.log 2>&1
+
+# Every 12 hours (midnight and noon):
+# 0 0,12 * * * cd /app && /home/scraperuser/.local/bin/python worker.py >> /app/logs/scraper.log 2>&1
+
+# Daily at 2 AM:
+# 0 2 * * * cd /app && /home/scraperuser/.local/bin/python worker.py >> /app/logs/scraper.log 2>&1
+
+# Empty line required at end of crontab file

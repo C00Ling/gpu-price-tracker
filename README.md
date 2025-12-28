@@ -66,26 +66,42 @@
 
 ## 🏗️ Архитектура
 
+### Professional Multi-Service Architecture
+
+Системата използва **модерна multi-service архитектура** с разделени API и Scraper services за независимо scaling и deployment.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     GPU Market Service                       │
+│                  GPU Price Tracker System                   │
 └─────────────────────────────────────────────────────────────┘
                             │
         ┌───────────────────┼───────────────────┐
         │                   │                   │
         ▼                   ▼                   ▼
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   Scraping   │    │   Storage    │    │     API      │
-│   Pipeline   │───▶│   Layer      │◀───│   Layer      │
-└──────────────┘    └──────────────┘    └──────────────┘
-        │                   │                   │
-        │                   │                   ▼
-        ▼                   ▼           ┌──────────────┐
-   ┌────────┐         ┌─────────┐      │  Dashboard   │
-   │  TOR   │         │ SQLite  │      │     UI       │
-   │ Proxy  │         │   DB    │      └──────────────┘
-   └────────┘         └─────────┘
+│  API Service │    │   Scraper    │    │  PostgreSQL  │
+│  (HTTP)      │    │   Worker     │    │   Database   │
+│  Read-Only   │    │  (Daemon)    │    │              │
+└──────┬───────┘    └──────┬───────┘    └──────┬───────┘
+       │                   │                    │
+       │                   │                    │
+       └───────────────────┴────────────────────┘
+              Shared Database Connection
 ```
+
+**Services:**
+- **API Service** - Read-only HTTP server (FastAPI + Uvicorn)
+- **Scraper Worker** - Autonomous background worker (TOR + BeautifulSoup)
+- **PostgreSQL** - Centralized persistent storage
+- **Shared Libraries** - Common code (core, api, storage, ingest)
+
+**Benefits:**
+- ✅ Independent scaling (API horizontal, Scraper fixed at 1)
+- ✅ Fault isolation (API crash doesn't stop scraping)
+- ✅ Graceful shutdown (no data loss)
+- ✅ Production-ready monitoring and health checks
+
+📚 **Detailed Architecture Documentation:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ### Data Flow
 
@@ -249,48 +265,64 @@ LOGGING_FILE=logs/gpu_service.log
 
 ## 🏃 Стартиране
 
-### Автоматично стартиране (препоръчително)
+### Multi-Service Architecture (Препоръчително)
+
+#### Docker Compose - Стартиране на всички services
+
+```bash
+# Стартирай PostgreSQL + API + Scraper
+docker-compose up -d
+
+# Провери статуса
+docker-compose ps
+
+# Виж logs
+docker-compose logs -f api      # API logs
+docker-compose logs -f scraper  # Scraper logs
+
+# Спри всички services
+docker-compose down
+```
+
+**Какво се случва:**
+- ✅ PostgreSQL стартира на `localhost:5432`
+- ✅ API стартира на `http://localhost:8000`
+- ✅ Scraper worker стартира в daemon mode (scrape every 1 hour)
+- ✅ TOR proxy се инициализира автоматично
+- ✅ Database migrations се прилагат автоматично
+
+**Достъп:**
+- API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- Database: `psql postgresql://postgres:postgres@localhost:5432/gpu_tracker`
+
+#### Ръчно стартиране на отделни services
+
+**API Service:**
+```bash
+cd services/api
+pip install -r requirements.txt
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/gpu_tracker"
+./start.sh
+```
+
+**Scraper Worker:**
+```bash
+cd services/scraper
+pip install -r requirements.txt
+export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/gpu_tracker"
+export WORKER_MODE=oneshot  # или daemon
+./start.sh
+```
+
+### Legacy Monolith (Deprecated)
 
 ```bash
 chmod +x run.sh
 ./run.sh
 ```
 
-Скриптът автоматично:
-- ✅ Проверява dependencies
-- ✅ Стартира TOR (ако не работи)
-- ✅ Стартира data pipeline (Single-Pass Adaptive Filtering)
-- ✅ Стартира FastAPI сървъра
-
-### Ръчно стартиране
-
-#### 1. Събиране на данни
-```bash
-# Стартирай data collection pipeline
-python -m ingest.pipeline
-```
-
-Това ще:
-- Събере данни от OLX.bg (3 страници по default)
-- Приложи quality филтри
-- Запази данните в SQLite база
-- Изчисли статистики
-
-#### 2. Стартиране на API
-```bash
-# Вариант 1: Директно с Python
-python main.py
-
-# Вариант 2: С uvicorn (препоръчително за production)
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### Production deployment
-
-```bash
-# С multiple workers за по-добра performance
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
-```
+**Бележка:** Монолитната версия е deprecated. Използвай multi-service architecture!
 
 ---
 
@@ -587,90 +619,111 @@ useWebSocket({
 
 ## 🗂️ Структура на проекта
 
+### Multi-Service Architecture
+
 ```
-GPU_SERVICE/
+GPU_PRICE_TRACKER/
 │
-├── 📄 main.py                 # FastAPI application entry point
-├── 📄 config.yaml             # Configuration file
-├── 📄 .env.example            # Environment variables template
-├── 📄 .env                    # Environment variables (не се commit-ва!)
+├── 📄 docker-compose.yml      # Multi-service local development
+├── 📄 README.md               # Main documentation
+├── 📄 ARCHITECTURE.md         # Architecture documentation
 ├── 📄 .gitignore              # Git ignore rules
-├── 📄 requirements.txt        # Python dependencies
-├── 📄 run.sh                  # Startup script
-├── 📄 README.md               # Documentation
 │
-├── 📁 api/                    # API Layer
-│   ├── routers/               # API endpoints (with inline Pydantic schemas)
-│   │   ├── listings.py        # Listings endpoints
-│   │   ├── stats.py           # Statistics endpoints
-│   │   └── value.py           # Value analysis endpoints
-│   ├── dependencies.py        # Dependency injection
-│   └── __init__.py
+├── 📁 services/               # ⭐ Multi-Service Architecture
+│   │
+│   ├── 📁 api/                # API Service (Read-Only HTTP Server)
+│   │   ├── 📄 main.py         # FastAPI application
+│   │   ├── 📄 Dockerfile      # API container build
+│   │   ├── 📄 start.sh        # Startup script with DB checks
+│   │   ├── 📄 requirements.txt # HTTP server dependencies
+│   │   └── 📄 .dockerignore   # Docker build optimization
+│   │
+│   ├── 📁 scraper/            # Scraper Worker (Background Worker)
+│   │   ├── 📄 worker.py       # Worker with 3 modes (daemon/oneshot/cron)
+│   │   ├── 📄 Dockerfile      # Scraper container (TOR + Python)
+│   │   ├── 📄 start.sh        # TOR init + worker startup
+│   │   ├── 📄 requirements.txt # Scraping dependencies
+│   │   ├── 📄 crontab         # Cron schedule config
+│   │   └── 📄 .dockerignore   # Docker build optimization
+│   │
+│   └── 📁 shared/             # Shared Code (both services use this)
+│       ├── 📁 api/            # API routes and schemas
+│       │   ├── routers/       # FastAPI endpoints
+│       │   │   ├── listings.py
+│       │   │   ├── stats.py
+│       │   │   └── value.py
+│       │   └── dependencies.py
+│       │
+│       ├── 📁 core/           # Business logic
+│       │   ├── config.py      # Configuration manager
+│       │   ├── logging.py     # Structured logging
+│       │   ├── sentry.py      # Error monitoring
+│       │   ├── filters.py     # Quality filters
+│       │   ├── resolver.py    # GPU model extraction
+│       │   ├── stats.py       # Statistics
+│       │   └── value.py       # FPS/лв analysis
+│       │
+│       ├── 📁 ingest/         # Data collection
+│       │   ├── pipeline.py    # Scraping pipeline
+│       │   └── scraper.py     # Web scraper
+│       │
+│       └── 📁 storage/        # Database layer
+│           ├── db.py          # SQLAlchemy setup
+│           ├── models.py      # ORM models (PostgreSQL)
+│           └── repo.py        # Repository pattern
 │
-├── 📁 core/                   # Core Business Logic
-│   ├── config.py              # Configuration manager
-│   ├── logging.py             # Structured logging
-│   ├── sentry.py              # Sentry error monitoring
-│   ├── rate_limiter.py        # Rate limiting & retry
-│   ├── validation.py          # Input validation
-│   ├── filters.py             # Quality filters
-│   ├── resolver.py            # GPU model extraction
-│   ├── stats.py               # Statistics calculations
-│   ├── value.py               # FPS/лв analysis
-│   └── __init__.py
+├── 📁 deployments/            # Deployment Configurations
+│   └── 📁 railway/            # Railway.app deployment
+│       ├── 📄 README.md       # Complete Railway guide
+│       ├── 📄 railway.api.toml
+│       └── 📄 railway.scraper.toml
 │
-├── 📁 ingest/                 # Data Collection
-│   ├── pipeline.py            # Main data pipeline
-│   ├── scraper.py             # Enhanced scraper
-│   └── __init__.py
+├── 📁 frontend/               # React Frontend (SPA)
+│   ├── 📁 src/
+│   │   ├── pages/             # React pages
+│   │   ├── components/        # UI components
+│   │   ├── hooks/             # Custom hooks
+│   │   └── services/          # API client
+│   ├── 📄 package.json
+│   ├── 📄 vite.config.ts
+│   └── 📄 tailwind.config.js
 │
-├── 📁 storage/                # Database Layer
-│   ├── db.py                  # SQLAlchemy setup
-│   ├── orm.py                 # Database models
-│   ├── repo.py                # Repository pattern
-│   └── __init__.py
+├── 📁 tests/                  # Unit & Integration Tests
+│   ├── conftest.py
+│   ├── test_api.py
+│   ├── test_filters.py
+│   ├── test_scraper.py
+│   └── test_sentry.py
 │
 ├── 📁 alembic/                # Database Migrations
 │   ├── versions/              # Migration files
-│   │   └── *.py              # Auto-generated migrations
-│   ├── env.py                 # Alembic environment
-│   └── script.py.mako         # Migration template
+│   ├── env.py
+│   └── script.py.mako
 │
 ├── 📄 alembic.ini             # Alembic configuration
-│
-├── 📁 static/                 # Static Files
-│   ├── dashboard.html         # Interactive dashboard
-│   └── favicon.ico            # Favicon
-│
-├── 📁 logs/                   # Log Files
-│   └── gpu_service.log        # Main log file (with rotation)
-│
-├── 📁 tests/                  # Unit Tests
-│   ├── conftest.py            # Pytest configuration
-│   ├── test_filters.py        # Filter & normalization tests
-│   ├── test_scraper.py        # Scraper extraction tests
-│   ├── test_sentry.py         # Sentry integration tests
-│   ├── test_api.py            # API tests
-│   ├── test_ingest.py         # Scraper tests
-│   ├── test_storage.py        # Database tests
-│   └── __init__.py
-│
-├── 📁 scripts/                # Utility Scripts
-│   ├── reset_db.py            # Database reset
-│   └── __init__.py
-│
-└── 📄 gpu.db                  # SQLite database (не се commit-ва!)
+├── 📄 main.py                 # Legacy monolith (deprecated)
+├── 📄 requirements.txt        # Legacy dependencies (deprecated)
+└── 📄 run.sh                  # Legacy startup (deprecated)
 ```
 
 ### Key Directories
 
-- **`api/`** - REST API endpoints, schemas, dependencies
-- **`core/`** - Business logic, utilities, helpers
-- **`ingest/`** - Data collection, scraping, pipeline
-- **`storage/`** - Database models, repository pattern
-- **`alembic/`** - Database migrations (Alembic)
-- **`static/`** - Frontend files, dashboard
+#### Multi-Service Architecture (New)
+- **`services/api/`** - HTTP API server (FastAPI, read-only)
+- **`services/scraper/`** - Background worker (TOR, scraping)
+- **`services/shared/`** - Shared code (core, api, storage, ingest)
+- **`deployments/railway/`** - Railway deployment configs
+
+#### Supporting Directories
+- **`frontend/`** - React SPA (TypeScript, Vite, TailwindCSS)
 - **`tests/`** - Unit and integration tests
+- **`alembic/`** - Database migrations
+
+#### Legacy (Deprecated)
+- **`main.py`** - Old monolithic application (use `services/api/` instead)
+- **`api/`, `core/`, `ingest/`, `storage/`** - Moved to `services/shared/`
+
+📚 **Migration Guide:** Старият монолит е deprecated. Използвай `docker-compose up` за новата multi-service архитектура!
 
 ---
 
@@ -992,66 +1045,116 @@ session.close()
 
 ## 🚀 Deployment
 
-Проектът е готов за production deployment с множество опции.
+Проектът използва **production-ready multi-service architecture** готова за deployment.
 
-### 🎯 Quick Start Deployment
+### 🎯 Quick Start - Railway (5 minutes)
 
-Препоръчваме **Railway** за най-бърз deployment (5 минути):
+**Railway multi-service deployment** е най-бързият начин за production deployment:
 
 ```bash
 # 1. Push към GitHub
-git remote add origin https://github.com/твоят-username/gpu-price-tracker.git
-git push -u origin main
+git push origin main
 
-# 2. Deploy на Railway.app
-# - Login with GitHub
-# - Click "New Project" → "Deploy from GitHub repo"
-# - Избери gpu-price-tracker
-# - Добави PostgreSQL + Redis
-# - Generate domain
-# ✅ Done! Проектът е live!
+# 2. Login to Railway
+railway login
+
+# 3. Create project
+railway init
+
+# 4. Add PostgreSQL
+# Railway Dashboard → New Service → Database → PostgreSQL
+
+# 5. Deploy API Service
+# New Service → GitHub Repo → services/api/
+# Set env vars: DATABASE_URL, ENVIRONMENT=production
+
+# 6. Deploy Scraper Worker
+# New Service → GitHub Repo → services/scraper/
+# Set env vars: DATABASE_URL, WORKER_MODE=daemon
+
+# 7. Generate domain for API
+# API Settings → Networking → Generate Domain
+
+# ✅ Done! System is live!
 ```
 
-**Цена:** $0-5/месец (безплатен $5 credit)
+**Architecture:**
+```
+Railway Project
+├─ PostgreSQL Database (managed)
+├─ API Service (1-3 replicas, auto-scaling)
+└─ Scraper Worker (1 replica, daemon mode)
+```
 
-### 📚 Deployment Guides
+**Cost:** $0-5/month with $5 free credit
 
-За детайлни инструкции, виж deployment documentation:
+📚 **Complete Railway Guide:** [deployments/railway/README.md](deployments/railway/README.md)
 
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Пълен deployment guide
-  - Railway deployment (препоръчано, 5 мин)
-  - Docker deployment
-  - Platform comparison
-  - Troubleshooting
-  - Security best practices
+### 📚 Deployment Options
 
-- **[DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md)** - Advanced VPS guide
-  - DigitalOcean / Hetzner setup
-  - Nginx + SSL configuration
-  - systemd service setup
-  - Automated backups
-  - Monitoring
+#### Option 1: Railway (Recommended)
+- ✅ **Setup time:** 5 minutes
+- ✅ **Cost:** $0-5/month
+- ✅ **Auto-scaling:** Yes (API service)
+- ✅ **Managed DB:** PostgreSQL included
+- ✅ **SSL:** Automatic HTTPS
+- 📖 **Guide:** [deployments/railway/README.md](deployments/railway/README.md)
 
-### 🐳 Docker Quick Start
+#### Option 2: Docker Compose
+- ✅ **Setup time:** 2 minutes
+- ✅ **Cost:** Free (self-hosted)
+- ✅ **Flexibility:** Full control
+- ⚠️ **Requires:** Docker + Docker Compose
+- 📖 **Guide:** [docker-compose.yml](docker-compose.yml)
 
 ```bash
-# Development
-docker-compose up --build
+# Start all services (PostgreSQL + API + Scraper)
+docker-compose up -d
 
-# Production
-docker-compose -f docker-compose.production.yml up -d
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
 ```
 
-### 💰 Platform Options
+#### Option 3: VPS Deployment
+- ✅ **Setup time:** 30 minutes
+- ✅ **Cost:** €4-6/month (Hetzner/DigitalOcean)
+- ✅ **Control:** Complete infrastructure control
+- ⚠️ **Requires:** Linux server administration skills
+- 📖 **Guide:** [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md)
 
-| Platform | Setup време | Цена/месец | Best for |
-|----------|-------------|------------|----------|
-| Railway | 5 мин | $0-5 | Бърз старт |
-| Hetzner VPS | 30 мин | €4 | Най-евтино |
-| Docker | 10 мин | Varies | Flexibility |
-| DigitalOcean | 15 мин | $6 | Managed |
+#### Option 4: Kubernetes (Advanced)
+- ✅ **Setup time:** 1-2 hours
+- ✅ **Cost:** Varies
+- ✅ **Scaling:** Advanced horizontal scaling
+- ⚠️ **Complexity:** High
+- 📖 **Guide:** Contact for enterprise deployment
 
-Виж пълно comparison в [DEPLOYMENT.md](DEPLOYMENT.md)
+### 💰 Cost Comparison
+
+| Platform | Monthly Cost | Setup Time | Scaling | Managed DB |
+|----------|--------------|------------|---------|------------|
+| Railway | $0-5 | 5 min | Auto | ✅ Yes |
+| Hetzner VPS | €4 | 30 min | Manual | ❌ No |
+| DigitalOcean | $6 | 15 min | Manual | ✅ Optional |
+| Docker (Local) | Free | 2 min | No | Self-hosted |
+
+### 🔧 Multi-Service Architecture
+
+**Services:**
+- **API Service** - HTTP server (FastAPI), scales 1-3 replicas
+- **Scraper Worker** - Background worker (TOR), fixed 1 replica
+- **PostgreSQL** - Database, managed or self-hosted
+
+**Benefits:**
+- Independent scaling and deployment
+- Fault isolation (service crashes don't affect others)
+- Graceful shutdown (no data loss)
+- Production monitoring and health checks
+
+📚 **Architecture Details:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 

@@ -1,135 +1,299 @@
-# 🚀 Quick Start Guide
+# 🚀 Quick Start Guide - Multi-Service Architecture
 
-Това е кратко ръководство за стартиране на GPU Market Service на локална машина.
+Стартирай GPU Price Tracker за **2 минути** с Docker Compose.
 
 ## 📋 Предварителни изисквания
 
-- Python 3.11+
-- pip
-- Git (optional)
+- Docker (20.10+)
+- Docker Compose (1.29+)
+- 2GB свободна RAM памет
+- 1GB свободно дисково пространство
 
-## ⚡ Бърз старт (1 минута)
+## ⚡ Бърз старт (2 минути)
 
-### 1. Клонирай проекта (ако още не е)
 ```bash
+# 1. Клонирай проекта
 git clone https://github.com/yourusername/gpu_price_tracker.git
 cd gpu_price_tracker
+
+# 2. Стартирай всички services
+docker-compose up -d
+
+# 3. Провери дали всичко работи
+./verify-setup.sh
+
+# 4. Отвори приложението
+open http://localhost:8000
 ```
 
-### 2. Пусни автоматичния setup
-```bash
-./quickstart.sh
+Готово! Приложението работи.
+
+## 🎯 Какво работи?
+
+```
+┌──────────────────────────────────────────┐
+│   Твоята GPU Price Tracker система       │
+├──────────────────────────────────────────┤
+│                                          │
+│  ✅ PostgreSQL Database (port 5432)     │
+│  ✅ API Service (http://localhost:8000) │
+│  ✅ Scraper Worker (background daemon)  │
+│  ✅ TOR Proxy (за анонимен scraping)    │
+│                                          │
+└──────────────────────────────────────────┘
 ```
 
-Това ще:
-- ✅ Създаде virtual environment
-- ✅ Инсталира dependencies
-- ✅ Създаде SQLite database
-- ✅ Пусне тестовете
+## 🌐 Достъп до приложението
 
-### 3. Стартирай API сървъра
-```bash
-source .venv/bin/activate  # Активирай venv ако не е
-python main.py
-```
-
-### 4. Отвори браузър
-- **API Docs**: http://localhost:8000/docs
-- **Dashboard**: http://localhost:8000/dashboard
+- **API**: http://localhost:8000
+- **Interactive Docs**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
+- **Database**: `psql postgresql://postgres:postgres@localhost:5432/gpu_tracker`
 
-## 🎯 Основни команди
+## 🎮 Основни команди
 
-### Стартиране на API
 ```bash
-python main.py
-# или
-uvicorn main:app --reload
+# Виж logs (всички services)
+docker-compose logs -f
+
+# Виж logs (конкретен service)
+docker-compose logs -f api
+docker-compose logs -f scraper
+
+# Провери статус
+docker-compose ps
+
+# Рестартирай service
+docker-compose restart api
+
+# Спри всички services
+docker-compose down
+
+# Rebuild и рестарт
+docker-compose up -d --build
+
+# Пусни scrape веднага (не чакай)
+docker-compose run --rm -e WORKER_MODE=oneshot scraper
 ```
 
-### Пускане на scraper
+## 📊 Първоначално събиране на данни
+
+Scraper-ът работи автоматично всеки **1 час** (development) или **6 часа** (production).
+
+**За данни веднага:**
 ```bash
-python -m ingest.pipeline
+# Пусни еднократен scrape
+docker-compose run --rm -e WORKER_MODE=oneshot scraper
+
+# Виж прогреса
+docker-compose logs -f scraper
 ```
 
-### Тестове
-```bash
-# Всички тестове
-pytest tests/ -v
-
-# Конкретен файл
-pytest tests/test_api.py -v
-
-# С coverage
-pytest tests/ --cov=. --cov-report=html
+**Очакван output:**
+```
+🔧 Starting TOR service...
+✅ TOR service is running
+🗄️ Waiting for PostgreSQL...
+✅ Database connection verified
+🚀 STARTING SCRAPER WORKER
+🔍 STARTING SCRAPING CYCLE
+   Scraping OLX.bg (7 search terms)...
+   Found 1308 listings
+   Applying quality filters...
+   Saving to database...
+✅ SCRAPING COMPLETED SUCCESSFULLY
 ```
 
-### Celery worker (за background tasks)
+## ✅ Провери че всичко работи
+
 ```bash
-# Терминал 1: Redis
-docker run -p 6379:6379 redis:alpine
+# 1. Пусни verification script
+./verify-setup.sh
 
-# Терминал 2: Celery worker
-celery -A jobs.celery_app worker --loglevel=info
+# 2. Провери API health
+curl http://localhost:8000/health
 
-# Терминал 3: Celery beat (scheduler)
-celery -A jobs.celery_app beat --loglevel=info
+# 3. Вземи GPU listings
+curl http://localhost:8000/api/listings/ | jq
+
+# 4. Вземи най-добрите GPU по стойност
+curl http://localhost:8000/api/value/top/10 | jq
 ```
 
-## 🐳 Docker (препоръчва се за production)
+## ⚙️ Конфигурация
 
-### Development mode
+**Default настройките работят веднага!**
+
+Опционална персонализация:
+
 ```bash
-docker-compose up
+# Копирай example configs
+cp services/api/.env.example services/api/.env
+cp services/scraper/.env.example services/scraper/.env
+
+# Редактирай ако е нужно
+nano services/api/.env
+nano services/scraper/.env
+
+# Рестартирай services
+docker-compose restart
 ```
-
-### Production mode
-```bash
-docker-compose -f docker-compose.production.yml up -d
-```
-
-## 📚 Пълна документация
-
-За повече детайли вижте [README.md](README.md)
 
 ## 🆘 Troubleshooting
 
-### Import errors
-```bash
-# Увери се че venv е активиран
-source .venv/bin/activate
+### Port 8000 е зает
 
-# Инсталирай dependencies отново
-pip install -r requirements.txt
+```bash
+# Намери и убий процеса
+lsof -ti:8000 | xargs kill -9
+
+# Или използвай друг port в docker-compose.yml
+ports:
+  - "8001:8000"
 ```
 
-### Database errors
+### Services не стартират
+
 ```bash
-# Изтрий и създай отново
-rm gpu.db
-python -c "from storage.db import init_db; init_db()"
+# Виж logs
+docker-compose logs
+
+# Рестартирай всичко
+docker-compose down
+docker-compose up -d
 ```
 
-### Port вече е зает
-```bash
-# Провери кой процес използва порт 8000
-lsof -i :8000
+### Database connection грешки
 
-# Убий процеса
-kill -9 <PID>
+```bash
+# Рестартирай PostgreSQL
+docker-compose restart postgres
+
+# Провери дали PostgreSQL работи
+docker-compose exec postgres pg_isready -U postgres
 ```
 
-## ✅ Проверка че всичко работи
+### Няма данни в базата
 
 ```bash
-# 1. Health check
-curl http://localhost:8000/health
+# Изчакай scraper да завърши първия цикъл (1 час)
+# ИЛИ пусни scrape веднага:
+docker-compose run --rm -e WORKER_MODE=oneshot scraper
 
-# 2. API endpoint
+# Виж scraper logs
+docker-compose logs scraper
+```
+
+## 🏗️ Архитектура
+
+```
+services/
+├── api/           # Read-only HTTP server (FastAPI)
+├── scraper/       # Background worker (TOR + scraping)
+└── shared/        # Споделени библиотеки
+
+docker-compose.yml # Multi-service orchestration
+```
+
+**Ключови features:**
+- ✅ Разделени API и Scraper services
+- ✅ Независимо scaling (API horizontal, Scraper fixed)
+- ✅ PostgreSQL за production storage
+- ✅ TOR proxy за анонимен scraping
+- ✅ Graceful shutdown (без загуба на данни)
+- ✅ Health checks и monitoring
+
+## 🛠️ Development
+
+```bash
+# Наблюдавай logs по време на development
+docker-compose logs -f
+
+# Rebuild след code промени
+docker-compose up -d --build
+
+# Достъп до database
+docker-compose exec postgres psql -U postgres -d gpu_tracker
+
+# Изпълни команди в containers
+docker-compose exec api bash
+docker-compose exec scraper bash
+```
+
+## 🚀 Production Deployment
+
+За production deployment на Railway (5 минути):
+
+```bash
+# Виж пълното ръководство
+cat deployments/railway/README.md
+
+# Или deploy с Railway CLI
+railway login
+railway init
+# Add PostgreSQL + API Service + Scraper Worker
+```
+
+**Railway Architecture:**
+```
+Railway Project
+├─ PostgreSQL Database (managed)
+├─ API Service (1-3 replicas, auto-scaling)
+└─ Scraper Worker (1 replica, daemon mode)
+```
+
+**Цена:** $0-5/месец с безплатен $5 credit
+
+## 📚 Научи повече
+
+- **Architecture Details**: [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Migration Guide**: [MIGRATION.md](MIGRATION.md) (от стария monolith)
+- **Railway Deployment**: [deployments/railway/README.md](deployments/railway/README.md)
+- **Main Documentation**: [README.md](README.md)
+
+## 📡 API Примери
+
+```bash
+# Вземи всички listings
 curl http://localhost:8000/api/listings/
 
-# 3. Stats
+# Вземи listings за конкретно GPU
+curl http://localhost:8000/api/listings/RTX%204070
+
+# Вземи price statistics
 curl http://localhost:8000/api/stats/
+
+# Вземи най-добрите GPU (FPS per лв)
+curl http://localhost:8000/api/value/
+
+# Вземи топ 10 най-добри
+curl http://localhost:8000/api/value/top/10
+
+# Вземи наличните GPU models
+curl http://localhost:8000/api/listings/models/list
+
+# Вземи общ брой listings
+curl http://localhost:8000/api/listings/count/total
 ```
 
-Ако всичко работи - готово! 🎉
+## 🎯 Следващи стъпки
+
+1. ✅ **Стартирай services**: `docker-compose up -d`
+2. ✅ **Провери setup**: `./verify-setup.sh`
+3. ✅ **Отвори API**: http://localhost:8000
+4. ✅ **Виж docs**: http://localhost:8000/docs
+5. ✅ **Прочети architecture**: [ARCHITECTURE.md](ARCHITECTURE.md)
+6. ✅ **Deploy на production**: [deployments/railway/README.md](deployments/railway/README.md)
+
+## ❓ Въпроси?
+
+- Отвори issue на GitHub
+- Прочети [README.md](README.md) за детайлна документация
+- Виж [ARCHITECTURE.md](ARCHITECTURE.md) за system design
+- Виж [MIGRATION.md](MIGRATION.md) ако upgrade-ваш от старата версия
+
+---
+
+**Добре дошъл в GPU Price Tracker! 🚀**
+
+Професионалната multi-service архитектура за анализ на GPU цени в България.

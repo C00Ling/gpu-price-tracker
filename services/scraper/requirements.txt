@@ -1,0 +1,42 @@
+# Scraper Worker Dependencies
+
+# Web Scraping
+beautifulsoup4==4.12.3
+lxml==5.3.0
+requests==2.32.3
+requests[socks]==2.32.3
+PySocks==1.7.1
+
+# HTTP Client with TOR support
+httpx==0.28.2
+httpx[socks]==0.28.2
+
+# Database (Write operations)
+sqlalchemy==2.0.37
+psycopg2-binary==2.9.10
+alembic==1.17.2
+
+# Data Processing
+pandas==2.2.3
+numpy==2.2.3
+
+# Configuration & Logging
+pyyaml==6.0.2
+python-dotenv==1.0.1
+
+# Error Monitoring
+sentry-sdk==2.19.3
+
+# Data validation
+pydantic==2.11.3
+pydantic-settings==2.7.3
+
+# Text processing (for model name extraction)
+python-Levenshtein==0.27.0
+fuzzywuzzy==0.18.0
+
+# Rate limiting
+ratelimit==2.2.1
+
+# TOR control
+stem==1.8.3
