@@ -17,11 +17,12 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 # Final stage
 FROM python:3.11-slim
 
-# Install runtime dependencies (TOR + cron + curl)
+# Install runtime dependencies (TOR + cron + curl + procps)
 RUN apt-get update && apt-get install -y \
     tor \
     cron \
     curl \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
