@@ -11,7 +11,7 @@ from core.logging import get_logger
 try:
     from sentry_sdk.integrations.fastapi import FastApiIntegration
     FASTAPI_AVAILABLE = True
-except ImportError:
+except Exception:  # Catches ImportError, DidNotEnable, and other import issues
     FASTAPI_AVAILABLE = False
 
 logger = get_logger("sentry")
