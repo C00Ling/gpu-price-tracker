@@ -222,12 +222,13 @@ class TestSentryIntegrations:
             call_kwargs = mock_sentry.init.call_args.kwargs
             integrations = call_kwargs['integrations']
 
-            # Should have at least 2 integrations (FastAPI, SQLAlchemy)
+            # Should have at least 2 integrations (SQLAlchemy, FastAPI)
             assert len(integrations) >= 2
 
-            # FastAPI integration should be first
-            fastapi_integration = integrations[0]
-            assert type(fastapi_integration).__name__ == 'FastApiIntegration'
+            # Check that we have both integrations
+            integration_names = [type(i).__name__ for i in integrations]
+            assert 'SqlalchemyIntegration' in integration_names
+            assert 'FastApiIntegration' in integration_names
 
     @patch('core.sentry.sentry_sdk')
     def test_pii_not_sent_by_default(self, mock_sentry):

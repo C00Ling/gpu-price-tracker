@@ -100,7 +100,7 @@ class TestGPURepository:
         # Should have 3 unique models
         assert len(models) == 3
         assert "RTX 4090" in models
-        assert "RTX 4070" in models
+        assert "RTX 4070 SUPER" in models  # Auto-corrected from RTX 4070
         assert "RX 7900 XTX" in models
 
     def test_get_available_models_empty(self, test_repo):

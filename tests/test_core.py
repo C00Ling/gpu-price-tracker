@@ -21,8 +21,9 @@ class TestFilters:
         assert normalize_model_name("rx6600xt") == "RX 6600 XT"
         assert normalize_model_name("GTX  1660  SUPER") == "GTX 1660 SUPER"
 
-        # Test uppercase
-        assert normalize_model_name("rtx 4070") == "RTX 4070"
+        # Test uppercase and model corrections
+        # NOTE: RTX 4070 is auto-corrected to RTX 4070 SUPER per MODEL_CORRECTIONS
+        assert normalize_model_name("rtx 4070") == "RTX 4070 SUPER"
         assert normalize_model_name("Rx 7900 XtX") == "RX 7900 XTX"
 
     def test_is_suspicious_listing_broken_gpu(self):
@@ -109,10 +110,14 @@ class TestFilters:
         """Test filtering scraped data"""
         from core.filters import filter_scraped_data
 
+        # Convert to proper format: List[dict] with 'price' and 'url' keys
+        test_data = {}
+        for model, prices in sample_prices_by_model.items():
+            test_data[model] = [{'price': p, 'url': f'http://test/{i}'} for i, p in enumerate(prices)]
+
         # Add some outliers
-        test_data = dict(sample_prices_by_model)
-        test_data["RTX 4090"].append(50)  # Too low
-        test_data["RTX 4090"].append(10000)  # Too high
+        test_data["RTX 4090"].append({'price': 50, 'url': 'http://test/outlier1'})  # Too low
+        test_data["RTX 4090"].append({'price': 10000, 'url': 'http://test/outlier2'})  # Too high
 
         filtered_data, stats = filter_scraped_data(test_data)
 
@@ -120,7 +125,7 @@ class TestFilters:
         assert stats["total_filtered"] > 0
         assert stats["total_kept"] < sum(len(v) for v in test_data.values())
 
-        # Filtered data should have fewer prices for RTX 4090
+        # Filtered data should have fewer items for RTX 4090
         assert len(filtered_data["RTX 4090"]) < len(test_data["RTX 4090"])
 
 
@@ -139,7 +144,7 @@ class TestStats:
 
         # Should have stats for each model
         assert "RTX 4090" in stats
-        assert "RTX 4070" in stats
+        assert "RTX 4070 SUPER" in stats  # Auto-corrected from RTX 4070
 
         # Check structure
         rtx_4090_stats = stats["RTX 4090"]

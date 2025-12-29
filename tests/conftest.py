@@ -1,4 +1,13 @@
 # tests/conftest.py
+import sys
+import os
+from pathlib import Path
+
+# Add services directories to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root / "services" / "api"))
+sys.path.insert(0, str(project_root / "services" / "shared"))
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -77,7 +86,10 @@ def client(test_db_session):
 
 @pytest.fixture
 def sample_gpu_data():
-    """Sample GPU listings for testing"""
+    """Sample GPU listings for testing
+
+    NOTE: Using normalized model names that won't be auto-corrected by MODEL_CORRECTIONS
+    """
     return [
         {
             "model": "RTX 4090",
@@ -90,12 +102,12 @@ def sample_gpu_data():
             "source": "OLX"
         },
         {
-            "model": "RTX 4070",
+            "model": "RTX 4070 SUPER",  # Using SUPER variant (auto-corrected from RTX 4070)
             "price": 1200,
             "source": "OLX"
         },
         {
-            "model": "RTX 4070",
+            "model": "RTX 4070 SUPER",  # Using SUPER variant (auto-corrected from RTX 4070)
             "price": 1300,
             "source": "OLX"
         },
@@ -109,22 +121,28 @@ def sample_gpu_data():
 
 @pytest.fixture
 def sample_prices_by_model():
-    """Sample price data grouped by model"""
+    """Sample price data grouped by model
+
+    NOTE: Using normalized model names that won't be auto-corrected by MODEL_CORRECTIONS
+    """
     return {
         "RTX 4090": [3500, 3600, 3550, 3700],
-        "RTX 4070": [1200, 1250, 1300, 1280],
-        "RTX 3060": [500, 520, 480, 550],
+        "RTX 4070 SUPER": [1200, 1250, 1300, 1280],  # Auto-corrected from RTX 4070
+        "RTX 3060 TI": [500, 520, 480, 550],  # Auto-corrected from RTX 3060
         "RX 6600": [350, 380, 360, 370],
     }
 
 
 @pytest.fixture
 def sample_benchmark_data():
-    """Sample GPU benchmark data"""
+    """Sample GPU benchmark data
+
+    NOTE: Using normalized model names that won't be auto-corrected by MODEL_CORRECTIONS
+    """
     return {
         "RTX 4090": 185.0,
-        "RTX 4070": 110.0,
-        "RTX 3060": 75.0,
+        "RTX 4070 SUPER": 110.0,  # Auto-corrected from RTX 4070
+        "RTX 3060 TI": 75.0,  # Auto-corrected from RTX 3060
         "RX 6600": 75.0,
     }
 
