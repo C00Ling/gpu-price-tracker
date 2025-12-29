@@ -161,8 +161,18 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # Mount static files (frontend build)
-static_path = os.path.join(os.path.dirname(__file__), '..', '..', 'static')
-if os.path.exists(static_path):
+# Try multiple paths for dev vs Docker environments
+static_path_candidates = [
+    os.path.join(os.path.dirname(__file__), 'static'),  # Docker: /app/static
+    os.path.join(os.path.dirname(__file__), '..', '..', 'static'),  # Dev: services/api/../../static
+]
+static_path = None
+for path in static_path_candidates:
+    if os.path.exists(path):
+        static_path = path
+        break
+
+if static_path:
     try:
         app.mount("/static", StaticFiles(directory=static_path), name="static")
         logger.info(f"📁 Mounted static files from {static_path}")
@@ -170,21 +180,23 @@ if os.path.exists(static_path):
         logger.warning(f"Failed to mount static files: {e}")
 
 # Mount assets folder
-assets_path = os.path.join(static_path, 'assets')
-if os.path.exists(assets_path):
-    try:
-        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
-        logger.info(f"📁 Mounted assets from {assets_path}")
-    except Exception as e:
-        logger.warning(f"Failed to mount assets: {e}")
+if static_path:
+    assets_path = os.path.join(static_path, 'assets')
+    if os.path.exists(assets_path):
+        try:
+            app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+            logger.info(f"📁 Mounted assets from {assets_path}")
+        except Exception as e:
+            logger.warning(f"Failed to mount assets: {e}")
 
 
 # Favicon
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    favicon_path = os.path.join(static_path, "favicon.ico")
-    if os.path.exists(favicon_path):
-        return FileResponse(favicon_path)
+    if static_path:
+        favicon_path = os.path.join(static_path, "favicon.ico")
+        if os.path.exists(favicon_path):
+            return FileResponse(favicon_path)
     return JSONResponse(status_code=404, content={"detail": "Favicon not found"})
 
 
@@ -199,9 +211,10 @@ app.include_router(websocket.router, prefix="/api", tags=["🔌 WebSocket"])
 @app.get("/", tags=["Info"], include_in_schema=False)
 async def root():
     """Serve frontend SPA"""
-    index_path = os.path.join(static_path, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path, media_type="text/html")
+    if static_path:
+        index_path = os.path.join(static_path, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path, media_type="text/html")
 
     return {
         "name": "GPU Market Service API",
@@ -269,10 +282,11 @@ async def get_scrape_status():
 @app.get("/dashboard", response_class=HTMLResponse, include_in_schema=False)
 async def dashboard():
     """Serve dashboard SPA"""
-    index_path = os.path.join(static_path, "index.html")
-    if os.path.exists(index_path):
-        with open(index_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+    if static_path:
+        index_path = os.path.join(static_path, "index.html")
+        if os.path.exists(index_path):
+            with open(index_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
 
     return HTMLResponse(
         content="<h1>Dashboard not found</h1><p>Please build frontend</p>",
@@ -287,10 +301,11 @@ async def spa_fallback(full_path: str):
     if full_path.startswith(("api/", "static/", "docs", "redoc", "openapi")):
         return JSONResponse(status_code=404, content={"detail": "Not found"})
 
-    index_path = os.path.join(static_path, "index.html")
-    if os.path.exists(index_path):
-        with open(index_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+    if static_path:
+        index_path = os.path.join(static_path, "index.html")
+        if os.path.exists(index_path):
+            with open(index_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
 
     return JSONResponse(
         status_code=404,
