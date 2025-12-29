@@ -36,8 +36,12 @@ class GPUScraper:
         })
 
         self.user_agents = config.get("scraper.user_agents", [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko/20100101 Firefox/133.0",
         ])
 
         self.gpu_prices = defaultdict(list)
@@ -93,18 +97,30 @@ class GPUScraper:
         if not self.use_tor:
             return
         try:
+            from stem import Signal
             from stem.control import Controller
-            from stem.signal import NEWNYM  # type: ignore
 
-            with Controller.from_port(port="9151") as c:
-                c.authenticate()
-                c.signal(NEWNYM)
-                time.sleep(5)
-                logger.info("TOR IP renewed successfully")
+            # Try both common TOR control ports (9051 is default, 9151 is browser)
+            ports_to_try = [9051, 9151]
+
+            for port in ports_to_try:
+                try:
+                    with Controller.from_port(port=port) as controller:
+                        controller.authenticate()
+                        controller.signal(Signal.NEWNYM)
+                        logger.info(f"✅ TOR IP renewed successfully via port {port}")
+                        time.sleep(10)  # Wait longer for circuit to establish
+                        return
+                except Exception as port_error:
+                    logger.debug(f"Port {port} failed: {port_error}")
+                    continue
+
+            logger.warning("❌ Could not renew TOR IP on any port (9051, 9151)")
+
         except ImportError:
-            logger.warning("stem library not installed, cannot renew TOR IP")
+            logger.warning("⚠️  stem library not installed, cannot renew TOR IP")
         except Exception as e:
-            logger.error(f"Failed to renew TOR IP: {e}")
+            logger.error(f"❌ Failed to renew TOR IP: {e}")
 
     def test_connection(self) -> bool:
         """Тества връзката с TOR fallback"""
@@ -144,24 +160,54 @@ class GPUScraper:
 
     def _get_realistic_headers(self) -> dict:
         """Generate realistic browser headers to avoid detection"""
-        return {
-            "User-Agent": random.choice(self.user_agents),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        user_agent = random.choice(self.user_agents)
+
+        # Detect browser type from user agent
+        is_firefox = "Firefox" in user_agent
+        is_chrome = "Chrome" in user_agent and "Firefox" not in user_agent
+
+        headers = {
+            "User-Agent": user_agent,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
             "Accept-Language": "bg-BG,bg;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Accept-Encoding": "gzip, deflate, br",
-            "DNT": "1",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
-            "Sec-Fetch-Dest": "document",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-User": "?1",
             "Cache-Control": "max-age=0",
         }
 
+        # Add browser-specific headers
+        if is_chrome:
+            headers.update({
+                "Sec-Ch-Ua": '"Chromium";v="131", "Not_A Brand";v="24"',
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Sec-Ch-Ua-Platform": '"Windows"',
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+            })
+        elif is_firefox:
+            headers.update({
+                "DNT": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+            })
+
+        # Add referer occasionally (simulate browsing from Google or direct)
+        if random.random() < 0.3:  # 30% chance of having referer
+            headers["Referer"] = random.choice([
+                "https://www.google.com/",
+                "https://www.google.bg/",
+            ])
+
+        return headers
+
     @retry_on_failure(
         max_retries=3,
-        delay=10,
+        delay=15,  # Increased from 10 to 15
         backoff=2.0,
         exceptions=(requests.RequestException, requests.HTTPError)
     )
@@ -170,6 +216,11 @@ class GPUScraper:
         # Rate limiting
         self.request_limiter.wait()
 
+        # Add random delay to simulate human behavior (2-5 seconds)
+        human_delay = random.uniform(2.0, 5.0)
+        logger.debug(f"Human-like delay: {human_delay:.2f}s")
+        time.sleep(human_delay)
+
         try:
             logger.debug(f"Making request to: {url}")
 
@@ -177,44 +228,50 @@ class GPUScraper:
                 url,
                 headers=self._get_realistic_headers(),
                 proxies=self.get_proxy(),
-                timeout=20,
+                timeout=30,  # Increased timeout from 20 to 30
                 allow_redirects=True,
             )
             r.raise_for_status()
 
             logger.debug(f"Request successful: {url} (Status: {r.status_code})")
+
+            # Random delay after successful request
+            post_delay = random.uniform(1.0, 3.0)
+            time.sleep(post_delay)
+
             return r
 
         except requests.HTTPError as e:
             logger.error(f"HTTP error {e.response.status_code}: {url}")
 
             if e.response.status_code == 429:
-                logger.warning("Rate limited by server, waiting 60s...")
-                time.sleep(60)
+                logger.warning("⚠️  Rate limited by server, waiting 90s...")
+                time.sleep(90)
+                if self.use_tor:
+                    self.renew_tor_ip()
 
             if e.response.status_code == 403:
-                logger.warning("403 Forbidden - possible bot detection")
+                logger.warning("⚠️  403 Forbidden - possible bot detection")
                 if self.use_tor:
-                    logger.info("Renewing TOR IP and waiting 30s...")
+                    logger.info("🔄 Renewing TOR IP and waiting 45s...")
                     self.renew_tor_ip()
+                    time.sleep(45)  # Increased wait time
+                else:
+                    logger.warning("⚠️  Consider enabling TOR to avoid 403 errors")
                     time.sleep(30)
-
-            if self.use_tor and e.response.status_code in [403, 429]:
-                logger.info("Renewing TOR IP...")
-                self.renew_tor_ip()
 
             raise
 
         except requests.Timeout:
-            logger.error(f"Request timeout: {url}")
+            logger.error(f"⏱️  Request timeout: {url}")
             raise
 
         except requests.ConnectionError as e:
-            logger.error(f"Connection error: {url} - {e}")
+            logger.error(f"🔌 Connection error: {url} - {e}")
             raise
 
         except Exception as e:
-            logger.error(f"Unexpected error during request: {e}")
+            logger.error(f"❌ Unexpected error during request: {e}")
             raise
 
     def _check_has_next_page(self, soup: BeautifulSoup) -> bool:

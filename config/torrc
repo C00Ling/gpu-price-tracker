@@ -5,14 +5,21 @@
 SOCKSPort 127.0.0.1:9050
 
 # Control port (for renewing IP via stem library)
-ControlPort 127.0.0.1:9151
+# Using standard port 9051 instead of 9151 (browser bundle port)
+ControlPort 127.0.0.1:9051
 
 # Authentication - disabled for localhost in containerized environment
 # This is safe because the control port is only accessible within the container
 CookieAuthentication 0
+# Explicitly disable password authentication to allow unauthenticated local access
+HashedControlPassword
 
 # Data directory - use temp directory in containerized environment
 DataDirectory /tmp/tor_data
 
 # Logging
 Log notice stdout
+
+# Circuit management - helps with IP renewal
+CircuitBuildTimeout 30
+LearnCircuitBuildTimeout 0

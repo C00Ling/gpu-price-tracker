@@ -30,7 +30,7 @@ if [ -f "config/torrc" ]; then
 else
     echo "   Using default TOR configuration"
     tor --SocksPort 9050 \
-        --ControlPort 9151 \
+        --ControlPort 9051 \
         --DataDirectory /tmp/tor_data \
         --Log "notice stdout" &
 fi
