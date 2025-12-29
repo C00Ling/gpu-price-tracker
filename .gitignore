@@ -3,40 +3,24 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/  # Python lib folder only
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
 
 # Virtual Environment
+.venv/
 venv/
 env/
-ENV/
-.venv/
 
-# Database
+# Database (local development)
 *.db
 *.sqlite
 *.sqlite3
-gpu.db
 
 # Logs
 logs/
 *.log
 
-# Environment variables
+# Environment variables (IMPORTANT: contains secrets!)
 .env
 .env.local
 .env.production
@@ -48,56 +32,21 @@ logs/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
-.tox/
 
-# Backups
-backups/
-*.tar.gz
-*.zip
+# OS files
+.DS_Store
+Thumbs.db
 
-# Docker
-docker-data/
+# Frontend
+frontend/node_modules/
+frontend/.vite/
 
 # Temporary files
 *.tmp
 temp/
 tmp/
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Jupyter Notebooks (if used for analysis)
-.ipynb_checkpoints/
-*.ipynb
-
-# MyPy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# SSL Certificates (if stored locally)
-ssl/
-*.pem
-*.key
-*.crt
-
-# Data dumps
-data/
-dumps/
-# Tor data
-tor_data/
-
-# Frontend build and cache
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-
-# Exception: Include frontend source lib folder
-!frontend/src/lib/
