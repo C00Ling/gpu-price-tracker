@@ -41,8 +41,8 @@ COPY --chown=apiuser:apiuser config.yaml .
 # Copy API service code
 COPY --chown=apiuser:apiuser services/api .
 
-# Copy static files (frontend build) - optional, comment out if not built yet
-# COPY --chown=apiuser:apiuser static ./static
+# Copy static files (frontend build)
+COPY --chown=apiuser:apiuser static ./static
 
 # Switch to non-root user
 USER apiuser
