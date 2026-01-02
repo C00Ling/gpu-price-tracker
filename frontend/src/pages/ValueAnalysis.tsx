@@ -29,13 +29,6 @@ export function ValueAnalysis() {
 
   const columns = [
     {
-      key: 'rank',
-      label: '#',
-      render: (item: any) => (
-        <span className="font-bold text-gray-400">{item.rank}</span>
-      ),
-    },
-    {
       key: 'model',
       label: 'Модел',
       sortable: true,
@@ -108,11 +101,6 @@ export function ValueAnalysis() {
     },
   ];
 
-  // Add index to data for ranking
-  const dataWithIndex = displayData?.map((item, index) => ({
-    ...item,
-    rank: index + 1,
-  }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -209,7 +197,7 @@ export function ValueAnalysis() {
           ) : (
             <>
               <Table
-                data={dataWithIndex || []}
+                data={displayData || []}
                 columns={columns}
                 keyExtractor={(item) => item.model}
                 emptyMessage="Няма данни за анализ"
