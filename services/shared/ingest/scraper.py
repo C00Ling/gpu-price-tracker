@@ -604,8 +604,8 @@ class GPUScraper:
         # Combine title and description for filtering
         full_text = f"{title} {description}".strip()
 
-        # Extract and normalize model
-        model = self.extract_gpu_model(title)
+        # Extract and normalize model (with VRAM detection from title/description)
+        model = self.extract_gpu_model(title, description)
 
         if model:
             if apply_filters:
@@ -693,15 +693,47 @@ class GPUScraper:
 
     # ================= ANALYSIS =================
 
-    def extract_gpu_model(self, title: str) -> Optional[str]:
+    def extract_vram_from_text(self, text: str) -> Optional[str]:
         """
-        Извлича и нормализира GPU модел от заглавие
-
-        VALIDATES extracted model against known GPUs to reject typos like "GTX 1018"
+        Извлича VRAM от текст (title или description)
 
         Examples:
-            "RTX3060TI 12GB" -> "RTX 3060 TI" ✅
-            "rx 6600xt oc" -> "RX 6600 XT" ✅
+            "RTX 3060 12GB" -> "12GB"
+            "8GB VRAM memory" -> "8GB"
+            "видео карта с 16 GB" -> "16GB"
+            "RTX 4080 16 GB GDDR6X" -> "16GB"
+
+        Returns:
+            VRAM string (e.g., "12GB") or None if not found
+        """
+        # Common VRAM sizes: 4GB, 6GB, 8GB, 10GB, 12GB, 16GB, 20GB, 24GB, 32GB
+        # Pattern: digit(s) + optional space + "GB" (case insensitive)
+        # Look for word boundaries to avoid false matches
+        pattern = r'\b(\d{1,2})\s?GB\b'
+
+        matches = re.findall(pattern, text, re.IGNORECASE)
+
+        if matches:
+            # Convert to int to filter valid VRAM sizes
+            valid_vram_sizes = [4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
+
+            for match in matches:
+                vram_size = int(match)
+                if vram_size in valid_vram_sizes:
+                    return f"{vram_size}GB"
+
+        return None
+
+    def extract_gpu_model(self, title: str, description: str = "") -> Optional[str]:
+        """
+        Извлича и нормализира GPU модел от заглавие и опционално description
+
+        VALIDATES extracted model against known GPUs to reject typos like "GTX 1018"
+        Извлича VRAM от title или description и го добавя към модела
+
+        Examples:
+            "RTX3060TI 12GB" -> "RTX 3060 TI 12GB" ✅
+            "rx 6600xt oc" (desc: "8GB VRAM") -> "RX 6600 XT 8GB" ✅
             "GTX 1660ti super" -> "GTX 1660 TI" ✅
             "GTX 1018" -> None ❌ (typo, should be GTX 1080)
         """
@@ -724,13 +756,34 @@ class GPUScraper:
                 from core.filters import normalize_model_name
                 normalized = normalize_model_name(model)
 
+                # Try to extract VRAM from title first
+                vram = self.extract_vram_from_text(title)
+
+                # If no VRAM in title, try description
+                if not vram and description:
+                    vram = self.extract_vram_from_text(description)
+
+                # Add VRAM to model if found
+                if vram:
+                    model_with_vram = f"{normalized} {vram}"
+                else:
+                    model_with_vram = normalized
+
                 # VALIDATE: Check if model exists in known GPUs
-                # This rejects typos like "GTX 1018" (should be "GTX 1080")
-                if not self._is_valid_gpu_model(normalized):
+                # Try with VRAM first, then without
+                if self._is_valid_gpu_model(model_with_vram):
+                    return model_with_vram
+                elif self._is_valid_gpu_model(normalized):
+                    # Model without VRAM is valid, but model+VRAM is not
+                    # This means VRAM variant is not in our database
+                    # Return model with VRAM anyway to track different variants
+                    if vram:
+                        logger.debug(f"Model {model_with_vram} not in database, but base model {normalized} is valid")
+                        return model_with_vram
+                    return normalized
+                else:
                     logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
                     return None
-
-                return normalized
 
         return None
 
