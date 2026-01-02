@@ -150,15 +150,15 @@ export function ValueAnalysis() {
 
         <CardContent>
           {/* VRAM Filter */}
-          <div className="mb-6 flex items-center space-x-3">
+          <div className="mb-6 flex items-center space-x-3 flex-wrap">
             <span className="text-sm font-medium text-gray-300">VRAM филтър:</span>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setVramFilter(undefined)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   vramFilter === undefined
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50'
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50 hover:text-primary-400'
                 }`}
               >
                 Всички
@@ -167,21 +167,41 @@ export function ValueAnalysis() {
                 onClick={() => setVramFilter(8)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   vramFilter === 8
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50'
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50 hover:text-primary-400'
                 }`}
               >
-                ≥8GB VRAM
+                8GB+
               </button>
               <button
-                onClick={() => setVramFilter(9)}
+                onClick={() => setVramFilter(12)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  vramFilter === 9
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50'
+                  vramFilter === 12
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50 hover:text-primary-400'
                 }`}
               >
-                &gt;8GB VRAM
+                12GB+
+              </button>
+              <button
+                onClick={() => setVramFilter(16)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  vramFilter === 16
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50 hover:text-primary-400'
+                }`}
+              >
+                16GB+
+              </button>
+              <button
+                onClick={() => setVramFilter(20)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  vramFilter === 20
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
+                    : 'bg-dark-navy-800 text-gray-300 border border-dark-navy-700 hover:border-primary-500/50 hover:text-primary-400'
+                }`}
+              >
+                20GB+
               </button>
             </div>
           </div>
