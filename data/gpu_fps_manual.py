@@ -28,22 +28,17 @@ GPU_FPS_BENCHMARKS = {
     "RTX 5050": 81,
 
     # ========== NVIDIA RTX 40-series ==========
-    "RTX 4090 Ti": 0.0,
     "RTX 4090": 180,
-    "RTX 4090 D": 0.0,
     "RTX 4080 SUPER": 155,
     "RTX 4080": 153,
-    "RTX 4080 16GB": 0.0,
-    "RTX 4080 12GB": 0.0,
     "RTX 4070 Ti SUPER": 140,
     "RTX 4070 Ti": 129,
     "RTX 4070 SUPER": 124,
     "RTX 4070": 115,
     "RTX 4060 Ti 16GB": 102,
     "RTX 4060 Ti 8GB": 91,
-    "RTX 4060 Ti": 0.0,
     "RTX 4060": 81,
-    "RTX 4050": 0.0,
+    "RTX 4050": 66,
 
     # ========== NVIDIA RTX 30-series ==========
     "RTX 3090 Ti": 146,
@@ -52,17 +47,14 @@ GPU_FPS_BENCHMARKS = {
     "RTX 3080 Ti 12GB": 128,
     "RTX 3080 12GB": 125,
     "RTX 3080 10GB": 116,
-    "RTX 3080": 0.0,
     "RTX 3070 Ti": 101,
     "RTX 3070": 94,
     "RTX 3060 Ti GDDR6X": 93,
     "RTX 3060 Ti": 88,
-    "RTX 3060 12GB": 0.0,
+    "RTX 3060 12GB": 77,
     "RTX 3060 8GB": 68,
-    "RTX 3060": 0.0,
-    "RTX 3050 8GB": 0.0,
+    "RTX 3050 8GB": 65,
     "RTX 3050 6GB": 50,
-    "RTX 3050": 0.0,
 
     # ========== NVIDIA RTX 20-series ==========
     "RTX 2080 Ti": 106,
@@ -73,16 +65,13 @@ GPU_FPS_BENCHMARKS = {
     "RTX 2060 SUPER": 77,
     "RTX 2060 12GB": 79,
     "RTX 2060 6GB": 66,
-    "RTX 2060": 0.0,
 
     # ========== NVIDIA GTX 16-series (Turing) ==========
     "GTX 1660 Ti": 60,
     "GTX 1660 SUPER": 59,
     "GTX 1660": 53,
     "GTX 1650 SUPER": 43,
-    "GTX 1650 GDDR6": 0.0,
-    "GTX 1650 GDDR5": 0.0,
-    "GTX 1650": 0.0,
+    "GTX 1650": 35,
     "GTX 1630": 23,
 
     # ========== NVIDIA GTX 10-series (Pascal) ==========
@@ -90,13 +79,9 @@ GPU_FPS_BENCHMARKS = {
     "GTX 1080": 70,
     "GTX 1070 Ti": 65,
     "GTX 1070": 62,
-    "GTX 1060 6GB": 0.0,
-    "GTX 1060 5GB": 0.0,
-    "GTX 1060 3GB": 0.0,
+    "GTX 1060 6GB": 40,
     "GTX 1050 Ti": 26,
-    "GTX 1050 3GB": 0.0,
-    "GTX 1050 2GB": 0.0,
-    "GTX 1050": 0.0,
+    "GTX 1050": 10,
 
     # ========== NVIDIA GTX 900-series (Maxwell) ==========
     "GTX 980 Ti": 58,
@@ -106,29 +91,6 @@ GPU_FPS_BENCHMARKS = {
     "GTX 960 2GB": 14,
     "GTX 960": 0.0,
     "GTX 950": 0.0,
-
-    # ========== NVIDIA GTX 700-series (Kepler) ==========
-    "GTX 780 Ti": 0.0,
-    "GTX 780": 0.0,
-    "GTX 770": 0.0,
-    "GTX 760": 0.0,
-    "GTX 750 Ti": 0.0,
-    "GTX 750": 0.0,
-    "GTX 745": 0.0,
-
-    # ========== NVIDIA GTX 600-series (Kepler) ==========
-    "GTX 690": 0.0,
-    "GTX 680": 0.0,
-    "GTX 670": 0.0,
-    "GTX 660 Ti": 0.0,
-    "GTX 660": 0.0,
-    "GTX 650 Ti": 0.0,
-    "GTX 650": 0.0,
-
-    # ========== NVIDIA GT Series ==========
-    "GT 1030": 0.0,
-    "GT 730": 0.0,
-    "GT 710": 0.0,
 
     # ========== NVIDIA Titan Series ==========
     "Titan RTX": 0.0,
@@ -182,8 +144,8 @@ GPU_FPS_BENCHMARKS = {
     "RX 5700 XT": 79,
     "RX 5700": 76,
     "RX 5600 XT": 65,
-    "RX 5600": 0.0,
-    "RX 5500 XT 8GB": 0.0,
+    "RX 5600 M": 58,
+    "RX 5500 XT 8GB": 48,
     "RX 5500 XT 4GB": 45,
     "RX 5500": 0.0,
 
@@ -203,59 +165,17 @@ GPU_FPS_BENCHMARKS = {
     "RX 550 2GB": 0.0,
     "RX 550": 0.0,
 
-    # ========== AMD RX 400-series (Polaris) ==========
-    "RX 480 8GB": 52,
-    "RX 480 4GB": 0.0,
-    "RX 480": 0.0,
-    "RX 470 8GB": 0.0,
-    "RX 470 4GB": 0.0,
-    "RX 470": 0.0,
-    "RX 460 4GB": 0.0,
-    "RX 460 2GB": 0.0,
-    "RX 460": 0.0,
-
     # ========== AMD Vega Series ==========
     "Radeon VII": 99,
     "Vega Frontier Edition": 81,
     "RX Vega 64": 72,
     "RX Vega 56": 68,
 
-    # ========== AMD R9 300-series ==========
-    "R9 Fury X": 0.0,
-    "R9 Fury": 0.0,
-    "R9 Nano": 0.0,
-    "R9 390X": 0.0,
-    "R9 390": 0.0,
-    "R9 380X": 0.0,
-    "R9 380": 0.0,
-    "R9 370": 0.0,
-
-    # ========== AMD R9 200-series ==========
-    "R9 295X2": 0.0,
-    "R9 290X": 0.0,
-    "R9 290": 0.0,
-    "R9 285": 0.0,
-    "R9 280X": 0.0,
-    "R9 280": 0.0,
-    "R9 270X": 0.0,
-    "R9 270": 0.0,
-
-    # ========== AMD R7 Series ==========
-    "R7 370": 0.0,
-    "R7 360": 0.0,
-    "R7 265": 0.0,
-    "R7 260X": 0.0,
-    "R7 260": 0.0,
-    "R7 250X": 0.0,
-    "R7 250": 0.0,
-
     # ========== Intel Arc (Alchemist) ==========
     "Arc B770": 0.0,
     "Arc B580": 102,
     "Arc B570": 91,
-    "Arc A770 16GB": 100,
-    "Arc A770 8GB": 0.0,
-    "Arc A770": 0.0,
+    "Arc A770": 100,
     "Arc A750": 87,
     "Arc A580": 84,
     "Arc A380": 47,
