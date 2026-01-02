@@ -178,6 +178,7 @@ def get_vram_for_model(model: str) -> int | None:
     if 'RTX 4070' in model_upper: return 12
     if 'RTX 4060 TI' in model_upper or 'RTX 4060TI' in model_upper: return 16
     if 'RTX 4060' in model_upper: return 8
+    if 'RTX 4050' in model_upper: return 6
 
     # NVIDIA RTX 30 series
     if 'RTX 3090 TI' in model_upper or 'RTX 3090TI' in model_upper: return 24
@@ -212,6 +213,23 @@ def get_vram_for_model(model: str) -> int | None:
     if 'RX 6600' in model_upper: return 8
     if 'RX 6500 XT' in model_upper: return 4
     if 'RX 6400' in model_upper: return 4
+
+    # NVIDIA RTX 20 series
+    if 'RTX 2080 TI' in model_upper or 'RTX 2080TI' in model_upper: return 11
+    if 'RTX 2080' in model_upper: return 8
+    if 'RTX 2070' in model_upper: return 8
+    if 'RTX 2060' in model_upper: return 6
+
+    # NVIDIA GTX 16 series
+    if 'GTX 1660 TI' in model_upper or 'GTX 1660TI' in model_upper: return 6
+    if 'GTX 1660' in model_upper: return 6
+    if 'GTX 1650' in model_upper: return 4
+
+    # AMD RX 5000 series
+    if 'RX 5700 XT' in model_upper: return 8
+    if 'RX 5700' in model_upper: return 8
+    if 'RX 5600 XT' in model_upper: return 6
+    if 'RX 5500 XT' in model_upper: return 8
 
     return None
 
