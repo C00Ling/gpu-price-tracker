@@ -52,6 +52,30 @@ export function ValueAnalysis() {
       ),
     },
     {
+      key: 'relative_score',
+      label: 'Performance',
+      sortable: true,
+      render: (item: any) => (
+        <div className="flex items-center space-x-2">
+          {item.relative_score ? (
+            <>
+              <div className="w-16 bg-dark-navy-800 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-primary-600 to-primary-400 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${item.relative_score}%` }}
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-300 min-w-[2.5rem]">
+                {item.relative_score}
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-500">-</span>
+          )}
+        </div>
+      ),
+    },
+    {
       key: 'vram',
       label: 'VRAM',
       sortable: true,
@@ -105,9 +129,13 @@ export function ValueAnalysis() {
               <h3 className="font-semibold text-white mb-1">
                 Как работи анализът на стойността?
               </h3>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-300 mb-2">
                 Изчисляваме FPS/лв (кадри в секунда на лев) за всеки модел, използвайки benchmark данни за 1080p игри
                 и медианната цена от обявите. По-високата стойност означава по-добра стойност за парите.
+              </p>
+              <p className="text-sm text-gray-400">
+                <strong className="text-gray-300">Performance:</strong> Относителен скор (0-100) спрямо RTX 5090 = 100.
+                По-високият скор означава по-висока gaming производителност.
               </p>
             </div>
           </div>

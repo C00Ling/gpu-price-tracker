@@ -1,6 +1,7 @@
 # core/value.py
 from typing import Dict, List, Tuple, Optional
 from ingest.scraper import SAMPLE_BENCHMARKS, GPU_VRAM
+from data.gpu_benchmarks import GPU_BENCHMARKS
 
 def calculate_value(prices_by_model: Dict[str, List[float]],
                    benchmarks: Dict[str, float]) -> List[Tuple[str, float, float, float]]:
@@ -64,6 +65,9 @@ def calculate_value_from_stats(stats: Dict[str, Dict], min_vram: Optional[int] =
         # Взимаме VRAM за модела
         vram = get_vram_for_model(model)
 
+        # Взимаме относителния скор за модела (RTX 5090 = 100)
+        relative_score = get_relative_score_for_model(model)
+
         # Филтрираме по VRAM, ако е зададен минимум
         if min_vram is not None:
             if vram is None or vram < min_vram:
@@ -78,7 +82,8 @@ def calculate_value_from_stats(stats: Dict[str, Dict], min_vram: Optional[int] =
             "fps": fps,
             "price": price,
             "fps_per_lv": fps_per_lv,
-            "vram": vram
+            "vram": vram,
+            "relative_score": relative_score
         })
 
     # Сортиране по най-добър FPS/лв
@@ -150,5 +155,43 @@ def get_vram_for_model(model: str) -> int | None:
             # Check if length difference is reasonable (within 3 chars)
             if abs(len(vram_normalized) - len(normalized_model_no_spaces)) <= 3:
                 return vram
+
+    return None
+
+
+def get_relative_score_for_model(model: str) -> int | None:
+    """
+    Намира относителния performance score за даден модел
+    RTX 5090 = 100 (baseline)
+
+    Args:
+        model: GPU model name
+
+    Returns:
+        Относителен скор (0-100) или None ако не е намерен
+    """
+    from core.filters import normalize_model_name
+
+    # Normalize the input model
+    normalized_model = normalize_model_name(model)
+
+    # First try exact match (highest priority)
+    for bench_model, score in GPU_BENCHMARKS.items():
+        bench_normalized = normalize_model_name(bench_model)
+        if bench_normalized == normalized_model:
+            return score
+
+    # If no exact match, try fuzzy matching with word boundaries
+    normalized_model_no_spaces = normalized_model.replace(' ', '')
+
+    for bench_model, score in GPU_BENCHMARKS.items():
+        bench_normalized = normalize_model_name(bench_model).replace(' ', '')
+
+        # Only match if one contains the other AND they're similar length
+        if normalized_model_no_spaces in bench_normalized or \
+           bench_normalized in normalized_model_no_spaces:
+            # Check if length difference is reasonable (within 3 chars)
+            if abs(len(bench_normalized) - len(normalized_model_no_spaces)) <= 3:
+                return score
 
     return None
