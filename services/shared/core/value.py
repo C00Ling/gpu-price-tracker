@@ -130,6 +130,7 @@ def get_vram_for_model(model: str) -> int | None:
     Намира VRAM за даден модел от GPU_VRAM данните
     Използва нормализация за по-добро съвпадение
     """
+    import re
     from core.filters import normalize_model_name
 
     # Normalize the input model
@@ -155,6 +156,62 @@ def get_vram_for_model(model: str) -> int | None:
             # Check if length difference is reasonable (within 3 chars)
             if abs(len(vram_normalized) - len(normalized_model_no_spaces)) <= 3:
                 return vram
+
+    # Try to extract VRAM from model name (e.g., "RTX 4080 16GB" -> 16)
+    vram_pattern = re.search(r'(\d+)\s*GB', model, re.IGNORECASE)
+    if vram_pattern:
+        return int(vram_pattern.group(1))
+
+    # Fallback: Common VRAM values for known GPU series
+    model_upper = model.upper()
+
+    # NVIDIA RTX 50 series
+    if 'RTX 5090' in model_upper: return 32
+    if 'RTX 5080' in model_upper: return 16
+    if 'RTX 5070' in model_upper: return 12
+    if 'RTX 5060' in model_upper: return 8
+
+    # NVIDIA RTX 40 series
+    if 'RTX 4090' in model_upper: return 24
+    if 'RTX 4080' in model_upper: return 16
+    if 'RTX 4070 TI' in model_upper or 'RTX 4070TI' in model_upper: return 12
+    if 'RTX 4070' in model_upper: return 12
+    if 'RTX 4060 TI' in model_upper or 'RTX 4060TI' in model_upper: return 16
+    if 'RTX 4060' in model_upper: return 8
+
+    # NVIDIA RTX 30 series
+    if 'RTX 3090 TI' in model_upper or 'RTX 3090TI' in model_upper: return 24
+    if 'RTX 3090' in model_upper: return 24
+    if 'RTX 3080 TI' in model_upper or 'RTX 3080TI' in model_upper: return 12
+    if 'RTX 3080' in model_upper and '12GB' in model_upper: return 12
+    if 'RTX 3080' in model_upper: return 10
+    if 'RTX 3070 TI' in model_upper or 'RTX 3070TI' in model_upper: return 8
+    if 'RTX 3070' in model_upper: return 8
+    if 'RTX 3060 TI' in model_upper or 'RTX 3060TI' in model_upper: return 8
+    if 'RTX 3060' in model_upper and '12GB' in model_upper: return 12
+    if 'RTX 3060' in model_upper: return 12
+    if 'RTX 3050' in model_upper: return 8
+
+    # AMD RX 7000 series
+    if 'RX 7900 XTX' in model_upper: return 24
+    if 'RX 7900 XT' in model_upper: return 20
+    if 'RX 7800 XT' in model_upper: return 16
+    if 'RX 7700 XT' in model_upper: return 12
+    if 'RX 7600' in model_upper: return 8
+
+    # AMD RX 6000 series
+    if 'RX 6950 XT' in model_upper: return 16
+    if 'RX 6900 XT' in model_upper: return 16
+    if 'RX 6800 XT' in model_upper: return 16
+    if 'RX 6800' in model_upper: return 16
+    if 'RX 6750 XT' in model_upper: return 12
+    if 'RX 6700 XT' in model_upper: return 12
+    if 'RX 6700' in model_upper: return 10
+    if 'RX 6650 XT' in model_upper: return 8
+    if 'RX 6600 XT' in model_upper: return 8
+    if 'RX 6600' in model_upper: return 8
+    if 'RX 6500 XT' in model_upper: return 4
+    if 'RX 6400' in model_upper: return 4
 
     return None
 
