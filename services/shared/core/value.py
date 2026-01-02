@@ -194,4 +194,12 @@ def get_relative_score_for_model(model: str) -> int | None:
             if abs(len(bench_normalized) - len(normalized_model_no_spaces)) <= 3:
                 return score
 
+    # If not found in GPU_BENCHMARKS, calculate from FPS data
+    # RTX 5090 baseline: 238 FPS = 100%
+    fps = get_fps_for_model(model)
+    if fps is not None and fps > 0:
+        RTX_5090_FPS = 238
+        relative_score = round((fps / RTX_5090_FPS) * 100)
+        return relative_score
+
     return None
