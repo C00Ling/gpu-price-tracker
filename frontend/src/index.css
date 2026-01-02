@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+@theme {
+  /* Primary colors */
+  --color-primary-50: #e6ffff;
+  --color-primary-100: #b3ffff;
+  --color-primary-200: #80ffff;
+  --color-primary-300: #4dffff;
+  --color-primary-400: #1affff;
+  --color-primary-500: #00d9ff;
+  --color-primary-600: #00b8d9;
+  --color-primary-700: #0097b3;
+  --color-primary-800: #00768c;
+  --color-primary-900: #005566;
+
+  /* Dark Navy colors */
+  --color-dark-navy-900: #0a0e1a;
+  --color-dark-navy-800: #0f1420;
+  --color-dark-navy-700: #141a2a;
+}
+
 /* Dark Navy theme global styles - Darker gradient background */
 html {
   background: linear-gradient(135deg, #050810 0%, #0f1a2a 100%);

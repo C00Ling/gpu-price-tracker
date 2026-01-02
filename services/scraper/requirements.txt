@@ -40,3 +40,7 @@ ratelimit==2.2.1
 
 # TOR control
 stem==1.8.2
+
+# Browser automation (for dynamic content scraping)
+selenium==4.27.1
+webdriver-manager==4.0.2
