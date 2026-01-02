@@ -80,6 +80,7 @@ GPU_FPS_BENCHMARKS = {
     "GTX 1070 TI": 65,
     "GTX 1070": 62,
     "GTX 1060 6GB": 40,
+    "GTX 1060 3GB": 20,
     "GTX 1050 TI": 26,
     "GTX 1050": 10,
 
@@ -140,9 +141,9 @@ GPU_FPS_BENCHMARKS = {
     # ========== AMD RX 500-series (Polaris) ==========
     "RX 590": 56,
     "RX 580 8GB": 54,
-    "RX 580 4GB": 0.0,
-    "RX 580 2GB": 0.0,
-    "RX 580": 0.0,
+    "RX 580 4GB": 48,
+    "RX 580 2GB": 42,
+    "RX 580": 54,
     "RX 570 8GB": 0.0,
     "RX 570 4GB": 0.0,
     "RX 570": 0.0,

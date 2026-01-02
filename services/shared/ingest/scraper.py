@@ -739,8 +739,8 @@ class GPUScraper:
         """
         patterns = [
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
-            r"GTX\s?\d{4}\s?(TI|SUPER)?",
-            r"RX\s?\d{4}\s?(XTX|XT|GRE)?",  # XTX before XT (longer match first)
+            r"GTX\s?\d{3,4}\s?(TI|SUPER)?",  # GTX supports 3-4 digits (GTX 960, GTX 1660)
+            r"RX\s?\d{3,4}\s?(XTX|XT|GRE)?",  # RX supports 3-4 digits (RX 580, RX 6800)
             r"ARC\s?[AB]\d{3}",  # Intel ARC (A-series: Alchemist, B-series: Battlemage)
             r"VEGA\s?\d+",
         ]
@@ -763,8 +763,9 @@ class GPUScraper:
                 if not vram and description:
                     vram = self.extract_vram_from_text(description)
 
-                # Add VRAM to model if found
-                if vram:
+                # Add VRAM to model if found AND not already in normalized model
+                # Prevents "GTX 1060 6GB" + "6GB" -> "GTX 1060 6GB 6GB"
+                if vram and vram not in normalized:
                     model_with_vram = f"{normalized} {vram}"
                 else:
                     model_with_vram = normalized

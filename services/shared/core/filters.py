@@ -68,18 +68,11 @@ MODEL_CORRECTIONS = {
     "RX 5600": "RX 5600 XT",      # Only XT variant exists
     "RX 5500": "RX 5500 XT",      # Only XT variant exists
 
-    # NVIDIA RTX 40-series
-    "RTX 4090": "RTX 4090",       # Only non-SUPER exists
-    "RTX 4080": "RTX 4080 SUPER", # SUPER is newer/better
-    "RTX 4070": "RTX 4070 SUPER", # SUPER is more common now
-    "RTX 4060": "RTX 4060 TI",    # TI is more common
+    # NVIDIA RTX 40-series - removed auto-corrections to allow precise VRAM matching
+    # Now with VRAM extraction, we want to keep exact model names
 
-    # NVIDIA RTX 30-series
-    "RTX 3090": "RTX 3090",       # Non-TI is valid
-    "RTX 3080": "RTX 3080",       # Non-TI is valid
-    "RTX 3070": "RTX 3070",       # Non-TI is valid
-    "RTX 3060": "RTX 3060 TI",    # TI is more common
-    "RTX 3050": "RTX 3050",       # Only non-8GB exists
+    # NVIDIA RTX 30-series - removed auto-corrections to allow precise VRAM matching
+    # "RTX 3060" and "RTX 3060 TI" are different cards
 
     # NVIDIA RTX 20-series
     "RTX 2080": "RTX 2080 SUPER", # SUPER is more common
