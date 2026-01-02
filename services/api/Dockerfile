@@ -35,6 +35,9 @@ COPY --from=builder /root/.local /home/apiuser/.local
 # Copy shared libraries
 COPY --chown=apiuser:apiuser services/shared ./shared
 
+# Copy data directory (GPU benchmarks)
+COPY --chown=apiuser:apiuser data ./data
+
 # Copy configuration file
 COPY --chown=apiuser:apiuser config.yaml .
 

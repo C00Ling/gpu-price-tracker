@@ -41,6 +41,9 @@ COPY --from=builder /root/.local /home/scraperuser/.local
 # Copy shared libraries
 COPY --chown=scraperuser:scraperuser services/shared ./shared
 
+# Copy data directory (GPU benchmarks)
+COPY --chown=scraperuser:scraperuser data ./data
+
 # Copy configuration file
 COPY --chown=scraperuser:scraperuser config.yaml .
 
