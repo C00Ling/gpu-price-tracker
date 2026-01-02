@@ -178,24 +178,12 @@ export function Home() {
       </Card>
 
       {/* CTA Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card hover>
-          <CardHeader title="Разгледай всички обяви" />
-          <CardContent>
-            <p className="text-gray-400 mb-4">
-              Преглед на всички обяви с филтри и търсене по модел
-            </p>
-            <Link to="/listings">
-              <Button>Отвори обяви</Button>
-            </Link>
-          </CardContent>
-        </Card>
-
+      <div className="max-w-2xl mx-auto mb-8">
         <Card hover>
           <CardHeader title="Анализ на стойността" />
           <CardContent>
             <p className="text-gray-400 mb-4">
-              Виж коя видео карта предлага най-добра стойност за парите
+              Виж коя видео карта предлага най-добра стойност за парите. Кликни на модела за да видиш най-евтината обява в OLX.
             </p>
             <Link to="/value">
               <Button>Виж анализа</Button>

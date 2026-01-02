@@ -37,6 +37,11 @@ def get_gpu_value(min_vram: int = None, db: Session = Depends(get_db)):
         # Изчисляваме value с VRAM филтър
         result = calculate_value_from_stats(stats, min_vram=min_vram)
 
+        # Добавяме URL на най-евтината обява за всеки модел
+        for item in result:
+            cheapest_url = repo.get_cheapest_listing_url(item['model'])
+            item['cheapest_url'] = cheapest_url
+
         # Cache for 10 minutes
         cache.set(cache_key, result, ttl=600)
         return result

@@ -33,7 +33,18 @@ export function ValueAnalysis() {
       label: 'Модел',
       sortable: true,
       render: (item: any) => (
-        <span className="font-semibold text-white">{item.model}</span>
+        item.cheapest_url ? (
+          <a
+            href={item.cheapest_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-primary-500 hover:text-primary-400 transition-colors underline decoration-primary-500/30 hover:decoration-primary-400"
+          >
+            {item.model}
+          </a>
+        ) : (
+          <span className="font-semibold text-white">{item.model}</span>
+        )
       ),
     },
     {

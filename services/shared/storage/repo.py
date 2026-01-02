@@ -235,6 +235,37 @@ class GPURepository:
             logger.error(f"Error getting total count: {e}")
             raise RepositoryError(f"Failed to get total count: {e}")
 
+    def get_cheapest_listing_url(self, model: str) -> Optional[str]:
+        """
+        Връща URL-а на най-евтината обява за даден модел
+
+        Args:
+            model: GPU модел
+
+        Returns:
+            URL на обявата или None ако няма
+        """
+        try:
+            from core.filters import normalize_model_name
+            normalized_model = normalize_model_name(model.strip())
+
+            # Намираме най-евтината обява с URL
+            cheapest = self.session.query(GPU).filter(
+                GPU.model == normalized_model,
+                GPU.url.isnot(None)
+            ).order_by(GPU.price.asc()).first()
+
+            if cheapest and cheapest.url:
+                logger.debug(f"Found cheapest listing URL for {normalized_model}: {cheapest.url}")
+                return cheapest.url
+
+            logger.debug(f"No URL found for cheapest listing of {normalized_model}")
+            return None
+
+        except SQLAlchemyError as e:
+            logger.error(f"Error getting cheapest listing URL for {model}: {e}")
+            return None
+
     def delete_listing(self, listing_id: int) -> bool:
         """
         Изтрива обява по ID
