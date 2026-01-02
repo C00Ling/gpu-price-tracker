@@ -213,6 +213,8 @@ export function ValueAnalysis() {
                 columns={columns}
                 keyExtractor={(item) => item.model}
                 emptyMessage="Няма данни за анализ"
+                defaultSortKey="relative_score"
+                defaultSortDirection="desc"
               />
 
               {/* Show More Button */}

@@ -16,6 +16,8 @@ interface TableProps<T> {
   keyExtractor: (item: T) => string | number;
   className?: string;
   emptyMessage?: string;
+  defaultSortKey?: string | null;
+  defaultSortDirection?: 'asc' | 'desc';
 }
 
 export function Table<T extends Record<string, any>>({
@@ -24,9 +26,11 @@ export function Table<T extends Record<string, any>>({
   keyExtractor,
   className = '',
   emptyMessage = 'Няма данни',
+  defaultSortKey = null,
+  defaultSortDirection = 'asc',
 }: TableProps<T>) {
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortKey, setSortKey] = useState<string | null>(defaultSortKey);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortDirection);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
