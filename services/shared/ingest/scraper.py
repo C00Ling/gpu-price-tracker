@@ -10,6 +10,7 @@ from collections import defaultdict
 from core.logging import get_logger
 from core.rate_limiter import RateLimiter, retry_on_failure
 from core.config import config
+from data.gpu_fps_manual import GPU_FPS_BENCHMARKS
 
 logger = get_logger("scraper")
 
@@ -816,22 +817,24 @@ class GPUScraper:
 
 
 # ================= BENCHMARKS =================
-# Sources: TechPowerUp Reviews + Tom's Hardware + TechSpot + GamersNexus (2025)
-# Resolution: 1080p Ultra/High (Raster Performance)
-# Updated: 2025-12-24
+# Real FPS Benchmark Data - Desktop Gaming GPUs Only
+# Source: HowManyFPS.com (January 2026)
+# Resolution: 1080p Ultra settings
+# Updated: 2026-01-02
 #
-# Note: Values are average FPS across multiple AAA games at 1080p ultra/high settings
-# Data represents rasterization (traditional rendering), not ray tracing
-# Compiled from multiple benchmark sources for accuracy and coverage
+# Note: Real FPS values from benchmark testing across multiple AAA games
+# Data represents actual frame rates, not relative scores
+# Values of 0.0 are pending manual data entry
+# Total: 211 GPU models (100 filled, 111 pending)
+SAMPLE_BENCHMARKS = GPU_FPS_BENCHMARKS.copy()
 
-# GPU Performance Benchmark Data
-# Relative performance scores @ 1080p gaming (RTX 5090 = 100 baseline)
-# Source: Compiled from TechPowerUp, Tom's Hardware, TechSpot, Gamers Nexus
-# Updated: 2026-01-01
-#
-# Note: These are relative performance scores (0-100 scale)
-# Higher score = better performance. Use for value-for-money calculations.
-SAMPLE_BENCHMARKS = {
+# Legacy relative scores system preserved in data/gpu_benchmarks.py
+# Use GPU_FPS_BENCHMARKS for real FPS, or gpu_benchmarks.py for relative scores
+
+# Original SAMPLE_BENCHMARKS (relative scores - DEPRECATED, kept for reference)
+# These are now replaced with real FPS values above
+# RTX 5090 was baseline = 100, now it's 238 FPS
+_DEPRECATED_RELATIVE_SCORES = {
     # NVIDIA RTX 50-series
     "RTX 5090": 100.0,
     "RTX 5080": 66.0,
@@ -984,8 +987,7 @@ SAMPLE_BENCHMARKS = {
 
     # Other budget cards
     "GT 1030": 4.0,
-
-}
+}  # End of deprecated relative scores
 
 
 GPU_VRAM = {
