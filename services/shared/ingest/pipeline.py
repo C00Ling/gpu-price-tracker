@@ -104,7 +104,9 @@ def run_pipeline(ws_manager=None):
 
             logger.info(f"✅ Filtering complete:")
             logger.info(f"   Total listings (raw):      {raw_total}")
-            logger.info(f"   Filtered out (outliers):   {filter_stats['total_filtered']}")
+            logger.info(f"   Filtered out:              {filter_stats['total_filtered']}")
+            logger.info(f"   - Blacklist keywords:      {filter_stats['blacklist_keywords']}")
+            logger.info(f"   - Full computer listings:  {filter_stats['full_computer']}")
             logger.info(f"   - Extremely low price:     {filter_stats['extremely_low_price']}")
             logger.info(f"   - Statistical outlier low: {filter_stats['statistical_outlier_low']}")
             logger.info(f"   - Statistical outlier high:{filter_stats['statistical_outlier_high']}")

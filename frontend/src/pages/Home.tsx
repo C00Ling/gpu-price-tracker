@@ -49,21 +49,21 @@ export function Home() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-400 mb-2">Обяви</p>
+            <p className="text-sm text-white mb-2">Обяви</p>
             <p className="text-3xl font-bold text-primary-500">{stats?.total_listings || 0}</p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-400 mb-2">Модели</p>
+            <p className="text-sm text-white mb-2">Модели</p>
             <p className="text-3xl font-bold text-primary-500">{stats?.unique_models || 0}</p>
           </div>
         </Card>
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-400 mb-2">Средна цена</p>
+            <p className="text-sm text-white mb-2">Средна цена</p>
             <p className="text-3xl font-bold text-primary-500">
               {stats?.avg_price ? `${stats.avg_price.toFixed(0)}лв` : '-'}
             </p>
@@ -72,7 +72,7 @@ export function Home() {
 
         <Card>
           <div className="text-center">
-            <p className="text-sm text-gray-400 mb-2">Мин. цена</p>
+            <p className="text-sm text-white mb-2">Мин. цена</p>
             <p className="text-3xl font-bold text-primary-500">
               {stats?.min_price ? `${stats.min_price.toFixed(0)}лв` : '-'}
             </p>

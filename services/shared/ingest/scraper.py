@@ -632,8 +632,8 @@ class GPUScraper:
                 logger.debug(f"Skipping duplicate URL: {url}")
                 return False
 
-            # Store both price and URL
-            self.gpu_prices[model].append({'price': price, 'url': url})
+            # Store price, URL, and title for post-processing filtering
+            self.gpu_prices[model].append({'price': price, 'url': url, 'title': title})
             self.seen_urls.add(url)
             logger.debug(f"Added: {model} - {price}лв ({url})")
             return True
@@ -774,7 +774,12 @@ class GPUScraper:
                             return normalized
                         return None
 
-                    model_with_vram = f"{normalized} {vram}"
+                    # Check if VRAM is redundant (model has only one VRAM variant)
+                    if self._is_redundant_vram(normalized, vram):
+                        logger.debug(f"Removing redundant VRAM: {normalized} {vram} -> {normalized}")
+                        model_with_vram = normalized
+                    else:
+                        model_with_vram = f"{normalized} {vram}"
                 else:
                     model_with_vram = normalized
 
@@ -871,6 +876,57 @@ class GPUScraper:
         # Model not in GPU_VRAM dictionary - allow it (we might not have all models)
         # But log for tracking
         logger.debug(f"Model {model} not in GPU_VRAM specs, allowing VRAM {vram}")
+        return True
+
+    def _is_redundant_vram(self, model: str, vram: str) -> bool:
+        """
+        Check if VRAM specification is redundant (model has only one VRAM variant)
+
+        Examples:
+            GTX 1080 8GB -> True (only 8GB variant exists)
+            GTX 1060 6GB -> False (3GB variant also exists)
+            RTX 3080 10GB -> False (12GB variant also exists)
+            RTX 3060 12GB -> True (only 12GB variant exists)
+
+        Args:
+            model: Base GPU model (e.g., "GTX 1080", "GTX 1060")
+            vram: VRAM string (e.g., "8GB", "6GB")
+
+        Returns:
+            True if VRAM is redundant, False if it's needed to differentiate variants
+        """
+        # Extract numeric VRAM value
+        try:
+            vram_value = int(vram.replace("GB", "").strip())
+        except (ValueError, AttributeError):
+            return False  # Can't parse, don't remove
+
+        # Check if model is in GPU_VRAM
+        if model not in GPU_VRAM:
+            return False  # Unknown model, keep VRAM info
+
+        expected_vram = GPU_VRAM[model]
+
+        # VRAM doesn't match - not redundant (actually invalid, but handled elsewhere)
+        if vram_value != expected_vram:
+            return False
+
+        # Check if there are other VRAM variants for this model
+        # Look for models with same base name but different VRAM specs
+        # Examples: "GTX 1060 3GB", "GTX 1060 6GB"
+        base_variants = [
+            gpu_model for gpu_model in GPU_VRAM.keys()
+            if gpu_model.startswith(model) and gpu_model != model
+        ]
+
+        # If there are variants (e.g., "GTX 1060 3GB" alongside "GTX 1060 6GB")
+        # then VRAM is NOT redundant
+        if base_variants:
+            logger.debug(f"VRAM {vram} for {model} is NOT redundant (variants exist: {base_variants})")
+            return False
+
+        # Only one VRAM variant exists, VRAM is redundant
+        logger.debug(f"VRAM {vram} for {model} is redundant (only one variant)")
         return True
 
     def get_min_prices(self, use_percentile=True) -> Dict[str, int]:

@@ -336,7 +336,7 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
     - По-просто за debugging
 
     Args:
-        raw_data: Речник {model: [items]} където items са dict{'price': float, 'url': str}
+        raw_data: Речник {model: [items]} където items са dict{'price': float, 'url': str, 'title': str}
 
     Returns:
         Tuple of (filtered_data, filter_stats)
@@ -346,6 +346,7 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
     filtered_data = {}
     filter_stats = {
         'blacklist_keywords': 0,
+        'full_computer': 0,
         'extremely_low_price': 0,
         'statistical_outlier_low': 0,
         'statistical_outlier_high': 0,
@@ -370,6 +371,31 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
         valid_items = []
         for item in items:
             price = item['price']
+            title = item.get('title', '').lower()
+
+            # Check for blacklisted keywords (highest priority - broken/defective GPUs)
+            blacklisted = False
+            for keyword in BLACKLIST_KEYWORDS:
+                if keyword.lower() in title:
+                    filter_stats['blacklist_keywords'] += 1
+                    filter_stats['total_filtered'] += 1
+                    logger.debug(f"Filtered {model} @ {price}лв: blacklisted keyword '{keyword}' in title")
+                    blacklisted = True
+                    break
+            if blacklisted:
+                continue
+
+            # Check for full computer listings (not just GPU)
+            is_computer = False
+            for keyword in COMPUTER_KEYWORDS:
+                if keyword.lower() in title:
+                    filter_stats['full_computer'] += 1
+                    filter_stats['total_filtered'] += 1
+                    logger.debug(f"Filtered {model} @ {price}лв: full computer listing '{keyword}'")
+                    is_computer = True
+                    break
+            if is_computer:
+                continue
 
             # Check extremely low price (< 50 лв)
             if price < 50:
