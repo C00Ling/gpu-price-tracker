@@ -736,70 +736,105 @@ class GPUScraper:
             "rx 6600xt oc" (desc: "8GB VRAM") -> "RX 6600 XT 8GB" ✅
             "GTX 1660ti super" -> "GTX 1660 TI" ✅
             "GTX 1018" -> None ❌ (typo, should be GTX 1080)
+            "Gigabyte 1060 6gb" -> "GTX 1060 6GB" ✅ (добавя GTX префикс)
         """
         patterns = [
+            # Standard patterns with brand prefix
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
             r"GTX\s?\d{3,4}\s?(TI|SUPER)?",  # GTX supports 3-4 digits (GTX 960, GTX 1660)
             r"RX\s?\d{3,4}\s?(XTX|XT|GRE)?",  # RX supports 3-4 digits (RX 580, RX 6800)
             r"ARC\s?[AB]\d{3}",  # Intel ARC (A-series: Alchemist, B-series: Battlemage)
             r"VEGA\s?\d+",
+
+            # Patterns for listings without GTX/RTX prefix but with manufacturer name
+            # Example: "Gigabyte 1060 6gb" -> should be detected as GTX 1060
+            r"(?:GIGABYTE|ASUS|MSI|ZOTAC|EVGA|PNY|PALIT|GAINWARD|INNO3D|KFA2|GALAX|COLORFUL|MANLI)\s+(\d{3,4})\s?(TI|SUPER)?",
         ]
 
         title_upper = title.upper()
 
-        for pattern in patterns:
+        # First try standard patterns
+        for pattern in patterns[:-1]:  # All patterns except the last manufacturer one
             match = re.search(pattern, title_upper)
             if match:
                 model = match.group(0)
+                break
+        else:
+            # If standard patterns didn't match, try manufacturer pattern
+            match = re.search(patterns[-1], title_upper)
+            if match:
+                # Extract just the model number (e.g., "1060" from "GIGABYTE 1060")
+                model_number = match.group(1)
+                suffix = match.group(2) if match.group(2) else ""
 
-                # Normalize the model name
-                from core.filters import normalize_model_name
-                normalized = normalize_model_name(model)
-
-                # Try to extract VRAM from title first
-                vram = self.extract_vram_from_text(title)
-
-                # If no VRAM in title, try description
-                if not vram and description:
-                    vram = self.extract_vram_from_text(description)
-
-                # Add VRAM to model if found AND not already in normalized model
-                # Prevents "GTX 1060 6GB" + "6GB" -> "GTX 1060 6GB 6GB"
-                if vram and vram not in normalized:
-                    # VRAM VALIDATION: Check if extracted VRAM is valid for this GPU model
-                    if not self._is_valid_vram_for_model(normalized, vram):
-                        logger.warning(f"Invalid VRAM {vram} for model {normalized} - rejecting (likely system RAM confusion)")
-                        # Return model without VRAM if base model is valid
-                        if self._is_valid_gpu_model(normalized):
-                            return normalized
-                        return None
-
-                    # Check if VRAM is redundant (model has only one VRAM variant)
-                    if self._is_redundant_vram(normalized, vram):
-                        logger.debug(f"Removing redundant VRAM: {normalized} {vram} -> {normalized}")
-                        model_with_vram = normalized
-                    else:
-                        model_with_vram = f"{normalized} {vram}"
+                # Determine which brand prefix to add based on model number
+                # GTX 10xx, 16xx series: add GTX
+                # RTX 20xx, 30xx, 40xx, 50xx: add RTX (shouldn't happen as RTX is usually written)
+                if model_number.startswith('1') or model_number.startswith('9'):
+                    # GTX 10-series (1030-1080), 16-series (1650-1660), 9-series (960-980)
+                    model = f"GTX {model_number}"
+                    if suffix:
+                        model += f" {suffix}"
+                elif model_number.startswith(('2', '3', '4', '5')):
+                    # RTX 20/30/40/50-series (unlikely to be missing RTX in title)
+                    model = f"RTX {model_number}"
+                    if suffix:
+                        model += f" {suffix}"
                 else:
-                    model_with_vram = normalized
+                    # Unknown series, skip
+                    model = None
+            else:
+                model = None
 
-                # VALIDATE: Check if model exists in known GPUs
-                # Try with VRAM first, then without
-                if self._is_valid_gpu_model(model_with_vram):
-                    return model_with_vram
-                elif self._is_valid_gpu_model(normalized):
-                    # Model without VRAM is valid, but model+VRAM is not
-                    # This means VRAM variant is not in our database
-                    # Return model with VRAM anyway to track different variants
-                    if vram:
-                        logger.debug(f"Model {model_with_vram} not in database, but base model {normalized} is valid")
-                        return model_with_vram
+        if not model:
+            return None
+
+        # Normalize the model name
+        from core.filters import normalize_model_name
+        normalized = normalize_model_name(model)
+
+        # Try to extract VRAM from title first
+        vram = self.extract_vram_from_text(title)
+
+        # If no VRAM in title, try description
+        if not vram and description:
+            vram = self.extract_vram_from_text(description)
+
+        # Add VRAM to model if found AND not already in normalized model
+        # Prevents "GTX 1060 6GB" + "6GB" -> "GTX 1060 6GB 6GB"
+        if vram and vram not in normalized:
+            # VRAM VALIDATION: Check if extracted VRAM is valid for this GPU model
+            if not self._is_valid_vram_for_model(normalized, vram):
+                logger.warning(f"Invalid VRAM {vram} for model {normalized} - rejecting (likely system RAM confusion)")
+                # Return model without VRAM if base model is valid
+                if self._is_valid_gpu_model(normalized):
                     return normalized
-                else:
-                    logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
-                    return None
+                return None
 
-        return None
+            # Check if VRAM is redundant (model has only one VRAM variant)
+            if self._is_redundant_vram(normalized, vram):
+                logger.debug(f"Removing redundant VRAM: {normalized} {vram} -> {normalized}")
+                model_with_vram = normalized
+            else:
+                model_with_vram = f"{normalized} {vram}"
+        else:
+            model_with_vram = normalized
+
+        # VALIDATE: Check if model exists in known GPUs
+        # Try with VRAM first, then without
+        if self._is_valid_gpu_model(model_with_vram):
+            return model_with_vram
+        elif self._is_valid_gpu_model(normalized):
+            # Model without VRAM is valid, but model+VRAM is not
+            # This means VRAM variant is not in our database
+            # Return model with VRAM anyway to track different variants
+            if vram:
+                logger.debug(f"Model {model_with_vram} not in database, but base model {normalized} is valid")
+                return model_with_vram
+            return normalized
+        else:
+            logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
+            return None
 
     def _is_valid_gpu_model(self, model: str) -> bool:
         """
