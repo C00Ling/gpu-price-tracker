@@ -12,6 +12,12 @@ import {
   TableSkeleton,
 } from '../components';
 
+// Helper function to remove VRAM suffix from model name for display
+// e.g. "GTX 1060 6GB" → "GTX 1060", "RX 580 8GB" → "RX 580"
+function stripVRAMFromModel(model: string): string {
+  return model.replace(/\s+\d+GB$/i, '');
+}
+
 export function ValueAnalysis() {
   const [vramFilter, setVramFilter] = useState<number | undefined>(undefined);
   const { data: valueData, isLoading, error, refetch } = useValueAnalysis(vramFilter);
@@ -32,20 +38,21 @@ export function ValueAnalysis() {
       key: 'model',
       label: 'Модел',
       sortable: true,
-      render: (item: any) => (
-        item.cheapest_url ? (
+      render: (item: any) => {
+        const displayName = stripVRAMFromModel(item.model);
+        return item.cheapest_url ? (
           <a
             href={item.cheapest_url}
             target="_blank"
             rel="noopener noreferrer"
             className="font-semibold text-primary-500 hover:text-primary-400 transition-colors underline decoration-primary-500/30 hover:decoration-primary-400"
           >
-            {item.model}
+            {displayName}
           </a>
         ) : (
-          <span className="font-semibold text-white">{item.model}</span>
-        )
-      ),
+          <span className="font-semibold text-white">{displayName}</span>
+        );
+      },
     },
     {
       key: 'fps',
