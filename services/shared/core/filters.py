@@ -38,6 +38,21 @@ BLACKLIST_KEYWORDS = [
     "срочно", "бързо", "спешно",  # Often scams
 ]
 
+# Keywords indicating full computer listings (not just GPU)
+COMPUTER_KEYWORDS = [
+    # Bulgarian
+    "компютър", "компютр", "кейс", "кутия", "система", "конфигурация",
+    "геймърски пк", "офисен пк", "настолен компютър", "десктоп",
+
+    # English
+    "desktop", "gaming pc", "office pc", "computer", "system", "build",
+    "configuration", "full pc", "complete pc", "tower",
+
+    # Multiple components (indicates full system)
+    "i3 ", "i5 ", "i7 ", "i9 ", "ryzen 3", "ryzen 5", "ryzen 7", "ryzen 9",
+    "+ cpu", "+ ram", "+ процесор", "+ ssd", "+ hdd",
+]
+
 # Outlier detection thresholds
 OUTLIER_THRESHOLD_LOW = 0.50   # 50% от медианата (по-балансирано филтриране)
 OUTLIER_THRESHOLD_HIGH = 3.0   # 300% от медианата (за скъпи outliers)
@@ -231,7 +246,12 @@ def is_suspicious_listing(
         if keyword.lower() in title_lower:
             return (True, f"Contains blacklisted keyword: '{keyword}'")
 
-    # 2. Extremely low price check (ALWAYS APPLIED - universal red flag)
+    # 2. Check for computer/full system listings (ALWAYS APPLIED)
+    for keyword in COMPUTER_KEYWORDS:
+        if keyword.lower() in title_lower:
+            return (True, f"Full computer listing (not just GPU): '{keyword}'")
+
+    # 3. Extremely low price check (ALWAYS APPLIED - universal red flag)
     if price < 50:
         return (True, f"Extremely low price: {price}лв (likely broken)")
 

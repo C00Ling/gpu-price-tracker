@@ -766,6 +766,14 @@ class GPUScraper:
                 # Add VRAM to model if found AND not already in normalized model
                 # Prevents "GTX 1060 6GB" + "6GB" -> "GTX 1060 6GB 6GB"
                 if vram and vram not in normalized:
+                    # VRAM VALIDATION: Check if extracted VRAM is valid for this GPU model
+                    if not self._is_valid_vram_for_model(normalized, vram):
+                        logger.warning(f"Invalid VRAM {vram} for model {normalized} - rejecting (likely system RAM confusion)")
+                        # Return model without VRAM if base model is valid
+                        if self._is_valid_gpu_model(normalized):
+                            return normalized
+                        return None
+
                     model_with_vram = f"{normalized} {vram}"
                 else:
                     model_with_vram = normalized
@@ -828,6 +836,42 @@ class GPUScraper:
 
         # If only 1-2 chars differ, likely a typo
         return 1 <= diffs <= 2
+
+    def _is_valid_vram_for_model(self, model: str, vram: str) -> bool:
+        """
+        Validates if extracted VRAM is correct for the GPU model
+        Prevents issues like "GTX 1650 8GB" (GTX 1650 only has 4GB)
+
+        Args:
+            model: Normalized GPU model name (e.g., "GTX 1650", "RTX 3060")
+            vram: Extracted VRAM string (e.g., "8GB", "12GB")
+
+        Returns:
+            True if VRAM is valid for this model, False otherwise
+        """
+        # Extract numeric VRAM value
+        try:
+            vram_value = int(vram.replace("GB", "").strip())
+        except (ValueError, AttributeError):
+            logger.debug(f"Could not parse VRAM value: {vram}")
+            return True  # If we can't parse, allow it (benefit of the doubt)
+
+        # Check if model exists in GPU_VRAM dictionary
+        if model in GPU_VRAM:
+            expected_vram = GPU_VRAM[model]
+
+            # Allow exact match
+            if vram_value == expected_vram:
+                return True
+
+            # Reject if VRAM doesn't match
+            logger.debug(f"VRAM mismatch: {model} expects {expected_vram}GB but found {vram_value}GB")
+            return False
+
+        # Model not in GPU_VRAM dictionary - allow it (we might not have all models)
+        # But log for tracking
+        logger.debug(f"Model {model} not in GPU_VRAM specs, allowing VRAM {vram}")
+        return True
 
     def get_min_prices(self, use_percentile=True) -> Dict[str, int]:
         """Връща минимални цени"""
