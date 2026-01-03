@@ -144,15 +144,12 @@ export function Home() {
         <CardContent>
           {topGPUs && topGPUs.length > 0 ? (
             <div className="space-y-3">
-              {topGPUs.map((gpu, index) => (
+              {topGPUs.map((gpu) => (
                 <div
                   key={gpu.model}
                   className="flex items-center justify-between p-4 bg-dark-navy-800/50 border border-dark-navy-700 rounded-lg hover:bg-dark-navy-800 hover:border-primary-500/50 transition-all"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="flex items-center justify-center w-8 h-8 bg-primary-500 text-white rounded-full font-bold">
-                      {index + 1}
-                    </div>
                     <div>
                       <p className="font-semibold text-white">{gpu.model}</p>
                       <p className="text-sm text-gray-400">
@@ -178,7 +175,7 @@ export function Home() {
       </Card>
 
       {/* CTA Section */}
-      <div className="max-w-2xl mx-auto mb-8">
+      <div className="max-w-4xl mx-auto mb-8">
         <Card hover className={`border-2 transition-all ${
           scrapeProgress.isRunning
             ? 'border-primary-500 animate-pulse'
