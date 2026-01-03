@@ -175,8 +175,7 @@ export function Home() {
       </Card>
 
       {/* CTA Section */}
-      <div className="max-w-4xl mx-auto mb-8">
-        <Card hover className={`border-2 transition-all ${
+      <Card hover className={`mb-8 border-2 transition-all ${
           scrapeProgress.isRunning
             ? 'border-primary-500 animate-pulse'
             : 'border-primary-500/30'
@@ -268,7 +267,6 @@ export function Home() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }
