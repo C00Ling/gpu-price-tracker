@@ -83,12 +83,6 @@ MODEL_CORRECTIONS = {
     "GTX 1660": "GTX 1660 SUPER", # SUPER is more common
     "GTX 1650": "GTX 1650 SUPER", # SUPER is more common
 
-    # NVIDIA GTX 10-series
-    "GTX 1080": "GTX 1080 TI",    # TI is more common
-    "GTX 1070": "GTX 1070 TI",    # TI is more common
-    "GTX 1060": "GTX 1060 6GB",   # 6GB is more common
-    "GTX 1050": "GTX 1050 TI",    # TI is more common
-
     # Common typos and errors
     "GTX 1060 SUPER": "GTX 1660 SUPER",  # Common confusion
     "GTX 1600": "GTX 1650 SUPER",        # Typo
@@ -192,6 +186,7 @@ def normalize_model_name(model: str) -> str:
     # Add space before memory size (3GB, 6GB, 8GB, 12GB, 16GB, etc.) - FIRST
     # This must run before TI/SUPER/XT to handle cases like "TI16GB"
     model = re.sub(r'(\d{4})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., 30603GB -> 3060 3GB
+    model = re.sub(r'(\d{3})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., 5808GB -> 580 8GB (AMD RX 580, RX 570, etc.)
     model = re.sub(r'([AB]\d{3})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., A77016GB -> A770 16GB (Intel ARC)
     model = re.sub(r'(TI|SUPER|XT|XTX|GRE)(\d{1,2}GB)$', r'\1 \2', model)  # e.g., TI16GB -> TI 16GB
 
