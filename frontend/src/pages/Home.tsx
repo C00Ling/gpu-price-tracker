@@ -179,95 +179,99 @@ export function Home() {
 
       {/* CTA Section */}
       <div className="max-w-2xl mx-auto mb-8">
-        <Card hover>
+        <Card hover className={`border-2 transition-all ${
+          scrapeProgress.isRunning
+            ? 'border-primary-500 animate-pulse'
+            : 'border-primary-500/30'
+        }`}>
           <CardHeader title="Анализ на стойността" />
           <CardContent>
             <p className="text-gray-400 mb-4">
               Виж коя видео карта предлага най-добра стойност за парите. Кликни на модела за да видиш най-евтината обява в OLX.
             </p>
-            <Link to="/value">
-              <Button>Виж анализа</Button>
-            </Link>
+
+            {/* Buttons Row */}
+            <div className="flex flex-wrap gap-3 mb-4">
+              <Link to="/value">
+                <Button>Виж анализа</Button>
+              </Link>
+              <Button
+                onClick={handleTriggerScrape}
+                disabled={scrapeProgress.isRunning}
+                variant="outline"
+                className="min-w-[160px]"
+              >
+                {scrapeProgress.isRunning ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Scrape-ва...
+                  </>
+                ) : (
+                  '🔄 Обнови данните'
+                )}
+              </Button>
+            </div>
+
+            {/* Last Update Info */}
+            <div className="text-xs text-gray-500 space-y-1">
+              <p>
+                Последните данни: {stats?.total_listings || 0} обяви от {stats?.unique_models || 0} модела
+              </p>
+              {scrapeProgress.completedAt && (
+                <p>
+                  Последно обновено: {new Date(scrapeProgress.completedAt).toLocaleString('bg-BG', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              )}
+            </div>
+
+            {/* Success/Error Messages */}
+            {scrapeMessage && (
+              <div
+                className={`mt-4 p-3 rounded-lg text-sm ${
+                  scrapeMessage.type === 'success'
+                    ? 'bg-dark-navy-800/50 border border-green-500/50 text-green-400'
+                    : scrapeMessage.type === 'error'
+                    ? 'bg-dark-navy-800/50 border border-red-500/50 text-red-400'
+                    : 'bg-dark-navy-800/50 border border-primary-500/50 text-primary-400'
+                }`}
+              >
+                {scrapeMessage.text}
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            {scrapeProgress.isRunning && (
+              <div className="space-y-2 mt-4">
+                {/* Status Text */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-primary-400 font-medium">{scrapeProgress.status}</span>
+                  <span className="text-gray-400">{Math.round(scrapeProgress.progress)}%</span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="relative w-full h-3 bg-dark-navy-900 rounded-full overflow-hidden border border-dark-navy-700">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${scrapeProgress.progress}%` }}
+                  >
+                    {/* Animated shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Admin Section - Update Data */}
-      <Card className={`border-2 bg-dark-navy-800/50 transition-all ${
-        scrapeProgress.isRunning
-          ? 'border-primary-500 animate-pulse'
-          : 'border-primary-500/30'
-      }`}>
-        <CardHeader
-          title="🔄 Обнови данните"
-          subtitle="Стартирай нов scrape за най-нови обяви от OLX"
-        />
-        <CardContent>
-          {scrapeMessage && (
-            <div
-              className={`mb-4 p-4 rounded-lg ${
-                scrapeMessage.type === 'success'
-                  ? 'bg-dark-navy-800/50 border border-green-500/50 text-green-400'
-                  : scrapeMessage.type === 'error'
-                  ? 'bg-dark-navy-800/50 border border-red-500/50 text-red-400'
-                  : 'bg-dark-navy-800/50 border border-primary-500/50 text-primary-400'
-              }`}
-            >
-              <p className="text-sm font-medium">{scrapeMessage.text}</p>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex-1 mr-4">
-              <p className="text-gray-300 text-sm mb-2">
-                Последните данни: {stats?.total_listings || 0} обяви от {stats?.unique_models || 0} модела
-              </p>
-              <p className="text-gray-500 text-xs">
-                Scraping отнема ~2-5 минути и ще обнови production базата данни.
-              </p>
-            </div>
-            <Button
-              onClick={handleTriggerScrape}
-              disabled={scrapeProgress.isRunning}
-              className="min-w-[140px]"
-            >
-              {scrapeProgress.isRunning ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Стартиране...
-                </>
-              ) : (
-                '🚀 Стартирай Scrape'
-              )}
-            </Button>
-          </div>
-
-          {/* Progress Bar */}
-          {scrapeProgress.isRunning && (
-            <div className="space-y-3">
-              {/* Status Text */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-primary-400 font-medium">{scrapeProgress.status}</span>
-                <span className="text-gray-400">{Math.round(scrapeProgress.progress)}%</span>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="relative w-full h-3 bg-dark-navy-900 rounded-full overflow-hidden border border-dark-navy-700">
-                <div
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${scrapeProgress.progress}%` }}
-                >
-                  {/* Animated shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
