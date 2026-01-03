@@ -79,10 +79,6 @@ MODEL_CORRECTIONS = {
     "RTX 2070": "RTX 2070 SUPER", # SUPER is more common
     "RTX 2060": "RTX 2060 SUPER", # SUPER is more common
 
-    # NVIDIA GTX 16-series
-    "GTX 1660": "GTX 1660 SUPER", # SUPER is more common
-    "GTX 1650": "GTX 1650 SUPER", # SUPER is more common
-
     # Common typos and errors
     "GTX 1060 SUPER": "GTX 1660 SUPER",  # Common confusion
     "GTX 1600": "GTX 1650 SUPER",        # Typo
