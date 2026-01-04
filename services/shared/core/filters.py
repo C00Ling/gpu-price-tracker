@@ -328,7 +328,7 @@ def calculate_statistics(prices: List[float]) -> Optional[Dict[str, Any]]:
     return stats
 
 
-def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dict[str, int]]:
+def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dict[str, int], List[Dict]]:
     """
     Post-processing filtering: филтрира scraped данни СЛЕД събирането им
 
@@ -341,11 +341,13 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
         raw_data: Речник {model: [items]} където items са dict{'price': float, 'url': str, 'title': str}
 
     Returns:
-        Tuple of (filtered_data, filter_stats)
+        Tuple of (filtered_data, filter_stats, rejected_listings)
         - filtered_data: Речник {model: [items]} само с валидни listings
         - filter_stats: Речник {reason: count} с статистика за филтриране
+        - rejected_listings: List of rejected items with reasons
     """
     filtered_data = {}
+    rejected_listings = []  # Track all rejected listings
     filter_stats = {
         'blacklist_keywords': 0,
         'full_computer': 0,
@@ -373,15 +375,26 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
         valid_items = []
         for item in items:
             price = item['price']
-            title = item.get('title', '').lower()
+            title = item.get('title', '')
+            title_lower = title.lower()
+            url = item.get('url', '')
 
             # Check for blacklisted keywords (highest priority - broken/defective GPUs)
             blacklisted = False
             for keyword in BLACKLIST_KEYWORDS:
-                if keyword.lower() in title:
+                if keyword.lower() in title_lower:
                     filter_stats['blacklist_keywords'] += 1
                     filter_stats['total_filtered'] += 1
-                    logger.debug(f"Filtered {model} @ {price}лв: blacklisted keyword '{keyword}' in title")
+                    reason = f"Blacklisted keyword: '{keyword}'"
+                    rejected_listings.append({
+                        'title': title,
+                        'price': price,
+                        'url': url,
+                        'model': model,
+                        'reason': reason,
+                        'category': '🚫 Blacklisted Keywords'
+                    })
+                    logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                     blacklisted = True
                     break
             if blacklisted:
@@ -390,10 +403,19 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             # Check for full computer listings (not just GPU)
             is_computer = False
             for keyword in COMPUTER_KEYWORDS:
-                if keyword.lower() in title:
+                if keyword.lower() in title_lower:
                     filter_stats['full_computer'] += 1
                     filter_stats['total_filtered'] += 1
-                    logger.debug(f"Filtered {model} @ {price}лв: full computer listing '{keyword}'")
+                    reason = f"Full computer listing: '{keyword}'"
+                    rejected_listings.append({
+                        'title': title,
+                        'price': price,
+                        'url': url,
+                        'model': model,
+                        'reason': reason,
+                        'category': '💻 Full Computer/Laptop'
+                    })
+                    logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                     is_computer = True
                     break
             if is_computer:
@@ -403,27 +425,48 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             if price < 50:
                 filter_stats['extremely_low_price'] += 1
                 filter_stats['total_filtered'] += 1
-                logger.debug(f"Filtered {model} @ {price}лв: extremely low price")
+                reason = f"Extremely low price: {price}лв (likely broken)"
+                rejected_listings.append({
+                    'title': title,
+                    'price': price,
+                    'url': url,
+                    'model': model,
+                    'reason': reason,
+                    'category': '⚠️  Extremely Low Price (<50лв)'
+                })
+                logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                 continue
 
             # Check low outlier
             if price < low_threshold:
                 filter_stats['statistical_outlier_low'] += 1
                 filter_stats['total_filtered'] += 1
-                logger.debug(
-                    f"Filtered {model} @ {price}лв: < {low_threshold:.0f}лв "
-                    f"(50% of median {median:.0f}лв)"
-                )
+                reason = f"Statistical outlier: {price}лв < {low_threshold:.0f}лв (50% of median {median:.0f}лв)"
+                rejected_listings.append({
+                    'title': title,
+                    'price': price,
+                    'url': url,
+                    'model': model,
+                    'reason': reason,
+                    'category': '📊 Statistical Outlier (Too Low)'
+                })
+                logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                 continue
 
             # Check high outlier
             if price > high_threshold:
                 filter_stats['statistical_outlier_high'] += 1
                 filter_stats['total_filtered'] += 1
-                logger.debug(
-                    f"Filtered {model} @ {price}лв: > {high_threshold:.0f}лв "
-                    f"(300% of median {median:.0f}лв)"
-                )
+                reason = f"Price too high: {price}лв > {high_threshold:.0f}лв (300% of median {median:.0f}лв)"
+                rejected_listings.append({
+                    'title': title,
+                    'price': price,
+                    'url': url,
+                    'model': model,
+                    'reason': reason,
+                    'category': '💸 Statistical Outlier (Too High)'
+                })
+                logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                 continue
 
             # Listing passed all checks
@@ -433,7 +476,7 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
         if valid_items:
             filtered_data[model] = valid_items
 
-    return filtered_data, filter_stats
+    return filtered_data, filter_stats, rejected_listings
 
 
 def get_filter_summary(filtered_data: Dict[str, List[float]]) -> str:

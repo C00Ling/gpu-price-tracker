@@ -99,7 +99,7 @@ def run_pipeline(ws_manager=None):
         from core.filters import filter_scraped_data
 
         try:
-            filtered_data, filter_stats = filter_scraped_data(scraper.gpu_prices)
+            filtered_data, filter_stats, rejected_listings = filter_scraped_data(scraper.gpu_prices)
             filtered_total = filter_stats['total_kept']
 
             logger.info(f"✅ Filtering complete:")
@@ -118,7 +118,6 @@ def run_pipeline(ws_manager=None):
 
             # Save rejected listings to cache for later viewing
             from core.cache import cache
-            rejected_listings = scraper.get_rejected_listings()
             cache.set("rejected_listings", rejected_listings, ttl=86400)  # Cache for 24 hours
             logger.info(f"💾 Saved {len(rejected_listings)} rejected listings to cache")
 

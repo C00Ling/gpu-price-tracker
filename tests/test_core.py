@@ -119,7 +119,7 @@ class TestFilters:
         test_data["RTX 4090"].append({'price': 50, 'url': 'http://test/outlier1'})  # Too low
         test_data["RTX 4090"].append({'price': 10000, 'url': 'http://test/outlier2'})  # Too high
 
-        filtered_data, stats = filter_scraped_data(test_data)
+        filtered_data, stats, rejected = filter_scraped_data(test_data)
 
         # Should have filtered out some prices
         assert stats["total_filtered"] > 0

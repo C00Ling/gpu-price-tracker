@@ -162,7 +162,7 @@ class TestFilterScrapedData:
                 {"price": 750, "url": "url3"},
             ]
         }
-        filtered, stats = filter_scraped_data(data)
+        filtered, stats, rejected = filter_scraped_data(data)
         
         assert len(filtered["RTX 3060"]) == 2
         assert stats["extremely_low_price"] == 1
@@ -178,7 +178,7 @@ class TestFilterScrapedData:
                 {"price": 200, "url": "url4"},  # Statistical outlier (< 50% of median)
             ]
         }
-        filtered, stats = filter_scraped_data(data)
+        filtered, stats, rejected = filter_scraped_data(data)
         
         # 200 is < 50% of median (~850), should be filtered
         assert len(filtered["RTX 3060"]) == 3
@@ -194,7 +194,7 @@ class TestFilterScrapedData:
                 {"price": 5000, "url": "url4"},  # Statistical outlier (> 300% of median)
             ]
         }
-        filtered, stats = filter_scraped_data(data)
+        filtered, stats, rejected = filter_scraped_data(data)
         
         # 5000 is > 300% of median (~850), should be filtered
         assert len(filtered["RTX 3060"]) == 3
@@ -208,18 +208,44 @@ class TestFilterScrapedData:
                 {"price": 5000, "url": "url2"},
             ]
         }
-        filtered, stats = filter_scraped_data(data)
+        filtered, stats, rejected = filter_scraped_data(data)
         
         # Should keep both (not enough samples for statistics)
         assert len(filtered["RTX 4090"]) == 2
 
     def test_empty_data(self):
         """Test filtering of empty data"""
-        filtered, stats = filter_scraped_data({})
-        
+        filtered, stats, rejected = filter_scraped_data({})
+
         assert filtered == {}
         assert stats["total_filtered"] == 0
         assert stats["total_kept"] == 0
+
+    def test_rejected_listings_tracked(self):
+        """Test that rejected listings are properly tracked with reasons"""
+        data = {
+            "RTX 3060": [
+                {"price": 800, "url": "url1", "title": "RTX 3060 12GB"},
+                {"price": 10, "url": "url2", "title": "RTX 3060 broken"},  # Too low
+                {"price": 5000, "url": "url3", "title": "RTX 3060 "},  # Too high
+                {"price": 850, "url": "url4", "title": "RTX 3060 TI"},
+            ]
+        }
+        filtered, stats, rejected = filter_scraped_data(data)
+
+        # Should have rejected 2 items
+        assert len(rejected) == 2
+        assert stats["extremely_low_price"] == 1
+        assert stats["statistical_outlier_high"] == 1
+
+        # Check rejected listings have required fields
+        for item in rejected:
+            assert "title" in item
+            assert "price" in item
+            assert "url" in item
+            assert "model" in item
+            assert "reason" in item
+            assert "category" in item
 
 
 class TestCalculateStatistics:
