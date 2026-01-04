@@ -748,7 +748,7 @@ class GPUScraper:
 
             # Patterns for listings without GTX/RTX prefix but with manufacturer name
             # Example: "Gigabyte 1060 6gb" -> should be detected as GTX 1060
-            r"(?:GIGABYTE|ASUS|MSI|ZOTAC|EVGA|PNY|PALIT|GAINWARD|INNO3D|KFA2|GALAX|COLORFUL|MANLI)\s+(\d{3,4})\s?(TI|SUPER)?",
+            r"(?:NVIDIA|GIGABYTE|ASUS|MSI|ZOTAC|EVGA|PNY|PALIT|GAINWARD|INNO3D|KFA2|GALAX|COLORFUL|MANLI)\s+(\d{3,4})\s?(TI|SUPER)?",
         ]
 
         title_upper = title.upper()
