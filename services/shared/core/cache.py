@@ -1,6 +1,9 @@
 import json
 import hashlib
 import logging
+import os
+import time
+from pathlib import Path
 from functools import wraps
 from typing import Optional, Any, Callable, cast, List, Union
 
@@ -14,13 +17,15 @@ try:
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
-    logger.warning("Redis not installed. Caching disabled. Install with: pip install redis")
+    logger.warning("Redis not installed. Using file-based cache fallback.")
 
 class Cache:
     def __init__(self):
         self.enabled = bool(config.get("redis.enabled", False)) and REDIS_AVAILABLE
         self.client: Optional[redis.Redis] = None
-        
+        self.use_file_cache = False
+        self.cache_dir = Path("cache")
+
         if self.enabled:
             try:
                 self.client = redis.Redis(
@@ -35,45 +40,108 @@ class Cache:
                 self.client.ping()
                 logger.info("✅ Redis cache connected")
             except Exception as e:
-                logger.warning(f"⚠️ Redis connection failed: {e}. Caching disabled.")
+                logger.warning(f"⚠️ Redis connection failed: {e}. Falling back to file-based cache.")
                 self.enabled = False
-    
+                self.use_file_cache = True
+        else:
+            # If Redis not configured, use file-based cache for development
+            self.use_file_cache = True
+            logger.info("📁 Using file-based cache (Redis not configured)")
+
+        # Setup file cache directory
+        if self.use_file_cache:
+            self.cache_dir.mkdir(exist_ok=True)
+
+    def _get_file_path(self, key: str) -> Path:
+        """Get file path for cache key"""
+        safe_key = hashlib.md5(key.encode()).hexdigest()
+        return self.cache_dir / f"{safe_key}.json"
+
     def get(self, key: str) -> Optional[Any]:
-        if not self.enabled or not self.client:
-            return None
-        try:
-            value = self.client.get(key)
-            if value:
-                return json.loads(cast(str, value))
-            return None
-        except Exception as e:
-            logger.error(f"Cache get error: {e}")
-            return None
-    
+        # Try Redis first
+        if self.enabled and self.client:
+            try:
+                value = self.client.get(key)
+                if value:
+                    return json.loads(cast(str, value))
+                return None
+            except Exception as e:
+                logger.error(f"Redis get error: {e}")
+
+        # Fallback to file cache
+        if self.use_file_cache:
+            try:
+                file_path = self._get_file_path(key)
+                if not file_path.exists():
+                    return None
+
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+
+                # Check TTL
+                if 'expires_at' in data and data['expires_at'] < time.time():
+                    file_path.unlink()  # Delete expired cache
+                    return None
+
+                return data.get('value')
+            except Exception as e:
+                logger.error(f"File cache get error: {e}")
+                return None
+
+        return None
+
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
-        if not self.enabled or not self.client:
-            return False
-        try:
-            default_ttl = config.get("redis.cache_ttl", 3600)
-            expire = int(ttl if ttl is not None else default_ttl)
-            serialized = json.dumps(value, default=str)
-            self.client.set(key, serialized, ex=expire)
-            return True
-        except Exception as e:
-            logger.error(f"Cache set error: {e}")
-            return False
+        # Try Redis first
+        if self.enabled and self.client:
+            try:
+                default_ttl = config.get("redis.cache_ttl", 3600)
+                expire = int(ttl if ttl is not None else default_ttl)
+                serialized = json.dumps(value, default=str)
+                self.client.set(key, serialized, ex=expire)
+                return True
+            except Exception as e:
+                logger.error(f"Redis set error: {e}")
+
+        # Fallback to file cache
+        if self.use_file_cache:
+            try:
+                file_path = self._get_file_path(key)
+                default_ttl = config.get("redis.cache_ttl", 3600) if hasattr(config, 'get') else 3600
+                expire_time = time.time() + (ttl if ttl is not None else default_ttl)
+
+                data = {
+                    'key': key,
+                    'value': value,
+                    'expires_at': expire_time
+                }
+
+                with open(file_path, 'w') as f:
+                    json.dump(data, f, default=str)
+
+                return True
+            except Exception as e:
+                logger.error(f"File cache set error: {e}")
+                return False
+
+        return False
 
     def invalidate_pattern(self, pattern: str) -> int:
-        if not self.enabled or not self.client:
+        # Try Redis first
+        if self.enabled and self.client:
+            try:
+                keys = cast(List[str], self.client.keys(pattern))
+                if keys:
+                    return int(cast(Any, self.client.delete(*keys)))
+                return 0
+            except Exception as e:
+                logger.error(f"Redis invalidate error: {e}")
+
+        # File cache doesn't support pattern matching easily
+        if self.use_file_cache:
+            logger.warning("Pattern invalidation not supported in file cache")
             return 0
-        try:
-            keys = cast(List[str], self.client.keys(pattern))
-            if keys:
-                return int(cast(Any, self.client.delete(*keys)))
-            return 0
-        except Exception as e:
-            logger.error(f"Cache invalidate error: {e}")
-            return 0
+
+        return 0
 
 cache = Cache()
 
