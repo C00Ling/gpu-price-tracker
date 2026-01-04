@@ -12,6 +12,10 @@ import {
   ValueBadge,
 } from '../components';
 
+function stripVRAMFromModel(model: string): string {
+  return model.replace(/\s+\d+GB$/i, '');
+}
+
 export function Home() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useSummaryStats();
   const { data: topGPUs, isLoading: topLoading, error: topError } = useTopValue(5);
@@ -103,7 +107,7 @@ export function Home() {
                 >
                   <div className="flex items-center space-x-4">
                     <div>
-                      <p className="font-semibold text-white">{gpu.model}</p>
+                      <p className="font-semibold text-white">{stripVRAMFromModel(gpu.model)}</p>
                       <p className="text-sm text-gray-400">
                         {gpu.fps} FPS @ {gpu.price.toFixed(0)}лв
                       </p>
