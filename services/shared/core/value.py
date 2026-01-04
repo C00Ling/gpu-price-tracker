@@ -44,6 +44,9 @@ def calculate_value_from_stats(stats: Dict[str, Dict], min_vram: Optional[int] =
     """
     Изчислява FPS/лв за всеки модел от stats dict (за API)
 
+    Групира модели по базово име (без VRAM) за да избегне дубликати.
+    Например: "RTX 4060 TI 8GB" и "RTX 4060 TI 16GB" се групират като "RTX 4060 TI"
+
     Args:
         stats: Речник {model: {min, max, median, mean, count}}
         min_vram: Минимум VRAM в GB (опционално филтриране)
@@ -51,22 +54,36 @@ def calculate_value_from_stats(stats: Dict[str, Dict], min_vram: Optional[int] =
     Returns:
         Списък с модели сортирани по FPS/лв
     """
-    result = []
+    import re
+
+    # First pass: Group models by base name (strip VRAM suffix)
+    grouped_stats = {}
 
     for model, data in stats.items():
         if not data or data.get("min", 0) == 0:
             continue
 
+        # Strip VRAM suffix to get base model name (e.g., "RTX 4060 TI 8GB" -> "RTX 4060 TI")
+        base_model = re.sub(r'\s+\d+GB$', '', model, flags=re.IGNORECASE)
+
+        # If this base model hasn't been seen yet, or if this variant has a cheaper price
+        if base_model not in grouped_stats or data.get("min", float('inf')) < grouped_stats[base_model].get("min", float('inf')):
+            grouped_stats[base_model] = data
+
+    # Second pass: Calculate value for each base model
+    result = []
+
+    for base_model, data in grouped_stats.items():
         # Взимаме FPS от benchmark данните
-        fps = get_fps_for_model(model)
+        fps = get_fps_for_model(base_model)
         if fps is None:
             continue  # Пропускаме модели без FPS данни
 
         # Взимаме VRAM за модела
-        vram = get_vram_for_model(model)
+        vram = get_vram_for_model(base_model)
 
         # Взимаме относителния скор за модела (RTX 5090 = 100)
-        relative_score = get_relative_score_for_model(model)
+        relative_score = get_relative_score_for_model(base_model)
 
         # Филтрираме по VRAM, ако е зададен минимум
         if min_vram is not None:
@@ -78,7 +95,7 @@ def calculate_value_from_stats(stats: Dict[str, Dict], min_vram: Optional[int] =
         fps_per_lv = round(fps / price, 3)
 
         result.append({
-            "model": model,
+            "model": base_model,
             "fps": fps,
             "price": price,
             "fps_per_lv": fps_per_lv,

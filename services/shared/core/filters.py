@@ -43,10 +43,12 @@ COMPUTER_KEYWORDS = [
     # Bulgarian
     "компютър", "компютр", "кейс", "кутия", "система", "конфигурация",
     "геймърски пк", "офисен пк", "настолен компютър", "десктоп",
+    "лаптоп", "преносим", "ноутбук", "нотбук",
 
     # English
     "desktop", "gaming pc", "office pc", "computer", "system", "build",
     "configuration", "full pc", "complete pc", "tower",
+    "laptop", "notebook", "portable",
 
     # Multiple components (indicates full system)
     "i3 ", "i5 ", "i7 ", "i9 ", "ryzen 3", "ryzen 5", "ryzen 7", "ryzen 9",
