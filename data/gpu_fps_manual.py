@@ -154,6 +154,18 @@ GPU_FPS_BENCHMARKS = {
     "RX 550 2GB": 0.0,
     "RX 550": 0.0,
 
+    # ========== AMD RX 400-series (Polaris) ==========
+    "RX 490": 54,  # Similar to RX 580
+    "RX 480 8GB": 52,  # Slightly slower than RX 580 8GB
+    "RX 480 4GB": 46,  # Slightly slower than RX 580 4GB
+    "RX 480": 52,
+    "RX 470 8GB": 46,  # Between RX 570 and RX 460
+    "RX 470 4GB": 42,
+    "RX 470": 46,
+    "RX 460 4GB": 38,  # Entry level
+    "RX 460 2GB": 34,
+    "RX 460": 38,
+
     # ========== AMD Vega Series ==========
     "Radeon VII": 99,
     "Vega Frontier Edition": 81,

@@ -925,7 +925,7 @@ class GPUScraper:
     def _is_valid_vram_for_model(self, model: str, vram: str) -> bool:
         """
         Validates if extracted VRAM is correct for the GPU model
-        Prevents issues like "GTX 1650 8GB" (GTX 1650 only has 4GB)
+        Prevents issues like "GTX 1650 32GB" (likely system RAM confusion)
 
         Args:
             model: Normalized GPU model name (e.g., "GTX 1650", "RTX 3060")
@@ -941,7 +941,14 @@ class GPUScraper:
             logger.debug(f"Could not parse VRAM value: {vram}")
             return True  # If we can't parse, allow it (benefit of the doubt)
 
-        # Check if model exists in GPU_VRAM dictionary
+        # STEP 1: Check if model+VRAM exists in SAMPLE_BENCHMARKS (most reliable)
+        # Example: "RX 580 4GB", "RX 580 8GB" - both are valid variants
+        model_with_vram = f"{model} {vram}"
+        if model_with_vram in SAMPLE_BENCHMARKS:
+            logger.debug(f"✅ {model_with_vram} found in benchmarks - valid VRAM variant")
+            return True
+
+        # STEP 2: Check GPU_VRAM dictionary for typical VRAM size
         if model in GPU_VRAM:
             expected_vram = GPU_VRAM[model]
 
@@ -949,8 +956,16 @@ class GPUScraper:
             if vram_value == expected_vram:
                 return True
 
-            # Reject if VRAM doesn't match
-            logger.debug(f"VRAM mismatch: {model} expects {expected_vram}GB but found {vram_value}GB")
+            # Don't immediately reject - check if it's a known variant
+            # Check SAMPLE_BENCHMARKS for other VRAM variants of this model
+            # Example: RX 580 expects 8GB, but "RX 580 4GB" exists in benchmarks
+            for benchmark_model in SAMPLE_BENCHMARKS:
+                if benchmark_model.startswith(model + " ") and vram in benchmark_model:
+                    logger.debug(f"✅ {model_with_vram} is a known variant in benchmarks")
+                    return True
+
+            # VRAM mismatch and no variant found - likely system RAM confusion
+            logger.debug(f"❌ VRAM mismatch: {model} typically {expected_vram}GB, found {vram_value}GB (not a known variant)")
             return False
 
         # Model not in GPU_VRAM dictionary - allow it (we might not have all models)
@@ -1337,6 +1352,12 @@ GPU_VRAM = {
     "RX 590": 8,
     "RX 580": 8,
     "RX 570": 4,
+
+    # AMD Radeon RX 400-series (Polaris)
+    "RX 490": 8,
+    "RX 480": 8,
+    "RX 470": 4,
+    "RX 460": 4,
 
     # AMD Radeon Vega
     "RADEON VII": 16,
