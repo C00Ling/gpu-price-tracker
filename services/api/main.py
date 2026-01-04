@@ -16,7 +16,7 @@ import signal
 # Add parent directories to path to import shared modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
 
-from api.routers import listings, stats, value, websocket
+from api.routers import listings, stats, value, websocket, rejected
 from storage.db import init_db
 from core.logging import get_logger
 from core.config import config
@@ -204,6 +204,7 @@ async def favicon():
 app.include_router(listings.router, prefix="/api/listings", tags=["📋 Listings"])
 app.include_router(stats.router, prefix="/api/stats", tags=["📊 Statistics"])
 app.include_router(value.router, prefix="/api/value", tags=["💎 Value Analysis"])
+app.include_router(rejected.router, prefix="/api/rejected", tags=["🚫 Rejected Listings"])
 app.include_router(websocket.router, prefix="/api", tags=["🔌 WebSocket"])
 
 

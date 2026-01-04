@@ -11,6 +11,7 @@ export function Navbar() {
   const navItems = [
     { path: '/', label: 'Начало' },
     { path: '/value', label: 'Стойност' },
+    { path: '/rejected', label: 'Отхвърлени' },
     { path: '/about', label: 'За проекта' },
   ];
 

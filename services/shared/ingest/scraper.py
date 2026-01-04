@@ -68,6 +68,7 @@ class GPUScraper:
         # Filter tracking
         self._filter_stats = {}
         self._filtered_count = 0
+        self._rejected_listings = []  # Store rejected listings with reasons
 
         logger.info(
             f"GPUScraper initialized (TOR: {self.use_tor}, "
@@ -625,6 +626,16 @@ class GPUScraper:
                     category = self._categorize_filter_reason(reason)
                     self._filter_stats[category] = self._filter_stats.get(category, 0) + 1
 
+                    # Store rejected listing with details
+                    self._rejected_listings.append({
+                        'title': title,
+                        'price': price,
+                        'url': url,
+                        'model': model,
+                        'reason': reason,
+                        'category': category
+                    })
+
                     return False
 
             # Check if URL already processed (prevents duplicates from multiple search terms)
@@ -1003,6 +1014,24 @@ class GPUScraper:
                     break
 
         return sorted(results, key=lambda x: x[3], reverse=True)
+
+    def get_rejected_listings(self) -> List[Dict]:
+        """
+        Връща списък с всички отхвърлени обяви с причини за отхвърляне
+
+        Returns:
+            List of dicts with: title, price, url, model, reason, category
+        """
+        return self._rejected_listings
+
+    def get_rejection_summary(self) -> Dict[str, int]:
+        """
+        Връща обобщена статистика за отхвърлените обяви по категория
+
+        Returns:
+            Dict with category -> count
+        """
+        return self._filter_stats
 
 
 # ================= BENCHMARKS =================

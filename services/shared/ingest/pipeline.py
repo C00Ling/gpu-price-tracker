@@ -116,6 +116,12 @@ def run_pipeline(ws_manager=None):
             # Replace raw data with filtered data
             scraper.gpu_prices = defaultdict(list, filtered_data)
 
+            # Save rejected listings to cache for later viewing
+            from core.cache import cache
+            rejected_listings = scraper.get_rejected_listings()
+            cache.set("rejected_listings", rejected_listings, ttl=86400)  # Cache for 24 hours
+            logger.info(f"💾 Saved {len(rejected_listings)} rejected listings to cache")
+
         except Exception as e:
             logger.error(f"❌ Post-processing failed: {e}")
             return False

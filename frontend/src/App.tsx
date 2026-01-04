@@ -1,7 +1,7 @@
 // Main App component with routing
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar, ErrorBoundary } from './components';
-import { Home, ValueAnalysis, About } from './pages';
+import { Home, ValueAnalysis, About, Rejected } from './pages';
 
 function App() {
   return (
@@ -14,6 +14,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/dashboard" element={<Home />} />
             <Route path="/value" element={<ValueAnalysis />} />
+            <Route path="/rejected" element={<Rejected />} />
             <Route path="/about" element={<About />} />
             {/* Catch-all for SPA */}
             <Route path="*" element={<Home />} />

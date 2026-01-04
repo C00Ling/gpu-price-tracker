@@ -156,6 +156,9 @@ export const api = {
       return response.json();
     },
   },
+
+  // Utility methods
+  getBaseUrl: () => getBaseUrl(),
 };
 
 export default api;
