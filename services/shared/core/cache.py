@@ -21,24 +21,41 @@ except ImportError:
 
 class Cache:
     def __init__(self):
-        self.enabled = bool(config.get("redis.enabled", False)) and REDIS_AVAILABLE
+        # Check for REDIS_URL environment variable (Railway, Heroku, etc.)
+        redis_url = os.getenv("REDIS_URL")
+        redis_enabled = bool(config.get("redis.enabled", False)) or bool(redis_url)
+
+        self.enabled = redis_enabled and REDIS_AVAILABLE
         self.client: Optional[redis.Redis] = None
         self.use_file_cache = False
         self.cache_dir = Path("cache")
 
         if self.enabled:
             try:
-                self.client = redis.Redis(
-                    host=str(config.get("redis.host", "localhost")),
-                    port=int(config.get("redis.port", 6379)),
-                    db=int(config.get("redis.db", 0)),
-                    password=cast(Optional[str], config.get("redis.password")),
-                    decode_responses=True,
-                    socket_timeout=5,
-                    socket_connect_timeout=5
-                )
+                # Prefer REDIS_URL if available (Railway, Heroku)
+                if redis_url:
+                    logger.info("🔗 Connecting to Redis using REDIS_URL...")
+                    self.client = redis.from_url(
+                        redis_url,
+                        decode_responses=True,
+                        socket_timeout=5,
+                        socket_connect_timeout=5
+                    )
+                else:
+                    # Fallback to individual config values
+                    logger.info("🔗 Connecting to Redis using config values...")
+                    self.client = redis.Redis(
+                        host=str(config.get("redis.host", "localhost")),
+                        port=int(config.get("redis.port", 6379)),
+                        db=int(config.get("redis.db", 0)),
+                        password=cast(Optional[str], config.get("redis.password")),
+                        decode_responses=True,
+                        socket_timeout=5,
+                        socket_connect_timeout=5
+                    )
+
                 self.client.ping()
-                logger.info("✅ Redis cache connected")
+                logger.info("✅ Redis cache connected successfully")
             except Exception as e:
                 logger.warning(f"⚠️ Redis connection failed: {e}. Falling back to file-based cache.")
                 self.enabled = False

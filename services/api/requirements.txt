@@ -18,6 +18,9 @@ websockets==15.0.1
 pyyaml==6.0.2
 python-dotenv==1.0.1
 
+# Caching
+redis==5.2.2
+
 # Error Monitoring
 sentry-sdk[fastapi]==2.19.2
 
