@@ -69,6 +69,7 @@ class GPUScraper:
         self._filter_stats = {}
         self._filtered_count = 0
         self._rejected_listings = []  # Store rejected listings with reasons
+        self._last_rejection_reason = None  # Track why last listing was rejected
 
         logger.info(
             f"GPUScraper initialized (TOR: {self.use_tor}, "
@@ -649,12 +650,40 @@ class GPUScraper:
             logger.debug(f"Added: {model} - {price}лв ({url})")
             return True
 
+        # Model extraction failed - check if we have a rejection reason
+        if self._last_rejection_reason and apply_filters:
+            # Track this rejection
+            self._filtered_count += 1
+            category = self._categorize_filter_reason(self._last_rejection_reason)
+            self._filter_stats[category] = self._filter_stats.get(category, 0) + 1
+
+            # Store rejected listing
+            self._rejected_listings.append({
+                'title': title,
+                'price': price,
+                'url': url,
+                'model': None,  # Model couldn't be extracted
+                'reason': self._last_rejection_reason,
+                'category': category
+            })
+
+            # Clear the rejection reason for next listing
+            self._last_rejection_reason = None
+
         return False
 
     def _categorize_filter_reason(self, reason: str) -> str:
         """Categorize filter reason for statistics"""
         if "blacklisted keyword" in reason.lower():
             return "🚫 Blacklisted Keywords"
+        elif "full computer" in reason.lower() or "laptop" in reason.lower():
+            return "💻 Full Computer/Laptop"
+        elif "typo" in reason.lower():
+            return "❌ Invalid GPU Model (Typo)"
+        elif "invalid vram" in reason.lower():
+            return "💾 Invalid VRAM"
+        elif "unknown gpu" in reason.lower() or "invalid/unknown" in reason.lower():
+            return "❓ Unknown GPU Model"
         elif "statistical outlier" in reason.lower():
             return "📊 Statistical Outlier (Too Low)"
         elif "too high" in reason.lower():
@@ -817,6 +846,7 @@ class GPUScraper:
             # VRAM VALIDATION: Check if extracted VRAM is valid for this GPU model
             if not self._is_valid_vram_for_model(normalized, vram):
                 logger.warning(f"Invalid VRAM {vram} for model {normalized} - rejecting (likely system RAM confusion)")
+                self._last_rejection_reason = f"Invalid VRAM {vram} for model {normalized} (likely system RAM confusion)"
                 # Return model without VRAM if base model is valid
                 if self._is_valid_gpu_model(normalized):
                     return normalized
@@ -845,6 +875,7 @@ class GPUScraper:
             return normalized
         else:
             logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
+            self._last_rejection_reason = f"Invalid/unknown GPU model: {normalized}"
             return None
 
     def _is_valid_gpu_model(self, model: str) -> bool:
@@ -871,8 +902,11 @@ class GPUScraper:
             # Check if only 1-2 characters differ (likely typo)
             if self._is_likely_typo(model, known_model):
                 logger.info(f"Typo detected: '{model}' -> probably '{known_model}' (rejected)")
+                self._last_rejection_reason = f"Invalid GPU model (typo): '{model}' → likely '{known_model}'"
                 return False
 
+        # Model not found in database at all
+        self._last_rejection_reason = f"Unknown GPU model: '{model}'"
         return False
 
     def _is_likely_typo(self, model: str, known_model: str) -> bool:
