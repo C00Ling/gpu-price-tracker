@@ -23,7 +23,6 @@ GPU_FPS_BENCHMARKS = {
     "RTX 5060 TI 16GB": 113,
     "RTX 5060 TI 12GB": 110,
     "RTX 5060 TI 8GB": 101,
-    "RTX 5060 TI": 0.0,
     "RTX 5060": 95,
     "RTX 5050": 81,
 
@@ -134,7 +133,7 @@ GPU_FPS_BENCHMARKS = {
     "RX 5600 M": 58,
     "RX 5500 XT 8GB": 48,
     "RX 5500 XT 4GB": 45,
-    "RX 5500": 0.0,
+    "RX 5500": 41,
 
     # ========== AMD RX 500-series (Polaris) ==========
     "RX 590": 56,
