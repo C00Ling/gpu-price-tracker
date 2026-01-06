@@ -27,6 +27,7 @@ export function Rejected() {
   const [summary, setSummary] = useState<Record<string, number>>({});
 
   useEffect(() => {
+    document.title = 'GPU Market - Отхвърлени';
     fetchData();
   }, []);
 

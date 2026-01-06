@@ -1,5 +1,5 @@
 // Listings page - All GPU listings with filters
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useListings, useListingsByModel, useAvailableModels } from '../hooks/useGPUData';
 import {
   Card,
@@ -19,6 +19,10 @@ function stripVRAMFromModel(model: string): string {
 }
 
 export function Listings() {
+  useEffect(() => {
+    document.title = 'GPU Market - Обяви';
+  }, []);
+
   const [selectedModel, setSelectedModel] = useState<string>('');
   const page = 1;
   const pageSize = 50;

@@ -1,4 +1,5 @@
 // Home page - Dashboard with summary stats and top GPUs
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSummaryStats, useTopValue } from '../hooks/useGPUData';
 import { useScrapeProgress } from '../hooks/useScrapeProgress';
@@ -17,6 +18,10 @@ function stripVRAMFromModel(model: string): string {
 }
 
 export function Home() {
+  useEffect(() => {
+    document.title = 'GPU Market - Начало';
+  }, []);
+
   const { data: stats, isLoading: statsLoading, error: statsError } = useSummaryStats();
   const { data: topGPUs, isLoading: topLoading, error: topError } = useTopValue(5);
 

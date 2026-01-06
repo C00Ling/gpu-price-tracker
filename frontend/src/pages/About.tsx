@@ -1,8 +1,13 @@
 // About page - Project information
+import { useEffect } from 'react';
 import { Card, CardHeader, CardContent } from '../components';
 import { config } from '../lib/config';
 
 export function About() {
+  useEffect(() => {
+    document.title = 'GPU Market - За проекта';
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Card className="mb-6">

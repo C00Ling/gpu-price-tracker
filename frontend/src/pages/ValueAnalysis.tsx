@@ -1,5 +1,5 @@
 // Value Analysis page - FPS per лв ranking
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useValueAnalysis } from '../hooks/useGPUData';
 import {
   Card,
@@ -19,6 +19,10 @@ function stripVRAMFromModel(model: string): string {
 }
 
 export function ValueAnalysis() {
+  useEffect(() => {
+    document.title = 'GPU Market - Стойност';
+  }, []);
+
   const [vramFilter, setVramFilter] = useState<number | undefined>(undefined);
   const { data: valueData, isLoading, error, refetch } = useValueAnalysis(vramFilter);
   const [showAll, setShowAll] = useState(true);
