@@ -359,18 +359,8 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
     }
 
     for model, items in raw_data.items():
-        if not items or len(items) < MIN_SAMPLE_SIZE:
-            # Keep models with too few listings (no stats available)
-            filtered_data[model] = items
-            filter_stats['total_kept'] += len(items)
+        if not items:
             continue
-
-        import statistics
-        # Extract just prices for statistics
-        prices = [item['price'] for item in items]
-        median = statistics.median(prices)
-        low_threshold = median * OUTLIER_THRESHOLD_LOW
-        high_threshold = median * OUTLIER_THRESHOLD_HIGH
 
         valid_items = []
         for item in items:
@@ -421,53 +411,8 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             if is_computer:
                 continue
 
-            # Check extremely low price (< 50 лв)
-            if price < 50:
-                filter_stats['extremely_low_price'] += 1
-                filter_stats['total_filtered'] += 1
-                reason = f"Extremely low price: {price}лв (likely broken)"
-                rejected_listings.append({
-                    'title': title,
-                    'price': price,
-                    'url': url,
-                    'model': model,
-                    'reason': reason,
-                    'category': '⚠️  Extremely Low Price (<50лв)'
-                })
-                logger.debug(f"Filtered {model} @ {price}лв: {reason}")
-                continue
-
-            # Check low outlier
-            if price < low_threshold:
-                filter_stats['statistical_outlier_low'] += 1
-                filter_stats['total_filtered'] += 1
-                reason = f"Statistical outlier: {price}лв < {low_threshold:.0f}лв (50% of median {median:.0f}лв)"
-                rejected_listings.append({
-                    'title': title,
-                    'price': price,
-                    'url': url,
-                    'model': model,
-                    'reason': reason,
-                    'category': '📊 Statistical Outlier (Too Low)'
-                })
-                logger.debug(f"Filtered {model} @ {price}лв: {reason}")
-                continue
-
-            # Check high outlier
-            if price > high_threshold:
-                filter_stats['statistical_outlier_high'] += 1
-                filter_stats['total_filtered'] += 1
-                reason = f"Price too high: {price}лв > {high_threshold:.0f}лв (300% of median {median:.0f}лв)"
-                rejected_listings.append({
-                    'title': title,
-                    'price': price,
-                    'url': url,
-                    'model': model,
-                    'reason': reason,
-                    'category': '💸 Statistical Outlier (Too High)'
-                })
-                logger.debug(f"Filtered {model} @ {price}лв: {reason}")
-                continue
+            # PRICE FILTERS DISABLED - Allow all prices through
+            # Only blacklist keywords and full computer/laptop filters remain active
 
             # Listing passed all checks
             valid_items.append(item)
