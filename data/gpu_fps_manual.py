@@ -87,11 +87,9 @@ GPU_FPS_BENCHMARKS = {
     # ========== NVIDIA GTX 900-series (Maxwell) ==========
     "GTX 980 TI": 58,
     "GTX 980": 42,
-    "GTX 970": 0.0,
-    "GTX 960 4GB": 0.0,
-    "GTX 960 2GB": 14,
-    "GTX 960": 0.0,
-    "GTX 950": 0.0,
+    "GTX 970": 38,
+    "GTX 960": 14,
+    "GTX 950": 10,
 
     # ========== AMD RX 9000-series (RDNA 4) ==========
     "RX 9070 XT": 152,
@@ -142,17 +140,10 @@ GPU_FPS_BENCHMARKS = {
     "RX 590": 56,
     "RX 580 8GB": 54,
     "RX 580 4GB": 48,
-    "RX 580 2GB": 42,
     "RX 580": 54,
-    "RX 570 8GB": 0.0,
-    "RX 570 4GB": 0.0,
-    "RX 570": 0.0,
-    "RX 560 4GB": 0.0,
-    "RX 560 2GB": 0.0,
-    "RX 560": 0.0,
-    "RX 550 4GB": 0.0,
-    "RX 550 2GB": 0.0,
-    "RX 550": 0.0,
+    "RX 570": 39,
+    "RX 560": 21,
+    "RX 550": 10,
 
     # ========== AMD RX 400-series (Polaris) ==========
     "RX 490": 54,  # Similar to RX 580
