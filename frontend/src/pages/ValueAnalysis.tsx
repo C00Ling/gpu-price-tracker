@@ -147,6 +147,19 @@ export function ValueAnalysis() {
                 <strong className="text-gray-300">Performance:</strong> Относителен скор (0-100) спрямо RTX 5090 = 100.
                 По-високият скор означава по-висока gaming производителност.
               </p>
+
+              <div className="mt-4 bg-zinc-800 rounded-lg p-3 border border-zinc-700">
+                <h4 className="text-xs font-semibold text-white mb-2 flex items-center gap-2">
+                  <span className="text-red-500">🎮</span>
+                  Benchmark настройки
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-300">
+                  <div><strong>Игра:</strong> Red Dead Redemption 2</div>
+                  <div><strong>Резолюция:</strong> 1920x1080</div>
+                  <div><strong>Настройки:</strong> Highest</div>
+                  <div><strong>CPU:</strong> Ryzen 9 9950X3D</div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

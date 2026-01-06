@@ -81,6 +81,23 @@ export function About() {
               ), а цената е медианната стойност от всички обяви за съответния модел.
             </p>
 
+            <div className="mt-4 bg-zinc-800 rounded-lg p-4 border border-zinc-700">
+              <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
+                <span className="text-red-500">🎮</span>
+                Benchmark настройки
+              </h4>
+              <ul className="space-y-1 text-sm text-gray-300">
+                <li>• <strong>Игра:</strong> Red Dead Redemption 2</li>
+                <li>• <strong>Резолюция:</strong> 1920 x 1080 (Full HD)</li>
+                <li>• <strong>Настройки:</strong> Highest</li>
+                <li>• <strong>Тестова система:</strong> AMD Ryzen 9 9950X3D CPU</li>
+              </ul>
+              <p className="text-xs text-gray-400 mt-3">
+                Benchmark данните представляват средна производителност в реални игрови сценарии.
+                Стойностите могат да варират в зависимост от конкретната система и настройки.
+              </p>
+            </div>
+
             <h3 className="text-xl font-semibold text-white mt-6 mb-3">
               API endpoints
             </h3>
