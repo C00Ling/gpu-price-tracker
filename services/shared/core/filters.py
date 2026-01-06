@@ -26,7 +26,7 @@ BLACKLIST_KEYWORDS = [
     "няма сигнал", "без сигнал", "не дава сигнал",
 
     # Parts only (not full cards)
-    "вентилатор", "вентилатори", "охлаждане",
+    "вентилатор", "вентилатори", "охлаждане", "мишка",
 
     # Mining-related (often worn out)
     "майнинг", "mining", "burnout", "mining rig", "копана", "ферма", "mining farm",
@@ -36,7 +36,7 @@ BLACKLIST_KEYWORDS = [
     "broken", "damaged", "faulty", "defective", "not working", "for parts",
     "parts only", "as is", "repair", "artifacts", "black screen",
     "burnt", "dead", "fried", "doa", "no signal", "no display",
-    "fan", "fans", "cooler", "cooling",
+    "fan", "fans", "cooler", "cooling", "mouse",
 
     # Common suspicious patterns
     "срочно", "бързо", "спешно",  # Often scams
