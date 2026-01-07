@@ -149,9 +149,9 @@ export function ValueAnalysis() {
               </p>
 
               {/* Benchmark Section */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-navy-900/50 border border-dark-navy-700">
+              <div className="flex items-center gap-3">
                 {/* RDR2 Thumbnail */}
-                <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-dark-navy-900 border border-dark-navy-600">
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-dark-navy-900/50 border border-dark-navy-600">
                   <img
                     src="https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
                     alt="Red Dead Redemption 2"
