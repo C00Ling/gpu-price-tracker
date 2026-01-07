@@ -135,7 +135,7 @@ export function ValueAnalysis() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold text-white mb-1">
                 Как работи анализът на стойността?
               </h3>
@@ -143,68 +143,55 @@ export function ValueAnalysis() {
                 Изчисляваме FPS/лв (кадри в секунда на лев) за всеки модел, използвайки benchmark данни за 1080p игри
                 и медианната цена от обявите. По-високата стойност означава по-добра стойност за парите.
               </p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 mb-4">
                 <strong className="text-gray-300">Performance:</strong> Относителен скор (0-100) спрямо RTX 5090 = 100.
                 По-високият скор означава по-висока gaming производителност.
               </p>
 
-              <div className="mt-4 relative overflow-hidden rounded-lg border border-dark-navy-700 bg-dark-navy-800/30">
-                {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    {/* RDR2 Thumbnail */}
-                    <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-dark-navy-900 border border-dark-navy-600">
-                      <img
-                        src="https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
-                        alt="Red Dead Redemption 2"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Fallback if image fails to load
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl">🎮</div>';
-                        }}
-                      />
-                    </div>
+              {/* Benchmark Section */}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-dark-navy-900/50 border border-dark-navy-700">
+                {/* RDR2 Thumbnail */}
+                <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-dark-navy-900 border border-dark-navy-600">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
+                    alt="Red Dead Redemption 2"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl">🎮</div>';
+                    }}
+                  />
+                </div>
 
-                    {/* Header */}
-                    <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-                        <svg className="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                          <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
-                          <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
-                          <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
-                          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                          <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                        </svg>
-                        <span>Benchmark настройки</span>
-                      </h4>
-                      <p className="text-xs text-gray-400 mt-0.5">Red Dead Redemption 2</p>
-                    </div>
+                {/* Benchmark Info */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <svg className="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    <h4 className="text-sm font-semibold text-white">Benchmark настройки</h4>
                   </div>
+                  <p className="text-xs text-gray-400 mb-2">Red Dead Redemption 2</p>
 
-                  {/* Specs Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* Specs */}
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-gray-400">Резолюция:</span>
-                      <span className="text-gray-200 font-medium">1920x1080</span>
+                      <span className="text-gray-400">1920x1080</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                       </svg>
-                      <span className="text-gray-400">Настройки:</span>
-                      <span className="text-gray-200 font-medium">Highest</span>
+                      <span className="text-gray-400">Highest</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                       </svg>
-                      <span className="text-gray-400">CPU:</span>
-                      <span className="text-gray-200 font-medium">Ryzen 9 9950X3D</span>
+                      <span className="text-gray-400">Ryzen 9 9950X3D</span>
                     </div>
                   </div>
                 </div>
