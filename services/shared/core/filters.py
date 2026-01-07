@@ -41,9 +41,22 @@ BLACKLIST_KEYWORDS = [
     "parts only", "part for", "for part", "as is", "repair", "artifacts", "black screen",
     "burnt", "dead", "fried", "doa", "no signal", "no display",
     "fan", "fans", "cooler", "cooling", "mouse",
+]
 
-    # Common suspicious patterns
-    "срочно", "бързо", "спешно",  # Often scams
+# Suspicious keywords that trigger statistical filtering (not immediate blacklist)
+# These words often appear in scams but can also be legitimate
+SUSPICIOUS_KEYWORDS = [
+    # Bulgarian
+    "подаръци", "подарък", "подаръци+", "подаръци !",
+    "срочно", "бързо", "спешно", "много спешно",
+    "намалена", "намаление", "промоция", "разпродажба",
+    "последна цена", "на цената на", "цената е крайна",
+    "договаряне", "договор", "на място",
+
+    # English
+    "urgent", "asap", "quickly", "gift", "gifts", "bonus",
+    "sale", "discount", "promo", "promotion", "deal",
+    "final price", "best price", "lowest price",
 ]
 
 # Keywords indicating full computer listings (not just GPU)
@@ -431,14 +444,26 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             median = statistics.median(prices)
             low_threshold = median * OUTLIER_THRESHOLD_LOW
 
-            # Filter out low price outliers
+            # Filter out low price outliers - ONLY if listing has suspicious keywords
             final_items = []
             for item in valid_items:
                 price = item['price']
-                if price < low_threshold:
+                title_lower = item.get('title', '').lower()
+
+                # Check if title contains any suspicious keyword
+                suspicious_keyword_found = None
+                for keyword in SUSPICIOUS_KEYWORDS:
+                    if keyword.lower() in title_lower:
+                        suspicious_keyword_found = keyword
+                        break
+
+                # Only filter if BOTH conditions are met:
+                # 1. Price is suspiciously low
+                # 2. Listing contains suspicious keywords
+                if price < low_threshold and suspicious_keyword_found:
                     filter_stats['statistical_outlier_low'] += 1
                     filter_stats['total_filtered'] += 1
-                    reason = f"Too low: {price:.0f}лв < {low_threshold:.0f}лв (40% of median {median:.0f}лв)"
+                    reason = f"Suspicious low price: {price:.0f}лв < {low_threshold:.0f}лв (40% of median {median:.0f}лв) + keyword '{suspicious_keyword_found}'"
                     rejected_listings.append({
                         'title': item.get('title', ''),
                         'price': price,
