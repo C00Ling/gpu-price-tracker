@@ -111,14 +111,6 @@ export function Rejected() {
         </span>
       ),
     },
-    {
-      key: 'reason',
-      label: 'Причина',
-      sortable: false,
-      render: (item: RejectedListing) => (
-        <span className="text-sm text-gray-400">{item.reason}</span>
-      ),
-    },
   ];
 
   const categories = Object.keys(summary).sort();
@@ -150,28 +142,6 @@ export function Rejected() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Summary Stats */}
-      {categories.length > 0 && (
-        <Card className="mb-6">
-          <CardHeader title="Статистика по категории" />
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {categories.map((category) => (
-                <div
-                  key={category}
-                  className="p-3 bg-dark-navy-800/50 border border-dark-navy-700 rounded-lg"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-300">{category}</span>
-                    <span className="text-lg font-semibold text-white">{summary[category]}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Rejected Listings Table */}
       <Card>

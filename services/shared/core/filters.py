@@ -20,13 +20,17 @@ logger = get_logger("filters")
 # Expanded blacklist keywords
 BLACKLIST_KEYWORDS = [
     # Bulgarian
-    "за части", "счупена", "не работи", "повредена", "дефект",
-    "за ремонт", "артефакти", "черен екран", "не дава екран", "не стартира", "изгоря",
+    "заектури", "за част", "част за", "части за", "счупена", "не работи", "повредена", "дефект",
+    "за ремонт", "ремонтен", "ремонтен комплект", "комплект за ремонт",
+    "артефакти", "черен екран", "не дава екран", "не стартира", "изгоря",
     "развален", "нетествана", "проблем", "не е тествана", "дефектна", "не функционира", "изправни",
     "няма сигнал", "без сигнал", "не дава сигнал",
 
     # Parts only (not full cards)
-    "вентилатор", "вентилатори", "охлаждане", "мишка",
+    "вентилатор", "вентилатори", "охлаждане", "охладител", "мишка", "backplate", "бекплейт",
+    "радиатор", "heatsink", "thermal pad", "термопад", "термопадове",
+    "water block", "waterblock", "воден блок", "водно охлаждане", "водно блок",
+    "liquid cooling",
 
     # Mining-related (often worn out)
     "майнинг", "mining", "burnout", "mining rig", "копана", "ферма", "mining farm",
@@ -34,7 +38,7 @@ BLACKLIST_KEYWORDS = [
 
     # English
     "broken", "damaged", "faulty", "defective", "not working", "for parts",
-    "parts only", "as is", "repair", "artifacts", "black screen",
+    "parts only", "part for", "for part", "as is", "repair", "artifacts", "black screen",
     "burnt", "dead", "fried", "doa", "no signal", "no display",
     "fan", "fans", "cooler", "cooling", "mouse",
 
@@ -60,8 +64,8 @@ COMPUTER_KEYWORDS = [
 ]
 
 # Outlier detection thresholds
-OUTLIER_THRESHOLD_LOW = 0.50   # 50% от медианата (по-балансирано филтриране)
-OUTLIER_THRESHOLD_HIGH = 3.0   # 300% от медианата (за скъпи outliers)
+OUTLIER_THRESHOLD_LOW = 0.40   # 40% от медианата (балансирано филтриране на твърде ниски цени)
+OUTLIER_THRESHOLD_HIGH = 3.0   # 300% от медианата (DISABLED - не се използва)
 
 # Minimum sample size за статистика
 MIN_SAMPLE_SIZE = 3  # Минимум 3 обяви за да приложим статистика (БЕЗ warm-up фаза)
@@ -415,14 +419,45 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             if is_computer:
                 continue
 
-            # PRICE FILTERS DISABLED - Allow all prices through
-            # Only blacklist keywords and full computer/laptop filters remain active
-
-            # Listing passed all checks
+            # Statistical outlier detection - only for low prices
+            # We need to collect all prices first, then filter
             valid_items.append(item)
-            filter_stats['total_kept'] += 1
 
-        if valid_items:
+        # Now apply statistical filtering if we have enough samples
+        if valid_items and len(valid_items) >= MIN_SAMPLE_SIZE:
+            import statistics
+
+            prices = [item['price'] for item in valid_items]
+            median = statistics.median(prices)
+            low_threshold = median * OUTLIER_THRESHOLD_LOW
+
+            # Filter out low price outliers
+            final_items = []
+            for item in valid_items:
+                price = item['price']
+                if price < low_threshold:
+                    filter_stats['statistical_outlier_low'] += 1
+                    filter_stats['total_filtered'] += 1
+                    reason = f"Too low: {price:.0f}лв < {low_threshold:.0f}лв (40% of median {median:.0f}лв)"
+                    rejected_listings.append({
+                        'title': item.get('title', ''),
+                        'price': price,
+                        'url': item.get('url', ''),
+                        'model': model,
+                        'reason': reason,
+                        'category': '📉 Statistical Outlier (Low Price)'
+                    })
+                    logger.debug(f"Filtered {model} @ {price}лв: {reason}")
+                else:
+                    final_items.append(item)
+                    filter_stats['total_kept'] += 1
+
+            if final_items:
+                filtered_data[model] = final_items
+        elif valid_items:
+            # Not enough samples for statistics, keep all
+            for item in valid_items:
+                filter_stats['total_kept'] += 1
             filtered_data[model] = valid_items
 
     return filtered_data, filter_stats, rejected_listings
@@ -441,7 +476,6 @@ def get_filter_summary(filtered_data: Dict[str, List[float]]) -> str:
     summary = []
     summary.append("📊 Post-Processing Filter Results:")
     summary.append(f"  Low Outlier Threshold:  < {OUTLIER_THRESHOLD_LOW * 100:.0f}% of median")
-    summary.append(f"  High Outlier Threshold: > {OUTLIER_THRESHOLD_HIGH * 100:.0f}% of median")
     summary.append(f"  Min Sample Size:        {MIN_SAMPLE_SIZE} listings")
     summary.append("")
 
@@ -450,9 +484,8 @@ def get_filter_summary(filtered_data: Dict[str, List[float]]) -> str:
             import statistics
             median = statistics.median(prices)
             low = median * OUTLIER_THRESHOLD_LOW
-            high = median * OUTLIER_THRESHOLD_HIGH
             summary.append(
-                f"  {model:20} → {low:>5.0f}лв - {high:>6.0f}лв "
+                f"  {model:20} → min: {low:>5.0f}лв "
                 f"(median: {median:.0f}лв, n={len(prices)})"
             )
         else:
