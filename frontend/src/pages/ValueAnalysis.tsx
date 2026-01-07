@@ -148,26 +148,42 @@ export function ValueAnalysis() {
                 По-високият скор означава по-висока gaming производителност.
               </p>
 
-              <div className="mt-4 relative overflow-hidden rounded-lg border border-dark-navy-700">
-                {/* Background with gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-red-900/10 via-dark-navy-800/50 to-orange-900/10"></div>
-
+              <div className="mt-4 relative overflow-hidden rounded-lg border border-dark-navy-700 bg-dark-navy-800/30">
                 {/* Content */}
-                <div className="relative p-4">
-                  <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                    <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                      <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
-                      <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
-                      <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
-                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                      <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                    <span>Benchmark настройки</span>
-                    <span className="ml-auto text-xs font-normal text-gray-400 bg-dark-navy-800/60 px-2 py-1 rounded">
-                      Red Dead Redemption 2
-                    </span>
-                  </h4>
+                <div className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    {/* RDR2 Thumbnail */}
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-dark-navy-900 border border-dark-navy-600">
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
+                        alt="Red Dead Redemption 2"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback if image fails to load
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl">🎮</div>';
+                        }}
+                      />
+                    </div>
+
+                    {/* Header */}
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                        <svg className="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                          <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                          <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                          <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <span>Benchmark настройки</span>
+                      </h4>
+                      <p className="text-xs text-gray-400 mt-0.5">Red Dead Redemption 2</p>
+                    </div>
+                  </div>
+
+                  {/* Specs Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
