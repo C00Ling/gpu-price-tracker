@@ -151,14 +151,14 @@ export function ValueAnalysis() {
               {/* Benchmark Section */}
               <div className="flex items-center gap-4 flex-wrap">
                 {/* RDR2 Thumbnail */}
-                <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-dark-navy-900/50 border border-dark-navy-600">
+                <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-dark-navy-900/50 border border-dark-navy-600 shadow-lg">
                   <img
                     src="https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
                     alt="Red Dead Redemption 2"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-fill"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-4xl">🎮</div>';
+                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-3xl">🎮</div>';
                     }}
                   />
                 </div>
@@ -172,7 +172,7 @@ export function ValueAnalysis() {
                 </div>
 
                 {/* Divider */}
-                <div className="hidden sm:block w-px h-12 bg-dark-navy-700"></div>
+                <div className="hidden sm:block w-px h-10 bg-dark-navy-700"></div>
 
                 {/* Specs horizontal */}
                 <div className="flex items-center gap-4 text-sm flex-wrap">
