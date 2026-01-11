@@ -81,7 +81,6 @@ COMPUTER_KEYWORDS = [
 FACTORY_WATERCOOLED_MODELS = [
     "waterforce",     # Gigabyte Waterforce series
     "aorus waterforce", # Gigabyte AORUS Waterforce
-    "ekwb",           # EKWB custom cards
     "hydro copper",   # EVGA Hydro Copper
     "sea hawk",       # MSI Sea Hawk
     "seahawk",        # MSI Sea Hawk (alternative spelling)
