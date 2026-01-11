@@ -387,13 +387,14 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
         for item in items:
             price = item['price']
             title = item.get('title', '')
-            title_lower = title.lower()
+            description = item.get('description', '')
+            full_text = f"{title} {description}".lower()
             url = item.get('url', '')
 
-            # Check for blacklisted keywords (highest priority - broken/defective GPUs)
+            # Check for blacklisted keywords in both title AND description (highest priority - broken/defective GPUs)
             blacklisted = False
             for keyword in BLACKLIST_KEYWORDS:
-                if keyword.lower() in title_lower:
+                if keyword.lower() in full_text:
                     filter_stats['blacklist_keywords'] += 1
                     filter_stats['total_filtered'] += 1
                     reason = f"Blacklisted keyword: '{keyword}'"
@@ -411,10 +412,10 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             if blacklisted:
                 continue
 
-            # Check for full computer listings (not just GPU)
+            # Check for full computer listings in both title AND description (not just GPU)
             is_computer = False
             for keyword in COMPUTER_KEYWORDS:
-                if keyword.lower() in title_lower:
+                if keyword.lower() in full_text:
                     filter_stats['full_computer'] += 1
                     filter_stats['total_filtered'] += 1
                     reason = f"Full computer listing: '{keyword}'"
@@ -448,12 +449,14 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             final_items = []
             for item in valid_items:
                 price = item['price']
-                title_lower = item.get('title', '').lower()
+                title = item.get('title', '')
+                description = item.get('description', '')
+                full_text_lower = f"{title} {description}".lower()
 
-                # Check if title contains any suspicious keyword
+                # Check if title OR description contains any suspicious keyword
                 suspicious_keyword_found = None
                 for keyword in SUSPICIOUS_KEYWORDS:
-                    if keyword.lower() in title_lower:
+                    if keyword.lower() in full_text_lower:
                         suspicious_keyword_found = keyword
                         break
 

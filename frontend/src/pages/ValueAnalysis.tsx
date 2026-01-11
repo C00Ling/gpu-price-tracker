@@ -151,45 +151,45 @@ export function ValueAnalysis() {
               {/* Benchmark Section */}
               <div className="flex items-center gap-4 flex-wrap">
                 {/* RDR2 Thumbnail */}
-                <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-dark-navy-900/50 border border-dark-navy-600">
+                <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-dark-navy-900/50 border border-dark-navy-600">
                   <img
                     src="https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg"
                     alt="Red Dead Redemption 2"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-2xl">🎮</div>';
+                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-4xl">🎮</div>';
                     }}
                   />
                 </div>
 
                 {/* Benchmark Title */}
                 <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-primary-500" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                   </svg>
-                  <span className="text-sm font-semibold text-white">Red Dead Redemption 2</span>
+                  <span className="text-base font-semibold text-white">Red Dead Redemption 2</span>
                 </div>
 
                 {/* Divider */}
-                <div className="hidden sm:block w-px h-8 bg-dark-navy-700"></div>
+                <div className="hidden sm:block w-px h-12 bg-dark-navy-700"></div>
 
                 {/* Specs horizontal */}
-                <div className="flex items-center gap-4 text-xs flex-wrap">
+                <div className="flex items-center gap-4 text-sm flex-wrap">
                   <div className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <span className="text-gray-400">1920x1080</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                     </svg>
                     <span className="text-gray-400">Highest</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                     </svg>
                     <span className="text-gray-400">Ryzen 9 9950X3D</span>

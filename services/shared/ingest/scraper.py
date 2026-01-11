@@ -644,8 +644,8 @@ class GPUScraper:
                 logger.debug(f"Skipping duplicate URL: {url}")
                 return False
 
-            # Store price, URL, and title for post-processing filtering
-            self.gpu_prices[model].append({'price': price, 'url': url, 'title': title})
+            # Store price, URL, title, and description for post-processing filtering
+            self.gpu_prices[model].append({'price': price, 'url': url, 'title': title, 'description': description})
             self.seen_urls.add(url)
             logger.debug(f"Added: {model} - {price}лв ({url})")
             return True
