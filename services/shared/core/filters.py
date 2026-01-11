@@ -279,9 +279,19 @@ def is_suspicious_listing(
     # Normalize the model for comparison
     gpu_model = normalize_model_name(gpu_model)
 
+    # Check if this is a factory water-cooled GPU (whitelist)
+    is_factory_watercooled = any(
+        watercool_model in title_lower
+        for watercool_model in FACTORY_WATERCOOLED_MODELS
+    )
+
     # 1. Check for blacklisted keywords (ALWAYS APPLIED - HIGHEST PRIORITY)
     for keyword in BLACKLIST_KEYWORDS:
         if keyword.lower() in title_lower:
+            # Skip water cooling keywords if this is a factory water-cooled model
+            water_cooling_keywords = ["водно охлаждане", "водно блок", "воден блок", "water block", "waterblock", "liquid cooling"]
+            if is_factory_watercooled and keyword.lower() in water_cooling_keywords:
+                continue
             return (True, f"Contains blacklisted keyword: '{keyword}'")
 
     # 2. Check for computer/full system listings (ALWAYS APPLIED)
