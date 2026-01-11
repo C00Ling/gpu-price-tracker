@@ -407,8 +407,9 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             url = item.get('url', '')
 
             # Check if this is a factory water-cooled GPU (whitelist)
+            # Check both title AND description for factory watercooled model names
             is_factory_watercooled = any(
-                watercool_model in title.lower()
+                watercool_model in full_text
                 for watercool_model in FACTORY_WATERCOOLED_MODELS
             )
 
