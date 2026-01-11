@@ -76,6 +76,21 @@ COMPUTER_KEYWORDS = [
     "+ cpu", "+ ram", "+ процесор", "+ ssd", "+ hdd",
 ]
 
+# Factory water-cooled GPU models (NOT parts - these are complete GPUs with integrated cooling)
+# These models should bypass water cooling blacklist keywords
+FACTORY_WATERCOOLED_MODELS = [
+    "waterforce",     # Gigabyte Waterforce series
+    "aorus waterforce", # Gigabyte AORUS Waterforce
+    "ekwb",           # EKWB custom cards
+    "hydro copper",   # EVGA Hydro Copper
+    "sea hawk",       # MSI Sea Hawk
+    "seahawk",        # MSI Sea Hawk (alternative spelling)
+    "poseidon",       # ASUS Poseidon
+    "hybrid",         # EVGA Hybrid (AIO cooling)
+    "ichill frostbite", # Inno3D iChill Frostbite
+    "arctic storm",   # ASUS Arctic Storm
+]
+
 # Outlier detection thresholds
 OUTLIER_THRESHOLD_LOW = 0.40   # 40% от медианата (балансирано филтриране на твърде ниски цени)
 OUTLIER_THRESHOLD_HIGH = 3.0   # 300% от медианата (DISABLED - не се използва)
@@ -391,10 +406,22 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             full_text = f"{title} {description}".lower()
             url = item.get('url', '')
 
+            # Check if this is a factory water-cooled GPU (whitelist)
+            is_factory_watercooled = any(
+                watercool_model in title.lower()
+                for watercool_model in FACTORY_WATERCOOLED_MODELS
+            )
+
             # Check for blacklisted keywords in both title AND description (highest priority - broken/defective GPUs)
             blacklisted = False
             for keyword in BLACKLIST_KEYWORDS:
                 if keyword.lower() in full_text:
+                    # Skip water cooling keywords if this is a factory water-cooled model
+                    water_cooling_keywords = ["водно охлаждане", "водно блок", "воден блок", "water block", "waterblock", "liquid cooling"]
+                    if is_factory_watercooled and keyword.lower() in water_cooling_keywords:
+                        logger.debug(f"Skipping water cooling keyword '{keyword}' for factory watercooled model: {title}")
+                        continue
+
                     filter_stats['blacklist_keywords'] += 1
                     filter_stats['total_filtered'] += 1
                     reason = f"Blacklisted keyword: '{keyword}'"
