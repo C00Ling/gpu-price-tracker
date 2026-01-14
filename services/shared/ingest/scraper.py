@@ -609,6 +609,30 @@ class GPUScraper:
         # Extract and normalize model (with VRAM detection from title/description)
         model = self.extract_gpu_model(title, description)
 
+        # Check if model extraction triggered a rejection (e.g., invalid VRAM)
+        # This happens when extract_gpu_model() returns a valid base model but sets _last_rejection_reason
+        if self._last_rejection_reason and apply_filters:
+            # Track this rejection
+            self._filtered_count += 1
+            category = self._categorize_filter_reason(self._last_rejection_reason)
+            self._filter_stats[category] = self._filter_stats.get(category, 0) + 1
+
+            # Store rejected listing
+            self._rejected_listings.append({
+                'title': title,
+                'price': price,
+                'url': url,
+                'model': model,  # May be base model without VRAM
+                'reason': self._last_rejection_reason,
+                'category': category
+            })
+
+            # Clear the rejection reason
+            self._last_rejection_reason = None
+
+            # Skip this listing (it's been tracked as rejected)
+            return False
+
         if model:
             if apply_filters:
                 # Get all current prices for this model (for outlier detection)
