@@ -612,17 +612,17 @@ class GPUScraper:
         # Check if model extraction triggered a rejection (e.g., invalid VRAM)
         # This happens when extract_gpu_model() returns a valid base model but sets _last_rejection_reason
         if self._last_rejection_reason and apply_filters:
-            # Track this rejection
+            # Track this rejection FOR VISIBILITY in /rejected page
             self._filtered_count += 1
             category = self._categorize_filter_reason(self._last_rejection_reason)
             self._filter_stats[category] = self._filter_stats.get(category, 0) + 1
 
-            # Store rejected listing
+            # Store rejected listing (for tracking/monitoring)
             self._rejected_listings.append({
                 'title': title,
                 'price': price,
                 'url': url,
-                'model': model,  # May be base model without VRAM
+                'model': model,  # Base model without invalid VRAM
                 'reason': self._last_rejection_reason,
                 'category': category
             })
@@ -630,8 +630,9 @@ class GPUScraper:
             # Clear the rejection reason
             self._last_rejection_reason = None
 
-            # Skip this listing (it's been tracked as rejected)
-            return False
+            # NOTE: We DON'T skip the listing!
+            # Continue processing with the base model (e.g., "RTX 3060 TI" without the invalid "16GB")
+            # This allows us to track the issue but still use the valid data
 
         if model:
             if apply_filters:
