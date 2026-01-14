@@ -1,0 +1,35 @@
+# Railway Multi-Service Configuration
+# GPU Price Tracker - API + Scraper Worker
+
+# API Service
+[services.api]
+name = "gpu-tracker-api"
+dockerfile = "services/api/Dockerfile"
+root = "."
+
+[services.api.deploy]
+healthcheckPath = "/health"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[services.api.variables]
+ENVIRONMENT = "production"
+LOG_LEVEL = "INFO"
+
+# Scraper Worker Service (Daemon Mode)
+[services.scraper]
+name = "gpu-tracker-scraper"
+dockerfile = "services/scraper/Dockerfile"
+root = "."
+
+[services.scraper.deploy]
+healthcheckPath = ""
+restartPolicyType = "ALWAYS"  # Important: Always restart for daemon mode
+restartPolicyMaxRetries = 10
+
+[services.scraper.variables]
+ENVIRONMENT = "production"
+WORKER_MODE = "daemon"  # Critical: Run in daemon mode for auto-scraping
+SCRAPE_INTERVAL_SECONDS = "21600"  # 6 hours (customize as needed)
+LOG_LEVEL = "INFO"
+TOR_WAIT_TIME = "10"
