@@ -78,6 +78,21 @@ scraper:
     - "no signal"
     - "no display"
 
+    # Water cooling / Parts (not full cards)
+    - "вентилатор"
+    - "охлаждане"
+    - "охладител"
+    - "радиатор"
+    - "water block"
+    - "waterblock"
+    - "воден блок"
+    - "водно охлаждане"
+    - "водно блок"
+    - "liquid cooling"
+    - "heatsink"
+    - "backplate"
+    - "бекплейт"
+
     # Suspicious patterns
     - "срочно"
     - "бързо"
