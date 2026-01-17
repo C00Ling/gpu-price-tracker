@@ -1524,7 +1524,7 @@ GPU_VRAM = {
     "RX 580": 8,
     "RX 570 8GB": 8,
     "RX 570 4GB": 4,
-    # "RX 570": 4,  # Removed - has multiple VRAM variants (4GB and 8GB)
+    "RX 570": 8,  # Default to 8GB variant (most common), but has 4GB too
     "RX 560": 4,
     "RX 550": 2,
 
