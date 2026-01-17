@@ -716,6 +716,8 @@ class GPUScraper:
             return "❌ Invalid GPU Model (Typo)"
         elif "invalid vram" in reason.lower():
             return "💾 Invalid VRAM"
+        elif "липсващ vram" in reason.lower() or "cannot determine vram" in reason.lower():
+            return "🔍 Липсващ VRAM"
         elif "unknown gpu" in reason.lower() or "invalid/unknown" in reason.lower():
             return "❓ Unknown GPU Model"
         elif "statistical outlier" in reason.lower():
@@ -893,19 +895,59 @@ class GPUScraper:
             else:
                 model_with_vram = f"{normalized} {vram}"
         else:
-            model_with_vram = normalized
+            # No VRAM extracted - check if we should auto-add or reject
+            if normalized in GPU_VRAM:
+                expected_vram = GPU_VRAM[normalized]
+
+                # Check if this model has multiple VRAM variants in benchmarks
+                # Examples: GTX 1060 (3GB/6GB), RX 580 (4GB/8GB), RTX 3080 (10GB/12GB) - has variants
+                # ARC A750 (only 8GB), RX 6600 (only 8GB) - single variant
+                has_multiple_variants = False
+                for benchmark_model in SAMPLE_BENCHMARKS:
+                    # Check if there are other VRAM variants (e.g., "GTX 1060 3GB", "GTX 1060 6GB")
+                    if benchmark_model.startswith(normalized + " ") and "GB" in benchmark_model:
+                        # Found a VRAM variant different from expected
+                        variant_vram_match = re.search(r'(\d{1,2})GB', benchmark_model)
+                        if variant_vram_match:
+                            variant_vram = int(variant_vram_match.group(1))
+                            if variant_vram != expected_vram:
+                                has_multiple_variants = True
+                                break
+
+                if has_multiple_variants:
+                    # Model has multiple VRAM variants - REJECT (must specify VRAM)
+                    logger.warning(f"Missing VRAM for multi-variant model: {normalized} (has multiple VRAM options)")
+                    self._last_rejection_reason = f"Липсващ VRAM: Моделът '{normalized}' има няколко VRAM варианта - трябва да се посочи точният VRAM"
+                    return None
+                else:
+                    # Model has single VRAM variant - auto-add default
+                    vram_str = f"{expected_vram}GB"
+                    model_with_vram = f"{normalized} {vram_str}"
+                    logger.debug(f"Auto-adding single VRAM variant: {normalized} -> {model_with_vram}")
+            else:
+                # Model not in GPU_VRAM dictionary - REJECT (cannot determine VRAM)
+                logger.warning(f"Cannot determine VRAM for model: {normalized} (not in GPU_VRAM specs)")
+                self._last_rejection_reason = f"Липсващ VRAM: Не може да се определи VRAM за модел '{normalized}'"
+                return None
 
         # VALIDATE: Check if model exists in known GPUs
         # Try with VRAM first, then without
         if self._is_valid_gpu_model(model_with_vram):
+            # Clear any rejection reason from validation checks
+            self._last_rejection_reason = None
             return model_with_vram
         elif self._is_valid_gpu_model(normalized):
             # Model without VRAM is valid, but model+VRAM is not
             # This means VRAM variant is not in our database
             # Return model with VRAM anyway to track different variants
-            if vram:
+            # Check if model_with_vram has VRAM (either extracted or auto-added)
+            if model_with_vram != normalized:  # model_with_vram has VRAM added
                 logger.debug(f"Model {model_with_vram} not in database, but base model {normalized} is valid")
+                # Clear any rejection reason - model is valid
+                self._last_rejection_reason = None
                 return model_with_vram
+            # Clear rejection reason
+            self._last_rejection_reason = None
             return normalized
         else:
             logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
@@ -922,13 +964,21 @@ class GPUScraper:
         Returns:
             True if model is valid, False if it's a typo (e.g., "GTX 1018")
         """
+        from core.filters import normalize_model_name
+
+        # Normalize model for comparison
+        model_normalized = normalize_model_name(model)
+
         # Check against benchmark data (most comprehensive list)
-        if model in SAMPLE_BENCHMARKS:
-            return True
+        # Need to normalize benchmark keys for case-insensitive comparison
+        for benchmark_model in SAMPLE_BENCHMARKS:
+            if normalize_model_name(benchmark_model) == model_normalized:
+                return True
 
         # Check against VRAM specs (alternative source)
-        if model in GPU_VRAM:
-            return True
+        for vram_model in GPU_VRAM:
+            if normalize_model_name(vram_model) == model_normalized:
+                return True
 
         # Fuzzy matching for common typos
         # "GTX 1018" -> suggest "GTX 1080" (closest match)
