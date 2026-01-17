@@ -1461,6 +1461,7 @@ GPU_VRAM = {
     "GTX 1070": 8,
     "GTX 1060 6GB": 6,
     "GTX 1060 3GB": 3,
+    "GTX 1060": 6,  # Default to 6GB variant (most common), but has 3GB too
     "GTX 1050 TI": 4,
     "GTX 1050": 2,
 
