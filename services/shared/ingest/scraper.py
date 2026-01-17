@@ -930,6 +930,10 @@ class GPUScraper:
                 self._last_rejection_reason = f"Липсващ VRAM: Не може да се определи VRAM за модел '{normalized}'"
                 return None
 
+        # NORMALIZE: Apply special case model name mappings
+        # Some models are sold under unofficial names but should map to official variants
+        model_with_vram = self._normalize_special_cases(model_with_vram)
+
         # VALIDATE: Check if model exists in known GPUs
         # Try with VRAM first, then without
         if self._is_valid_gpu_model(model_with_vram):
@@ -1048,6 +1052,29 @@ class GPUScraper:
 
         # If only 1-2 chars differ (after all checks above), likely a typo
         return 1 <= diffs <= 2
+
+    def _normalize_special_cases(self, model: str) -> str:
+        """
+        Normalize special case model names to their official variants
+
+        Examples:
+        - "RTX 4070 TI 16GB" → "RTX 4070 TI SUPER 16GB" (16GB variant is SUPER)
+        - "RTX 4070 TI 12GB" → "RTX 4070 TI 12GB" (12GB is original, no change)
+
+        Args:
+            model: GPU model name (e.g., "RTX 4070 TI 16GB")
+
+        Returns:
+            Normalized model name with official variant naming
+        """
+        # RTX 4070 Ti 16GB is actually the SUPER variant
+        if model == "RTX 4070 TI 16GB":
+            logger.debug(f"Normalizing {model} → RTX 4070 TI SUPER 16GB")
+            return "RTX 4070 TI SUPER 16GB"
+
+        # Add more special cases here as needed
+
+        return model
 
     def _is_valid_vram_for_model(self, model: str, vram: str) -> bool:
         """
