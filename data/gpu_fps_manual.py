@@ -95,7 +95,7 @@ GPU_FPS_BENCHMARKS = {
     "RX 9070": 146,
     "RX 9070 GRE": 124,
     "RX 9060 XT 16GB": 110,
-    "RX 9060 XT 12GB": 109,
+    "RX 9060 XT": 110,
     "RX 9060": 93,
 
     # ========== AMD RX 7000-series (RDNA 3) ==========
@@ -106,6 +106,7 @@ GPU_FPS_BENCHMARKS = {
     "RX 7700 XT": 108,
     "RX 7650 GRE": 80,
     "RX 7600 XT": 92,
+    "RX 7600 8GB": 81,
     "RX 7600": 81,
     "RX 7400 ": 57,
 
@@ -120,6 +121,7 @@ GPU_FPS_BENCHMARKS = {
     "RX 6700 XT": 96,
     "RX 6700": 86,
     "RX 6650 XT": 77,
+    "RX 6600 XT 8GB": 76,
     "RX 6600 XT": 76,
     "RX 6600": 69,
     "RX 6600 LE": 67,

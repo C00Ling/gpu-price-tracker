@@ -112,10 +112,9 @@ MODEL_CORRECTIONS = {
     # NVIDIA RTX 30-series - removed auto-corrections to allow precise VRAM matching
     # "RTX 3060" and "RTX 3060 TI" are different cards
 
-    # NVIDIA RTX 20-series
-    "RTX 2080": "RTX 2080 SUPER", # SUPER is more common
-    "RTX 2070": "RTX 2070 SUPER", # SUPER is more common
-    "RTX 2060": "RTX 2060 SUPER", # SUPER is more common
+    # NVIDIA RTX 20-series - removed auto-corrections
+    # RTX 2080/2070/2060 and their SUPER variants are DIFFERENT cards with different performance!
+    # RTX 2070: 79 FPS vs RTX 2070 SUPER: 82 FPS - не бива да се смесват
 
     # Common typos and errors
     "GTX 1060 SUPER": "GTX 1660 SUPER",  # Common confusion

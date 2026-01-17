@@ -99,6 +99,7 @@ GPU_BENCHMARKS = {
     "RX 7800 XT": 45,
     "RX 7700 XT": 38,
     "RX 7600 XT": 26,
+    "RX 7600 8GB": 22,
     "RX 7600": 22,
 
     # AMD RX 6000-series (RDNA 2)
@@ -110,6 +111,7 @@ GPU_BENCHMARKS = {
     "RX 6700 XT": 37,
     "RX 6700": 33,
     "RX 6650 XT": 31,
+    "RX 6600 XT 8GB": 29,
     "RX 6600 XT": 29,
     "RX 6600": 24,
     "RX 6500 XT": 14,

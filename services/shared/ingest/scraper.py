@@ -1051,17 +1051,27 @@ class GPUScraper:
         min_prices = self.get_min_prices(use_percentile)
         results = []
 
+        from core.filters import normalize_model_name
+
         for model, price in min_prices.items():
-            # Normalize both for comparison
-            from core.filters import normalize_model_name
             norm_model = normalize_model_name(model).replace(" ", "")
 
+            # First pass: exact match only (prevents RTX 2070 matching RTX 2070 SUPER)
+            matched = False
             for b_model, fps in self.gpu_benchmarks.items():
                 norm_bench = normalize_model_name(b_model).replace(" ", "")
-
-                if norm_model == norm_bench or norm_model in norm_bench or norm_bench in norm_model:
+                if norm_model == norm_bench:
                     results.append((model, fps, price, fps / price))
+                    matched = True
                     break
+
+            # Second pass: substring match only if no exact match found
+            if not matched:
+                for b_model, fps in self.gpu_benchmarks.items():
+                    norm_bench = normalize_model_name(b_model).replace(" ", "")
+                    if norm_model in norm_bench or norm_bench in norm_model:
+                        results.append((model, fps, price, fps / price))
+                        break
 
         return sorted(results, key=lambda x: x[3], reverse=True)
 
@@ -1187,6 +1197,7 @@ _DEPRECATED_RELATIVE_SCORES = {
     "RX 7800 XT": 45.0,
     "RX 7700 XT": 38.0,
     "RX 7600 XT": 26.0,
+    "RX 7600 8GB": 22.0,
     "RX 7600": 22.0,
 
     # AMD RX 6000-series (RDNA 2)
@@ -1198,6 +1209,7 @@ _DEPRECATED_RELATIVE_SCORES = {
     "RX 6700 XT": 37.0,
     "RX 6700": 33.0,
     "RX 6650 XT": 31.0,
+    "RX 6600 XT 8GB": 29.0,
     "RX 6600 XT": 29.0,
     "RX 6600": 24.0,
     "RX 6500 XT": 14.0,
@@ -1342,8 +1354,7 @@ GPU_VRAM = {
     "RX 9070": 12,
     "RX 9070 GRE": 12,
     "RX 9060 XT 16GB": 16,
-    "RX 9060 XT 12GB": 12,
-    "RX 9060 XT": 12,
+    "RX 9060 XT": 16,
     "RX 9060": 8,
 
     # AMD Radeon RX 7000-series (RDNA 3)
