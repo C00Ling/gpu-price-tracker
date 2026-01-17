@@ -1026,11 +1026,8 @@ class GPUScraper:
 
         # If model numbers are different (e.g., 1080 vs 1060), NOT a typo
         if num1 != num2:
-            # Exception: Allow single digit transposition (1018 -> 1080)
-            if len(num1) == len(num2) and sorted(num1) == sorted(num2):
-                # Same digits, different order -> likely typo
-                return True
-            # Different model numbers -> not a typo
+            # Different model numbers = different GPUs
+            # (RX 6700 vs RX 7600, GTX 1080 vs GTX 1060, etc.)
             return False
 
         # Same brand and model number, check VRAM differences
