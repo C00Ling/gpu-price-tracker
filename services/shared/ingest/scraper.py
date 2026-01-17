@@ -1380,6 +1380,8 @@ GPU_VRAM = {
     "RTX 4080 SUPER": 16,
     "RTX 4080": 16,
     "RTX 4070 TI SUPER": 16,
+    "RTX 4070 TI 16GB": 16,  # RTX 4070 Ti SUPER variant
+    "RTX 4070 TI 12GB": 12,  # Original RTX 4070 Ti
     "RTX 4070 TI": 12,
     "RTX 4070 SUPER": 12,
     "RTX 4070": 12,
@@ -1494,7 +1496,7 @@ GPU_VRAM = {
     "RX 580": 8,
     "RX 570 8GB": 8,
     "RX 570 4GB": 4,
-    "RX 570": 4,
+    # "RX 570": 4,  # Removed - has multiple VRAM variants (4GB and 8GB)
     "RX 560": 4,
     "RX 550": 2,
 
