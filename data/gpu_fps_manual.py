@@ -142,6 +142,8 @@ GPU_FPS_BENCHMARKS = {
     "RX 580 8GB": 54,
     "RX 580 4GB": 48,
     "RX 580": 54,
+    "RX 570 8GB": 42,  # 8GB variant, slightly better than base
+    "RX 570 4GB": 37,  # 4GB variant, slightly worse than base
     "RX 570": 39,
     "RX 560": 21,
     "RX 550": 10,
