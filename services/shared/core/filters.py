@@ -391,6 +391,10 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             full_text = f"{title} {description}".lower()
             url = item.get('url', '')
 
+            # Water cooling keywords - separate category
+            WATER_COOLING_KEYWORDS = ['ekwb', 'ek-wb', 'ek water', 'water block', 'waterblock',
+                                       'воден блок', 'водно охлаждане', 'водно блок', 'liquid cooling']
+
             # Check for blacklisted keywords in both title AND description (highest priority - broken/defective GPUs)
             blacklisted = False
             for keyword in BLACKLIST_KEYWORDS:
@@ -398,13 +402,20 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
                     filter_stats['blacklist_keywords'] += 1
                     filter_stats['total_filtered'] += 1
                     reason = f"Blacklisted keyword: '{keyword}'"
+
+                    # Determine category - water cooling gets special category
+                    if keyword.lower() in WATER_COOLING_KEYWORDS:
+                        category = '💧 Water Cooling Parts'
+                    else:
+                        category = '🚫 Blacklisted Keywords'
+
                     rejected_listings.append({
                         'title': title,
                         'price': price,
                         'url': url,
                         'model': model,
                         'reason': reason,
-                        'category': '🚫 Blacklisted Keywords'
+                        'category': category
                     })
                     logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                     blacklisted = True

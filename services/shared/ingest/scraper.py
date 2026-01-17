@@ -699,7 +699,16 @@ class GPUScraper:
 
     def _categorize_filter_reason(self, reason: str) -> str:
         """Categorize filter reason for statistics"""
-        if "blacklisted keyword" in reason.lower():
+        reason_lower = reason.lower()
+
+        # Check for water cooling keywords BEFORE general blacklist
+        water_cooling_keywords = ['ekwb', 'ek-wb', 'ek water', 'water block', 'waterblock',
+                                   'воден блок', 'водно охлаждане', 'liquid cooling']
+        for wc_keyword in water_cooling_keywords:
+            if wc_keyword in reason_lower:
+                return "💧 Water Cooling Parts"
+
+        if "blacklisted keyword" in reason_lower:
             return "🚫 Blacklisted Keywords"
         elif "full computer" in reason.lower() or "laptop" in reason.lower():
             return "💻 Full Computer/Laptop"
