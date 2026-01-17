@@ -1009,54 +1009,21 @@ class GPUScraper:
 
     def _is_redundant_vram(self, model: str, vram: str) -> bool:
         """
-        Check if VRAM specification is redundant (model has only one VRAM variant)
+        Check if VRAM specification is redundant.
 
-        Examples:
-            GTX 1080 8GB -> True (only 8GB variant exists)
-            GTX 1060 6GB -> False (3GB variant also exists)
-            RTX 3080 10GB -> False (12GB variant also exists)
-            RTX 3060 12GB -> True (only 12GB variant exists)
+        NOTE: Always returns False to keep VRAM info for all models.
+        This ensures different VRAM variants (e.g., RTX 3060 8GB vs 12GB)
+        are stored as separate entries in the database.
 
         Args:
             model: Base GPU model (e.g., "GTX 1080", "GTX 1060")
             vram: VRAM string (e.g., "8GB", "6GB")
 
         Returns:
-            True if VRAM is redundant, False if it's needed to differentiate variants
+            Always False - VRAM is never considered redundant
         """
-        # Extract numeric VRAM value
-        try:
-            vram_value = int(vram.replace("GB", "").strip())
-        except (ValueError, AttributeError):
-            return False  # Can't parse, don't remove
-
-        # Check if model is in GPU_VRAM
-        if model not in GPU_VRAM:
-            return False  # Unknown model, keep VRAM info
-
-        expected_vram = GPU_VRAM[model]
-
-        # VRAM doesn't match - not redundant (actually invalid, but handled elsewhere)
-        if vram_value != expected_vram:
-            return False
-
-        # Check if there are other VRAM variants for this model
-        # Look for models with same base name but different VRAM specs
-        # Examples: "GTX 1060 3GB", "GTX 1060 6GB"
-        base_variants = [
-            gpu_model for gpu_model in GPU_VRAM.keys()
-            if gpu_model.startswith(model) and gpu_model != model
-        ]
-
-        # If there are variants (e.g., "GTX 1060 3GB" alongside "GTX 1060 6GB")
-        # then VRAM is NOT redundant
-        if base_variants:
-            logger.debug(f"VRAM {vram} for {model} is NOT redundant (variants exist: {base_variants})")
-            return False
-
-        # Only one VRAM variant exists, VRAM is redundant
-        logger.debug(f"VRAM {vram} for {model} is redundant (only one variant)")
-        return True
+        # Always keep VRAM information to differentiate variants
+        return False
 
     def get_min_prices(self, use_percentile=True) -> Dict[str, int]:
         """Връща минимални цени"""
@@ -1298,6 +1265,7 @@ GPU_VRAM = {
     "RTX 5070 TI": 16,
     "RTX 5070": 12,
     "RTX 5060 TI 16GB": 16,
+    "RTX 5060 TI 12GB": 12,
     "RTX 5060 TI 8GB": 8,
     "RTX 5060 TI": 8,
     "RTX 5060": 8,
@@ -1311,19 +1279,28 @@ GPU_VRAM = {
     "RTX 4070 SUPER": 12,
     "RTX 4070": 12,
     "RTX 4060 TI 16GB": 16,
+    "RTX 4060 TI 8GB": 8,
     "RTX 4060 TI": 8,
     "RTX 4060": 8,
 
     # NVIDIA GeForce RTX 30-series (Ampere)
     "RTX 3090 TI": 24,
     "RTX 3090": 24,
+    "RTX 3080 TI 20GB": 20,
+    "RTX 3080 TI 12GB": 12,
     "RTX 3080 TI": 12,
     "RTX 3080 12GB": 12,
+    "RTX 3080 10GB": 10,
     "RTX 3080": 10,
     "RTX 3070 TI": 8,
     "RTX 3070": 8,
+    "RTX 3060 TI GDDR6X": 8,
     "RTX 3060 TI": 8,
+    "RTX 3060 12GB": 12,
+    "RTX 3060 8GB": 8,
     "RTX 3060": 12,
+    "RTX 3050 8GB": 8,
+    "RTX 3050 6GB": 6,
     "RTX 3050": 8,
 
     # NVIDIA GeForce RTX 20-series (Turing)
@@ -1333,6 +1310,8 @@ GPU_VRAM = {
     "RTX 2070 SUPER": 8,
     "RTX 2070": 8,
     "RTX 2060 SUPER": 8,
+    "RTX 2060 12GB": 12,
+    "RTX 2060 6GB": 6,
     "RTX 2060": 6,
 
     # NVIDIA GeForce GTX 10/16-series (Pascal/Turing)
@@ -1340,6 +1319,8 @@ GPU_VRAM = {
     "GTX 1660 TI": 6,
     "GTX 1660": 6,
     "GTX 1650 SUPER": 4,
+    "GTX 1650": 4,
+    "GTX 1630": 4,
     "GTX 1080 TI": 11,
     "GTX 1080": 8,
     "GTX 1070 TI": 8,
@@ -1349,10 +1330,21 @@ GPU_VRAM = {
     "GTX 1050 TI": 4,
     "GTX 1050": 2,
 
+    # NVIDIA GTX 900-series (Maxwell)
+    "GTX 980 TI": 6,
+    "GTX 980": 4,
+    "GTX 970": 4,
+    "GTX 960": 2,
+    "GTX 950": 2,
+
     # AMD Radeon RX 9000-series (RDNA 4)
     "RX 9070 XT": 16,
     "RX 9070": 12,
+    "RX 9070 GRE": 12,
+    "RX 9060 XT 16GB": 16,
+    "RX 9060 XT 12GB": 12,
     "RX 9060 XT": 12,
+    "RX 9060": 8,
 
     # AMD Radeon RX 7000-series (RDNA 3)
     "RX 7900 XTX": 24,
@@ -1360,8 +1352,10 @@ GPU_VRAM = {
     "RX 7900 GRE": 16,
     "RX 7800 XT": 16,
     "RX 7700 XT": 12,
+    "RX 7650 GRE": 8,
     "RX 7600 XT": 16,
     "RX 7600": 8,
+    "RX 7400": 4,
 
     # AMD Radeon RX 6000-series (RDNA 2)
     "RX 6950 XT": 16,
@@ -1369,28 +1363,47 @@ GPU_VRAM = {
     "RX 6800 XT": 16,
     "RX 6800": 16,
     "RX 6750 XT": 12,
+    "RX 6750 GRE 12GB": 12,
+    "RX 6750 GRE 10GB": 10,
     "RX 6700 XT": 12,
     "RX 6700": 10,
     "RX 6650 XT": 8,
     "RX 6600 XT": 8,
     "RX 6600": 8,
+    "RX 6600 LE": 8,
     "RX 6500 XT": 4,
+    "RX 6400": 4,
 
     # AMD Radeon RX 5000-series (RDNA 1)
     "RX 5700 XT": 8,
     "RX 5700": 8,
     "RX 5600 XT": 6,
+    "RX 5500 XT 8GB": 8,
+    "RX 5500 XT 4GB": 4,
     "RX 5500 XT": 8,
+    "RX 5500": 4,
 
     # AMD Radeon RX 500-series (Polaris)
     "RX 590": 8,
+    "RX 580 8GB": 8,
+    "RX 580 4GB": 4,
     "RX 580": 8,
+    "RX 570 8GB": 8,
+    "RX 570 4GB": 4,
     "RX 570": 4,
+    "RX 560": 4,
+    "RX 550": 2,
 
     # AMD Radeon RX 400-series (Polaris)
     "RX 490": 8,
+    "RX 480 8GB": 8,
+    "RX 480 4GB": 4,
     "RX 480": 8,
+    "RX 470 8GB": 8,
+    "RX 470 4GB": 4,
     "RX 470": 4,
+    "RX 460 4GB": 4,
+    "RX 460 2GB": 2,
     "RX 460": 4,
 
     # AMD Radeon Vega
@@ -1401,15 +1414,21 @@ GPU_VRAM = {
     # Intel Arc (Alchemist & Battlemage)
     "ARC B580": 12,
     "ARC B570": 10,
+    "ARC A770 16GB": 16,
+    "ARC A770 8GB": 8,
     "ARC A770": 16,
     "ARC A750": 8,
     "ARC A580": 8,
     "ARC A380": 6,
+    "ARC A350": 4,
+    "ARC A310": 4,
 
     # Titan cards
     "TITAN RTX": 24,
     "TITAN V": 12,
     "TITAN XP": 12,
+
+    # Budget cards
+    "GT 1030": 2,
 }
-# Total: 119 GPU models
 
