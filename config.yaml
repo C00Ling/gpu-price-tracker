@@ -92,6 +92,9 @@ scraper:
     - "heatsink"
     - "backplate"
     - "бекплейт"
+    - "ekwb"
+    - "ek-wb"
+    - "ek water"
 
     # Suspicious patterns
     - "срочно"

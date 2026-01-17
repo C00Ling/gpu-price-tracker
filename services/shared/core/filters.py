@@ -30,7 +30,7 @@ BLACKLIST_KEYWORDS = [
     "вентилатор", "вентилатори", "охлаждане", "охладител", "мишка", "backplate", "бекплейт",
     "радиатор", "heatsink", "thermal pad", "термопад", "термопадове",
     "water block", "waterblock", "воден блок", "водно охлаждане", "водно блок",
-    "liquid cooling",
+    "liquid cooling", "ekwb", "ek-wb", "ek water",
 
     # Mining-related (often worn out)
     "майнинг", "mining", "burnout", "mining rig", "копана", "ферма", "mining farm",
