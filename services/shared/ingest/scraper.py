@@ -994,16 +994,62 @@ class GPUScraper:
         return False
 
     def _is_likely_typo(self, model: str, known_model: str) -> bool:
-        """Check if model is a likely typo of known_model"""
-        # Simple heuristic: same prefix, similar numbers
-        # "GTX 1018" vs "GTX 1080" -> same prefix, numbers differ by transposition
+        """
+        Check if model is a likely typo of known_model
+
+        Examples of real typos:
+        - "GTX 1018" vs "GTX 1080" (transposition)
+        - "RTX 409" vs "RTX 4090" (missing digit)
+
+        Examples of DIFFERENT models (NOT typos):
+        - "GTX 1080" vs "GTX 1060" (different model numbers)
+        - "RTX 3080" vs "RTX 3090" (different tier)
+        """
+        # Extract GPU brand and model number
+        # GTX 1080 8GB -> brand: GTX, number: 1080
+        # RTX 3090 24GB -> brand: RTX, number: 3090
+
+        def extract_brand_and_number(m: str) -> tuple:
+            """Extract brand (GTX/RTX/RX) and model number"""
+            import re
+            match = re.search(r'(GTX|RTX|RX|ARC)\s*(\d{3,4})', m.upper())
+            if match:
+                return match.group(1), match.group(2)
+            return None, None
+
+        brand1, num1 = extract_brand_and_number(model)
+        brand2, num2 = extract_brand_and_number(known_model)
+
+        # Must have same brand
+        if brand1 != brand2 or not brand1:
+            return False
+
+        # If model numbers are different (e.g., 1080 vs 1060), NOT a typo
+        if num1 != num2:
+            # Exception: Allow single digit transposition (1018 -> 1080)
+            if len(num1) == len(num2) and sorted(num1) == sorted(num2):
+                # Same digits, different order -> likely typo
+                return True
+            # Different model numbers -> not a typo
+            return False
+
+        # Same brand and model number, check VRAM differences
+        # "GTX 1080 8GB" vs "GTX 1080 10GB" -> NOT a typo, different VRAM variants
+        if "GB" in model and "GB" in known_model:
+            vram1 = re.search(r'(\d{1,2})GB', model)
+            vram2 = re.search(r'(\d{1,2})GB', known_model)
+            if vram1 and vram2 and vram1.group(1) != vram2.group(1):
+                # Different VRAM -> different variants, not typo
+                return False
+
+        # Same brand, same model number, check overall string similarity
         if len(model) != len(known_model):
             return False
 
-        # Count differing characters
+        # Count differing characters (excluding spaces)
         diffs = sum(1 for a, b in zip(model, known_model) if a != b)
 
-        # If only 1-2 chars differ, likely a typo
+        # If only 1-2 chars differ (after all checks above), likely a typo
         return 1 <= diffs <= 2
 
     def _is_valid_vram_for_model(self, model: str, vram: str) -> bool:
