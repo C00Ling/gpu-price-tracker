@@ -20,6 +20,9 @@ env/
 logs/
 *.log
 
+# Cache
+cache/
+
 # Environment variables (IMPORTANT: contains secrets!)
 .env
 .env.local
@@ -29,6 +32,7 @@ logs/
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
