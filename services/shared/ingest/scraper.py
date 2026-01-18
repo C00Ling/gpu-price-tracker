@@ -813,28 +813,27 @@ class GPUScraper:
         # Common VRAM sizes: 4GB, 6GB, 8GB, 10GB, 12GB, 16GB, 20GB, 24GB, 32GB
         # Pattern: digit(s) + optional space + "GB" (case insensitive)
         # Look for word boundaries to avoid false matches
-        # Match formats: "8GB", "8G", "8гб" (Cyrillic), "8 GB", etc.
-        # IMPORTANT: "3г" alone means "3 years warranty" in Bulgarian, not 3GB!
-        # - For Latin: allow "8G" or "8GB" (G alone is OK)
-        # - For Cyrillic: require "8гб" (both letters to avoid "3г" = 3 years)
-        patterns = [
-            r'\b(\d{1,2})\s?GB\b',      # 8GB, 8 GB (Latin, full)
-            r'\b(\d{1,2})\s?G\b',        # 8G (Latin, short - common in listings)
-            r'\b(\d{1,2})\s?[Гг][Бб]\b', # 8гб, 8ГБ (Cyrillic, must have both letters)
+        # Match formats: "8GB", "8G", "8гб", "8г" (Cyrillic), "8 GB", etc.
+        # IMPORTANT: "3г" alone often means "3 години" (3 years warranty) in Bulgarian!
+        # So for Cyrillic "г" alone, only accept sizes >= 4 (no GPU has 1-3г warranty confusion)
+
+        valid_vram_sizes = [2, 3, 4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
+        # Sizes that are unlikely to be warranty years (4+ years warranty is rare)
+        safe_cyrillic_sizes = [4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
+
+        # Try patterns in order of specificity
+        patterns_and_sizes = [
+            (r'\b(\d{1,2})\s?GB\b', valid_vram_sizes),       # 8GB, 8 GB (Latin, full)
+            (r'\b(\d{1,2})\s?[Гг][Бб]\b', valid_vram_sizes), # 8гб, 8ГБ (Cyrillic, full)
+            (r'\b(\d{1,2})\s?G\b', valid_vram_sizes),        # 8G (Latin, short)
+            (r'\b(\d{1,2})\s?[Гг]\b', safe_cyrillic_sizes),  # 8г (Cyrillic short, only 4+ to avoid "3г" warranty)
         ]
 
-        matches = []
-        for pattern in patterns:
-            matches.extend(re.findall(pattern, text, re.IGNORECASE))
-
-        if matches:
-            # Convert to int to filter valid VRAM sizes
-            # 2GB: RX 460, GT 1030; 3GB: GTX 1060; 4-48GB: various modern GPUs
-            valid_vram_sizes = [2, 3, 4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
-
+        for pattern, allowed_sizes in patterns_and_sizes:
+            matches = re.findall(pattern, text, re.IGNORECASE)
             for match in matches:
                 vram_size = int(match)
-                if vram_size in valid_vram_sizes:
+                if vram_size in allowed_sizes:
                     return f"{vram_size}GB"
 
         return None
