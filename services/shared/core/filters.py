@@ -72,8 +72,24 @@ COMPUTER_KEYWORDS = [
     "laptop", "notebook", "portable",
 
     # Multiple components (indicates full system)
-    "i3 ", "i5 ", "i7 ", "i9 ", "ryzen 3", "ryzen 5", "ryzen 7", "ryzen 9",
+    # Intel CPUs - various formats (i7 , i7-, i7-12700, etc.)
+    "i3 ", "i3-", "i5 ", "i5-", "i7 ", "i7-", "i9 ", "i9-",
+    # AMD CPUs
+    "ryzen 3", "ryzen 5", "ryzen 7", "ryzen 9",
+    # Component combinations
     "+ cpu", "+ ram", "+ процесор", "+ ssd", "+ hdd",
+    # Display sizes (laptops)
+    "15.6\"", "15.6'", "15,6\"", "15,6'", "17.3\"", "17.3'", "17,3\"", "17,3'",
+    "14\"", "14'", "13.3\"", "13.3'", "13,3\"", "13,3'",
+    # Screen specs (laptops)
+    "fhd 144hz", "fhd 165hz", "fhd 240hz", "fhd 360hz", "qhd 165hz",
+    # Laptop model indicators
+    "gp76", "gp66", "ge76", "ge66", "gl66", "gl76",  # MSI gaming laptops
+    "rog strix", "tuf gaming", "zephyrus",  # ASUS gaming laptops
+    "legion", "ideapad",  # Lenovo laptops
+    "omen", "victus", "pavilion gaming",  # HP gaming laptops
+    "predator", "nitro",  # Acer gaming laptops
+    "alienware", "inspiron", "xps",  # Dell laptops
 ]
 
 # Outlier detection thresholds
