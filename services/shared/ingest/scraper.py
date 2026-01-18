@@ -865,15 +865,15 @@ class GPUScraper:
         patterns = [
             # Standard patterns with brand prefix (with optional space)
             # Note: "S" alone means SUPER (e.g., RTX 2060S = RTX 2060 SUPER)
-            r"RTX\s?\d{4}\s?(TI|SUPER|S)\b",
-            r"GTX\s?\d{3,4}\s?(TI|SUPER|S)\b",  # GTX supports 3-4 digits (GTX 960, GTX 1660)
-            r"RX\s?\d{3,4}\s?(XTX|XT|GRE)?",  # RX supports 3-4 digits (RX 580, RX 6800)
+            r"RTX\s?\d{4}\s?(TI|SUPER|S)?\b",  # RTX 3060, RTX 3060 TI, RTX 2060S
+            r"GTX\s?\d{3,4}\s?(TI|SUPER|S)?\b",  # GTX 960, GTX 1660 TI, GTX 1660S
+            r"RX\s?\d{3,4}\s?(XTX|XT|GRE)?",  # RX 580, RX 6600 XT
 
             # Patterns without space before suffix (common in Bulgarian listings)
             # Examples: RTX3060TI, GTX1660TI, RX5500XT, RX6600XT, RTX2060S
-            r"RTX\d{4}(TI|SUPER|S)\b",  # RTX3060TI, RTX4070SUPER, RTX2060S
-            r"GTX\d{3,4}(TI|SUPER|S)\b",  # GTX1660TI, GTX1650SUPER, GTX1660S
-            r"RX\d{3,4}(XTX|XT|GRE)?",  # RX5500XT, RX6600XT, RX580
+            r"RTX\d{4}(TI|SUPER|S)?\b",  # RTX3060, RTX3060TI, RTX2060S
+            r"GTX\d{3,4}(TI|SUPER|S)?\b",  # GTX960, GTX1660TI, GTX1660S
+            r"RX\d{3,4}(XTX|XT|GRE)?",  # RX580, RX5500XT, RX6600XT
 
             r"ARC\s?[AB]\d{3}",  # Intel ARC (A-series: Alchemist, B-series: Battlemage)
             r"VEGA\s?\d+",
