@@ -814,9 +814,18 @@ class GPUScraper:
         # Pattern: digit(s) + optional space + "GB" (case insensitive)
         # Look for word boundaries to avoid false matches
         # Match formats: "8GB", "8G", "8гб" (Cyrillic), "8 GB", etc.
-        pattern = r'\b(\d{1,2})\s?[Gг][Bб]?\b'
+        # IMPORTANT: "3г" alone means "3 years warranty" in Bulgarian, not 3GB!
+        # - For Latin: allow "8G" or "8GB" (G alone is OK)
+        # - For Cyrillic: require "8гб" (both letters to avoid "3г" = 3 years)
+        patterns = [
+            r'\b(\d{1,2})\s?GB\b',      # 8GB, 8 GB (Latin, full)
+            r'\b(\d{1,2})\s?G\b',        # 8G (Latin, short - common in listings)
+            r'\b(\d{1,2})\s?[Гг][Бб]\b', # 8гб, 8ГБ (Cyrillic, must have both letters)
+        ]
 
-        matches = re.findall(pattern, text, re.IGNORECASE)
+        matches = []
+        for pattern in patterns:
+            matches.extend(re.findall(pattern, text, re.IGNORECASE))
 
         if matches:
             # Convert to int to filter valid VRAM sizes
