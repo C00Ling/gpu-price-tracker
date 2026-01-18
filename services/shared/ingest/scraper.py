@@ -11,6 +11,7 @@ from core.logging import get_logger
 from core.rate_limiter import RateLimiter, retry_on_failure
 from core.config import config
 from data.gpu_fps_manual import GPU_FPS_BENCHMARKS
+from core.filters import COMPUTER_KEYWORDS
 
 logger = get_logger("scraper")
 
@@ -606,6 +607,26 @@ class GPUScraper:
 
         # Combine title and description for filtering
         full_text = f"{title} {description}".strip()
+        full_text_lower = full_text.lower()
+
+        # Check for full computer listings BEFORE extracting model
+        # This prevents false "missing VRAM" rejections for computer listings
+        for keyword in COMPUTER_KEYWORDS:
+            if keyword.lower() in full_text_lower:
+                # Track this as rejected for visibility
+                self._filtered_count += 1
+                category = "💻 Full Computer/Laptop"
+                self._filter_stats[category] = self._filter_stats.get(category, 0) + 1
+
+                self._rejected_listings.append({
+                    'title': title,
+                    'price': price,
+                    'url': url,
+                    'model': None,
+                    'reason': f"Full computer listing: '{keyword}'",
+                    'category': category
+                })
+                return False
 
         # Extract and normalize model (with VRAM detection from title/description)
         model = self.extract_gpu_model(title, description)
