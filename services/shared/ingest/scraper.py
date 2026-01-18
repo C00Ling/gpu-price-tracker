@@ -813,8 +813,8 @@ class GPUScraper:
         # Common VRAM sizes: 4GB, 6GB, 8GB, 10GB, 12GB, 16GB, 20GB, 24GB, 32GB
         # Pattern: digit(s) + optional space + "GB" (case insensitive)
         # Look for word boundaries to avoid false matches
-        # Match both "8GB" and "8G" formats (some listings use shortened "8G")
-        pattern = r'\b(\d{1,2})\s?G[Bb]?\b'
+        # Match formats: "8GB", "8G", "8гб" (Cyrillic), "8 GB", etc.
+        pattern = r'\b(\d{1,2})\s?[Gг][Bб]?\b'
 
         matches = re.findall(pattern, text, re.IGNORECASE)
 
