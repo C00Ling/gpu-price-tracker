@@ -820,7 +820,8 @@ class GPUScraper:
 
         if matches:
             # Convert to int to filter valid VRAM sizes
-            valid_vram_sizes = [4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
+            # 2GB: RX 460, GT 1030; 3GB: GTX 1060; 4-48GB: various modern GPUs
+            valid_vram_sizes = [2, 3, 4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
 
             for match in matches:
                 vram_size = int(match)
