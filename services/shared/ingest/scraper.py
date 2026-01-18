@@ -810,30 +810,40 @@ class GPUScraper:
         Returns:
             VRAM string (e.g., "12GB") or None if not found
         """
-        # Common VRAM sizes: 4GB, 6GB, 8GB, 10GB, 12GB, 16GB, 20GB, 24GB, 32GB
-        # Pattern: digit(s) + optional space + "GB" (case insensitive)
-        # Look for word boundaries to avoid false matches
+        # Common VRAM sizes: 2GB, 3GB, 4GB, 6GB, 8GB, 10GB, 11GB, 12GB, 16GB, 20GB, 24GB, 32GB, 48GB
         # Match formats: "8GB", "8G", "8гб", "8г" (Cyrillic), "8 GB", etc.
+        #
         # IMPORTANT: "3г" alone often means "3 години" (3 years warranty) in Bulgarian!
-        # So for Cyrillic "г" alone, only accept sizes >= 4 (no GPU has 1-3г warranty confusion)
+        # But GTX 1060 3GB is a real card. Solution: exclude warranty context patterns.
 
         valid_vram_sizes = [2, 3, 4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
-        # Sizes that are unlikely to be warranty years (4+ years warranty is rare)
-        safe_cyrillic_sizes = [4, 6, 8, 10, 11, 12, 16, 20, 24, 32, 48]
+
+        # First, check if text contains warranty context that might confuse us
+        # If "Xг гаранция" or "гаранция Xг" pattern exists, exclude that number
+        warranty_pattern = r'(\d{1,2})\s?[гГ]\.?\s*(?:гаранция|години|год)|(?:гаранция|години)\s*(\d{1,2})\s?[гГ]'
+        warranty_matches = re.findall(warranty_pattern, text, re.IGNORECASE)
+        warranty_numbers = set()
+        for match in warranty_matches:
+            for num in match:
+                if num:
+                    warranty_numbers.add(int(num))
 
         # Try patterns in order of specificity
-        patterns_and_sizes = [
-            (r'\b(\d{1,2})\s?GB\b', valid_vram_sizes),       # 8GB, 8 GB (Latin, full)
-            (r'\b(\d{1,2})\s?[Гг][Бб]\b', valid_vram_sizes), # 8гб, 8ГБ (Cyrillic, full)
-            (r'\b(\d{1,2})\s?G\b', valid_vram_sizes),        # 8G (Latin, short)
-            (r'\b(\d{1,2})\s?[Гг]\b', safe_cyrillic_sizes),  # 8г (Cyrillic short, only 4+ to avoid "3г" warranty)
+        patterns = [
+            r'\b(\d{1,2})\s?GB\b',       # 8GB, 8 GB (Latin, full)
+            r'\b(\d{1,2})\s?[Гг][Бб]\b', # 8гб, 8ГБ (Cyrillic, full)
+            r'\b(\d{1,2})\s?G\b',        # 8G (Latin, short)
+            r'\b(\d{1,2})\s?[Гг]\b',     # 8г (Cyrillic short)
         ]
 
-        for pattern, allowed_sizes in patterns_and_sizes:
+        for pattern in patterns:
             matches = re.findall(pattern, text, re.IGNORECASE)
             for match in matches:
                 vram_size = int(match)
-                if vram_size in allowed_sizes:
+                # Skip if this number was identified as warranty years
+                if vram_size in warranty_numbers:
+                    continue
+                if vram_size in valid_vram_sizes:
                     return f"{vram_size}GB"
 
         return None
