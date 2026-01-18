@@ -17,30 +17,49 @@ from core.config import config
 
 logger = get_logger("filters")
 
-# Expanded blacklist keywords
+# Separate keyword lists for different rejection categories
+
+# Mining-related keywords (separate category)
+MINING_KEYWORDS = [
+    "майнинг", "mining", "burnout", "mining rig", "копана", "ферма", "mining farm",
+    "от ферма", "от майнинг", "за майнинг", "копаене", "miner", "майнър",
+    "crypto", "крипто", "eth", "ethereum", "bitcoin",
+]
+
+# Cooling parts / fans (separate category)
+COOLING_KEYWORDS = [
+    # Fans
+    "вентилатор", "вентилатори", "fan", "fans",
+    # Coolers
+    "охлаждане", "охладител", "cooler", "cooling",
+    # Heatsinks
+    "радиатор", "heatsink", "thermal pad", "термопад", "термопадове",
+    # Backplates
+    "backplate", "бекплейт",
+]
+
+# Water cooling parts (separate category)
+WATER_COOLING_KEYWORDS = [
+    "water block", "waterblock", "воден блок", "водно охлаждане", "водно блок",
+    "liquid cooling", "ekwb", "ek-wb", "ek water",
+]
+
+# Defective/broken items (general blacklist)
 BLACKLIST_KEYWORDS = [
-    # Bulgarian
+    # Bulgarian - defective
     "заектури", "за част", "част за", "части за", "счупена", "не работи", "повредена", "дефект",
     "за ремонт", "ремонтен", "ремонтен комплект", "комплект за ремонт",
     "артефакти", "черен екран", "не дава екран", "не стартира", "изгоря",
     "развален", "нетествана", "проблем", "не е тествана", "дефектна", "не функционира", "изправни",
     "няма сигнал", "без сигнал", "не дава сигнал",
 
-    # Parts only (not full cards)
-    "вентилатор", "вентилатори", "охлаждане", "охладител", "мишка", "backplate", "бекплейт",
-    "радиатор", "heatsink", "thermal pad", "термопад", "термопадове",
-    "water block", "waterblock", "воден блок", "водно охлаждане", "водно блок",
-    "liquid cooling", "ekwb", "ek-wb", "ek water",
-
-    # Mining-related (often worn out)
-    "майнинг", "mining", "burnout", "mining rig", "копана", "ферма", "mining farm",
-    "от ферма", "от майнинг", "за майнинг", "копаене",
-
-    # English
+    # English - defective
     "broken", "damaged", "faulty", "defective", "not working", "for parts",
     "parts only", "part for", "for part", "as is", "repair", "artifacts", "black screen",
     "burnt", "dead", "fried", "doa", "no signal", "no display",
-    "fan", "fans", "cooler", "cooling", "mouse",
+
+    # Other non-GPU items
+    "мишка", "mouse",
 ]
 
 # Suspicious keywords that trigger statistical filtering (not immediate blacklist)
@@ -411,31 +430,83 @@ def filter_scraped_data(raw_data: Dict[str, List]) -> tuple[Dict[str, List], Dic
             full_text = f"{title} {description}".lower()
             url = item.get('url', '')
 
-            # Water cooling keywords - separate category
-            WATER_COOLING_KEYWORDS = ['ekwb', 'ek-wb', 'ek water', 'water block', 'waterblock',
-                                       'воден блок', 'водно охлаждане', 'водно блок', 'liquid cooling']
-
-            # Check for blacklisted keywords in both title AND description (highest priority - broken/defective GPUs)
-            blacklisted = False
-            for keyword in BLACKLIST_KEYWORDS:
+            # Check for mining-related keywords (separate category)
+            mining_found = False
+            for keyword in MINING_KEYWORDS:
                 if keyword.lower() in full_text:
                     filter_stats['blacklist_keywords'] += 1
                     filter_stats['total_filtered'] += 1
-                    reason = f"Blacklisted keyword: '{keyword}'"
-
-                    # Determine category - water cooling gets special category
-                    if keyword.lower() in WATER_COOLING_KEYWORDS:
-                        category = '💧 Water Cooling Parts'
-                    else:
-                        category = '🚫 Blacklisted Keywords'
-
+                    reason = f"Mining related: '{keyword}'"
                     rejected_listings.append({
                         'title': title,
                         'price': price,
                         'url': url,
                         'model': model,
                         'reason': reason,
-                        'category': category
+                        'category': '⛏️ Mining Related'
+                    })
+                    logger.debug(f"Filtered {model} @ {price}лв: {reason}")
+                    mining_found = True
+                    break
+            if mining_found:
+                continue
+
+            # Check for water cooling parts (separate category)
+            water_cooling_found = False
+            for keyword in WATER_COOLING_KEYWORDS:
+                if keyword.lower() in full_text:
+                    filter_stats['blacklist_keywords'] += 1
+                    filter_stats['total_filtered'] += 1
+                    reason = f"Water cooling parts: '{keyword}'"
+                    rejected_listings.append({
+                        'title': title,
+                        'price': price,
+                        'url': url,
+                        'model': model,
+                        'reason': reason,
+                        'category': '💧 Water Cooling Parts'
+                    })
+                    logger.debug(f"Filtered {model} @ {price}лв: {reason}")
+                    water_cooling_found = True
+                    break
+            if water_cooling_found:
+                continue
+
+            # Check for cooling/fan parts (separate category)
+            cooling_found = False
+            for keyword in COOLING_KEYWORDS:
+                if keyword.lower() in full_text:
+                    filter_stats['blacklist_keywords'] += 1
+                    filter_stats['total_filtered'] += 1
+                    reason = f"Cooling/fan parts: '{keyword}'"
+                    rejected_listings.append({
+                        'title': title,
+                        'price': price,
+                        'url': url,
+                        'model': model,
+                        'reason': reason,
+                        'category': '🌀 Cooling Parts'
+                    })
+                    logger.debug(f"Filtered {model} @ {price}лв: {reason}")
+                    cooling_found = True
+                    break
+            if cooling_found:
+                continue
+
+            # Check for blacklisted keywords (defective/broken items)
+            blacklisted = False
+            for keyword in BLACKLIST_KEYWORDS:
+                if keyword.lower() in full_text:
+                    filter_stats['blacklist_keywords'] += 1
+                    filter_stats['total_filtered'] += 1
+                    reason = f"Blacklisted keyword: '{keyword}'"
+                    rejected_listings.append({
+                        'title': title,
+                        'price': price,
+                        'url': url,
+                        'model': model,
+                        'reason': reason,
+                        'category': '🚫 Blacklisted Keywords'
                     })
                     logger.debug(f"Filtered {model} @ {price}лв: {reason}")
                     blacklisted = True
