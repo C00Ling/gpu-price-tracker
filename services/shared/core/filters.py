@@ -27,13 +27,14 @@ MINING_KEYWORDS = [
 ]
 
 # Cooling parts / fans (separate category)
+# NOTE: Avoid generic words like "охлаждане", "cooling" - they appear in normal GPU listings
 COOLING_KEYWORDS = [
-    # Fans
-    "вентилатор", "вентилатори", "fan", "fans",
-    # Coolers
-    "охлаждане", "охладител", "cooler", "cooling",
-    # Heatsinks
-    "радиатор", "heatsink", "thermal pad", "термопад", "термопадове",
+    # Fans - specific part listings
+    "вентилатор за", "вентилатори за", "fan for", "fans for",
+    "резервен вентилатор", "replacement fan",
+    # Coolers/Heatsinks
+    "охладител за", "cooler for",
+    "радиатор за", "heatsink for", "thermal pad", "термопад", "термопадове",
     # Backplates
     "backplate", "бекплейт",
 ]
