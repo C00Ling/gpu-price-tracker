@@ -845,11 +845,17 @@ class GPUScraper:
             "Gigabyte 1060 6gb" -> "GTX 1060 6GB" ✅ (добавя GTX префикс)
         """
         patterns = [
-            # Standard patterns with brand prefix
+            # Standard patterns with brand prefix (with optional space)
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
             r"GTX\s?\d{3,4}\s?(TI|SUPER)?",  # GTX supports 3-4 digits (GTX 960, GTX 1660)
             r"RX\s?\d{3,4}\s?(XTX|XT|GRE)?",  # RX supports 3-4 digits (RX 580, RX 6800)
-            r"RX\d{4}(XTX|XT)",  # RX without space before suffix (RX5500XT, RX6600XT)
+
+            # Patterns without space before suffix (common in Bulgarian listings)
+            # Examples: RTX3060TI, GTX1660TI, RX5500XT, RX6600XT
+            r"RTX\d{4}(TI|SUPER)",  # RTX3060TI, RTX4070SUPER
+            r"GTX\d{3,4}(TI|SUPER)",  # GTX1660TI, GTX1650SUPER
+            r"RX\d{3,4}(XTX|XT|GRE)?",  # RX5500XT, RX6600XT, RX580
+
             r"ARC\s?[AB]\d{3}",  # Intel ARC (A-series: Alchemist, B-series: Battlemage)
             r"VEGA\s?\d+",
 
