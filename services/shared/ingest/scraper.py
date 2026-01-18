@@ -1365,7 +1365,8 @@ _DEPRECATED_RELATIVE_SCORES = {
     "GTX 980 TI": 24.0,
     "GTX 980": 19.0,
     "GTX 970": 16.0,
-    "GTX 960": 10.0,
+    "GTX 960 4GB": 10.0,
+    "GTX 960 2GB": 9.0,
     "GTX 950": 7.0,
 
     # NVIDIA GTX 700-series (Kepler)
@@ -1534,7 +1535,8 @@ GPU_VRAM = {
     "GTX 980 TI": 6,
     "GTX 980": 4,
     "GTX 970": 4,
-    "GTX 960": 2,
+    "GTX 960 4GB": 4,
+    "GTX 960 2GB": 2,
     "GTX 950": 2,
 
     # AMD Radeon RX 9000-series (RDNA 4)
