@@ -13,7 +13,7 @@ interface Column<T> {
 interface TableProps<T> {
   data: T[];
   columns: Column<T>[];
-  keyExtractor: (item: T) => string | number;
+  keyExtractor: (item: T, index: number) => string | number;
   className?: string;
   emptyMessage?: string;
   defaultSortKey?: string | null;
@@ -99,8 +99,8 @@ export function Table<T extends Record<string, any>>({
           </tr>
         </thead>
         <tbody className="bg-transparent divide-y divide-dark-navy-800">
-          {sortedData.map((item) => (
-            <tr key={keyExtractor(item)} className="hover:bg-dark-navy-800/30 transition-colors border-b border-dark-navy-800">
+          {sortedData.map((item, index) => (
+            <tr key={keyExtractor(item, index)} className="hover:bg-dark-navy-800/30 transition-colors border-b border-dark-navy-800">
               {columns.map((column) => (
                 <td
                   key={column.key}

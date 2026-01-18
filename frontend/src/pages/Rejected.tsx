@@ -185,7 +185,7 @@ export function Rejected() {
           <Table
             data={filteredListings}
             columns={columns}
-            keyExtractor={(item) => item.url}
+            keyExtractor={(item, index) => `${item.url}-${index}`}
             emptyMessage="Няма отхвърлени обяви"
             defaultSortKey="category"
             defaultSortDirection="asc"

@@ -290,7 +290,7 @@ export function ValueAnalysis() {
               <Table
                 data={displayData || []}
                 columns={columns}
-                keyExtractor={(item) => item.model}
+                keyExtractor={(item, index) => `${item.model}-${index}`}
                 emptyMessage="Няма данни за анализ"
                 defaultSortKey="relative_score"
                 defaultSortDirection="desc"

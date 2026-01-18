@@ -167,7 +167,7 @@ export function Listings() {
             <Table
               data={filteredListings || []}
               columns={columns}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item, index) => `${item.id}-${index}`}
               emptyMessage="Няма намерени обяви"
             />
           )}
