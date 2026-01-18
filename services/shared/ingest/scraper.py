@@ -70,6 +70,7 @@ class GPUScraper:
         self._filtered_count = 0
         self._rejected_listings = []  # Store rejected listings with reasons
         self._last_rejection_reason = None  # Track why last listing was rejected
+        self._last_rejected_model = None  # Track the base model that was rejected
 
         logger.info(
             f"GPUScraper initialized (TOR: {self.use_tor}, "
@@ -624,13 +625,14 @@ class GPUScraper:
                 'title': title,
                 'price': price,
                 'url': url,
-                'model': model,  # Base model without invalid VRAM
+                'model': model or self._last_rejected_model,  # Use extracted model or rejected base model
                 'reason': self._last_rejection_reason,
                 'category': category
             })
 
-            # Clear the rejection reason
+            # Clear the rejection reason and model
             self._last_rejection_reason = None
+            self._last_rejected_model = None
 
             # NOTE: We DON'T skip the listing!
             # Continue processing with the base model (e.g., "RTX 3060 TI" without the invalid "16GB")
@@ -691,13 +693,14 @@ class GPUScraper:
                 'title': title,
                 'price': price,
                 'url': url,
-                'model': None,  # Model couldn't be extracted
+                'model': self._last_rejected_model,  # Base model that was rejected
                 'reason': self._last_rejection_reason,
                 'category': category
             })
 
-            # Clear the rejection reason for next listing
+            # Clear the rejection reason and model for next listing
             self._last_rejection_reason = None
+            self._last_rejected_model = None
 
         return False
 
@@ -887,6 +890,7 @@ class GPUScraper:
             if not self._is_valid_vram_for_model(normalized, vram):
                 logger.warning(f"Invalid VRAM {vram} for model {normalized} - rejecting (likely system RAM confusion)")
                 self._last_rejection_reason = f"Invalid VRAM {vram} for model {normalized} (likely system RAM confusion)"
+                self._last_rejected_model = normalized  # Save base model for rejected listings
                 # Return model without VRAM if base model is valid
                 if self._is_valid_gpu_model(normalized):
                     return normalized
@@ -922,6 +926,7 @@ class GPUScraper:
                     # Model has multiple VRAM variants - REJECT (must specify VRAM)
                     logger.warning(f"Missing VRAM for multi-variant model: {normalized} (has multiple VRAM options)")
                     self._last_rejection_reason = f"Липсващ VRAM: Моделът '{normalized}' има няколко VRAM варианта - трябва да се посочи точният VRAM"
+                    self._last_rejected_model = normalized  # Save base model for rejected listings
                     return None
                 else:
                     # Model has single VRAM variant - auto-add default
@@ -932,6 +937,7 @@ class GPUScraper:
                 # Model not in GPU_VRAM dictionary - REJECT (cannot determine VRAM)
                 logger.warning(f"Cannot determine VRAM for model: {normalized} (not in GPU_VRAM specs)")
                 self._last_rejection_reason = f"Липсващ VRAM: Не може да се определи VRAM за модел '{normalized}'"
+                self._last_rejected_model = normalized  # Save base model for rejected listings
                 return None
 
         # NORMALIZE: Apply special case model name mappings
@@ -943,6 +949,7 @@ class GPUScraper:
         if self._is_valid_gpu_model(model_with_vram):
             # Clear any rejection reason from validation checks
             self._last_rejection_reason = None
+            self._last_rejected_model = None
             return model_with_vram
         elif self._is_valid_gpu_model(normalized):
             # Model without VRAM is valid, but model+VRAM is not
@@ -953,13 +960,16 @@ class GPUScraper:
                 logger.debug(f"Model {model_with_vram} not in database, but base model {normalized} is valid")
                 # Clear any rejection reason - model is valid
                 self._last_rejection_reason = None
+                self._last_rejected_model = None
                 return model_with_vram
             # Clear rejection reason
             self._last_rejection_reason = None
+            self._last_rejected_model = None
             return normalized
         else:
             logger.debug(f"Rejected invalid GPU model: {normalized} (from title: {title})")
             self._last_rejection_reason = f"Invalid/unknown GPU model: {normalized}"
+            self._last_rejected_model = normalized  # Save base model for rejected listings
             return None
 
     def _is_valid_gpu_model(self, model: str) -> bool:
@@ -995,10 +1005,12 @@ class GPUScraper:
             if self._is_likely_typo(model, known_model):
                 logger.info(f"Typo detected: '{model}' -> probably '{known_model}' (rejected)")
                 self._last_rejection_reason = f"Invalid GPU model (typo): '{model}' → likely '{known_model}'"
+                self._last_rejected_model = model  # Save the typo model for rejected listings
                 return False
 
         # Model not found in database at all
         self._last_rejection_reason = f"Unknown GPU model: '{model}'"
+        self._last_rejected_model = model  # Save the unknown model for rejected listings
         return False
 
     def _is_likely_typo(self, model: str, known_model: str) -> bool:
