@@ -611,7 +611,9 @@ class GPUScraper:
 
         # Check if model extraction triggered a rejection (e.g., invalid VRAM)
         # This happens when extract_gpu_model() returns a valid base model but sets _last_rejection_reason
-        if self._last_rejection_reason and apply_filters:
+        # ALWAYS track VRAM/model validation rejections (even when apply_filters=False)
+        # because this is data validation, not filtering
+        if self._last_rejection_reason:
             # Track this rejection FOR VISIBILITY in /rejected page
             self._filtered_count += 1
             category = self._categorize_filter_reason(self._last_rejection_reason)
@@ -676,7 +678,9 @@ class GPUScraper:
             return True
 
         # Model extraction failed - check if we have a rejection reason
-        if self._last_rejection_reason and apply_filters:
+        # ALWAYS track VRAM/model validation rejections (even when apply_filters=False)
+        # because this is data validation, not filtering
+        if self._last_rejection_reason:
             # Track this rejection
             self._filtered_count += 1
             category = self._categorize_filter_reason(self._last_rejection_reason)

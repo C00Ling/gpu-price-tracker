@@ -23,6 +23,7 @@ GPU_FPS_BENCHMARKS = {
     "RTX 5060 TI 16GB": 113,
     "RTX 5060 TI 12GB": 110,
     "RTX 5060 TI 8GB": 101,
+    "RTX 5060 TI": 101,  # Base variant, defaults to 8GB
     "RTX 5060": 95,
     "RTX 5050": 81,
 
@@ -36,6 +37,7 @@ GPU_FPS_BENCHMARKS = {
     "RTX 4070": 115,
     "RTX 4060 TI 16GB": 102,
     "RTX 4060 TI 8GB": 91,
+    "RTX 4060 TI": 91,  # Base variant, defaults to 8GB
     "RTX 4060": 81,
     "RTX 4050": 66,
 
@@ -44,16 +46,20 @@ GPU_FPS_BENCHMARKS = {
     "RTX 3090": 139,
     "RTX 3080 TI 20GB": 131,
     "RTX 3080 TI 12GB": 128,
+    "RTX 3080 TI": 128,  # Base variant, defaults to 12GB
     "RTX 3080 12GB": 125,
     "RTX 3080 10GB": 116,
+    "RTX 3080": 116,  # Base variant, defaults to 10GB
     "RTX 3070 TI": 101,
     "RTX 3070": 94,
     "RTX 3060 TI GDDR6X": 93,
     "RTX 3060 TI": 88,
     "RTX 3060 12GB": 77,
     "RTX 3060 8GB": 68,
+    "RTX 3060": 77,  # Base variant, defaults to 12GB
     "RTX 3050 8GB": 65,
     "RTX 3050 6GB": 50,
+    "RTX 3050": 65,  # Base variant, defaults to 8GB
 
     # ========== NVIDIA RTX 20-series ==========
     "RTX 2080 TI": 106,
@@ -64,6 +70,7 @@ GPU_FPS_BENCHMARKS = {
     "RTX 2060 SUPER": 77,
     "RTX 2060 12GB": 79,
     "RTX 2060 6GB": 66,
+    "RTX 2060": 66,  # Base variant, defaults to 6GB
 
     # ========== NVIDIA GTX 16-series (Turing) ==========
     "GTX 1660 TI": 60,
@@ -80,6 +87,7 @@ GPU_FPS_BENCHMARKS = {
     "GTX 1070": 62,
     "GTX 1060 6GB": 40,
     "GTX 1060 3GB": 20,
+    "GTX 1060": 40,  # Base variant, defaults to 6GB (most common)
     "GTX 1050 TI": 26,
     "GTX 1050": 10,
 
@@ -135,6 +143,7 @@ GPU_FPS_BENCHMARKS = {
     "RX 5600 M": 58,
     "RX 5500 XT 8GB": 48,
     "RX 5500 XT 4GB": 45,
+    "RX 5500 XT": 48,  # Base variant, defaults to 8GB
     "RX 5500": 41,
 
     # ========== AMD RX 500-series (Polaris) ==========
