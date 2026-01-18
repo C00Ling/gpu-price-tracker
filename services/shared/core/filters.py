@@ -74,8 +74,9 @@ COMPUTER_KEYWORDS = [
     # Multiple components (indicates full system)
     # Intel CPUs - various formats (i7 , i7-, i7-12700, etc.)
     "i3 ", "i3-", "i5 ", "i5-", "i7 ", "i7-", "i9 ", "i9-",
-    # AMD CPUs
+    # AMD CPUs - full and abbreviated forms
     "ryzen 3", "ryzen 5", "ryzen 7", "ryzen 9",
+    "r3 ", "r5 ", "r7 ", "r9 ",  # Abbreviated (R5 5600G, R7 5800X, etc.)
     # Component combinations
     "+ cpu", "+ ram", "+ процесор", "+ ssd", "+ hdd",
     # Display sizes (laptops)
