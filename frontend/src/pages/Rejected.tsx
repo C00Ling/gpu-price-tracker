@@ -183,6 +183,7 @@ export function Rejected() {
 
           {/* Table */}
           <Table
+            key={selectedCategory || 'all'}
             data={filteredListings}
             columns={columns}
             keyExtractor={(item, index) => `${item.url}-${index}`}
