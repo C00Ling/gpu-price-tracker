@@ -240,6 +240,10 @@ def normalize_model_name(model: str) -> str:
     model = re.sub(r'([AB]\d{3})(\d{1,2}GB)$', r'\1 \2', model)  # e.g., A77016GB -> A770 16GB (Intel ARC)
     model = re.sub(r'(TI|SUPER|XT|XTX|GRE)(\d{1,2}GB)$', r'\1 \2', model)  # e.g., TI16GB -> TI 16GB
 
+    # Normalize "S" suffix to "SUPER" (e.g., RTX2060S -> RTX2060SUPER)
+    # Must be done BEFORE adding spaces
+    model = re.sub(r'(\d{4})S\b', r'\1SUPER', model)
+
     # Add space before suffix (TI, SUPER, XT, XTX, GRE)
     model = re.sub(r'(\d+)(TI|SUPER|XT|XTX|GRE)', r'\1 \2', model)
 
