@@ -849,6 +849,7 @@ class GPUScraper:
             r"RTX\s?\d{4}\s?(TI|SUPER)?",
             r"GTX\s?\d{3,4}\s?(TI|SUPER)?",  # GTX supports 3-4 digits (GTX 960, GTX 1660)
             r"RX\s?\d{3,4}\s?(XTX|XT|GRE)?",  # RX supports 3-4 digits (RX 580, RX 6800)
+            r"RX\d{4}(XTX|XT)",  # RX without space before suffix (RX5500XT, RX6600XT)
             r"ARC\s?[AB]\d{3}",  # Intel ARC (A-series: Alchemist, B-series: Battlemage)
             r"VEGA\s?\d+",
 
